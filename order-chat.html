@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>QIMA 小程序 - 下单助手</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --carbon: #191919;
+    --seal: #737373;
+    --pool-500: #4169e1;
+    --pool-100: #e6ecfb;
+    --pool-050: #f2f5fd;
+    --qima-red: #e4002b;
+    --border: #dedede;
+    --kiwi: #1f9d6b;
+  }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Inter, sans-serif;
+    background: #c9ced8; color: var(--carbon);
+    min-height: 100vh; overflow-x: hidden;
+  }
+  body { display: flex; justify-content: center; }
+
+  .phone {
+    position: relative; width: 390px; height: 844px;
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, #eef1fb 0%, #faf9fd 55%, #fdfbfb 100%);
+    overflow: hidden; flex-shrink: 0;
+  }
+
+  /* ===== 状态栏 ===== */
+  .statusbar {
+    height: 47px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 27px 0 0; flex-shrink: 0;
+  }
+  .statusbar .time { width: 134px; text-align: center; font-weight: 600; font-size: 17px; letter-spacing: -.4px; padding-top: 4px; }
+  .statusbar .indicators { display: flex; align-items: center; gap: 7px; padding-top: 4px; }
+  .statusbar .indicators img { display: block; }
+
+  /* ===== 顶部导航 ===== */
+  .navbar {
+    height: 50px; width: 100%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; position: relative;
+  }
+  .navbar .back { width: 11px; height: 19px; }
+  .navbar .nav-center { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; }
+  .navbar .nav-title { font-size: 17px; font-weight: 600; letter-spacing: -.34px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .navbar .ai-badge {
+    font-size: 10px; font-weight: 600; color: var(--pool-500);
+    background: var(--pool-100); border-radius: 5px; padding: 1px 6px; letter-spacing: .5px;
+  }
+  .navbar .nav-sub { font-size: 11px; color: var(--seal); margin-top: 2px; }
+  .nav-capsule {
+    width: 83px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,.7); border: .5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around; position: relative;
+  }
+  .nav-capsule img { width: 17px; height: 17px; }
+  .nav-capsule .divider { width: 1px; height: 18px; background: #d2d2d2; }
+
+  /* ===== 聊天滚动区 ===== */
+  .chat {
+    flex: 1; overflow-y: auto; padding: 12px 16px 16px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .chat::-webkit-scrollbar { display: none; }
+
+  .row { display: flex; gap: 8px; align-items: flex-start; }
+  .row.user { flex-direction: row-reverse; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .avatar.bot {
+    object-fit: cover; background: #fff;
+    box-shadow: 0 2px 6px rgba(25,25,25,.08);
+  }
+  .avatar.me { background: #dfe6f7; overflow: hidden; }
+
+  .bubble {
+    max-width: 256px; border-radius: 14px; padding: 11px 13px;
+    font-size: 14px; line-height: 21px; color: var(--carbon);
+    box-shadow: 0 1px 4px rgba(25,25,25,.05);
+  }
+  .row.bot .bubble { background: #fff; border-top-left-radius: 4px; }
+  .row.user .bubble { background: var(--pool-100); border-top-right-radius: 4px; }
+
+  /* 宽卡片（上传 / 商品 / 字段）占满气泡列 */
+  .wide { max-width: 268px; width: 268px; }
+  .panel {
+    background: #fff; border-radius: 14px; border-top-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(25,25,25,.05); overflow: hidden;
+  }
+  .panel-pad { padding: 14px; }
+  .panel-title { font-size: 14px; font-weight: 600; color: var(--carbon); margin-bottom: 12px; }
+
+  /* 上传区 */
+  .dropzone {
+    border: 1.5px dashed #c5cee8; border-radius: 12px;
+    background: #f7f9ff; padding: 22px 12px; text-align: center; cursor: pointer;
+  }
+  .dropzone .up-ic { font-size: 26px; color: var(--pool-500); }
+  .dropzone .up-main { font-size: 13px; color: var(--carbon); margin-top: 8px; }
+  .dropzone .up-sub { font-size: 11px; color: #9aa0ad; margin-top: 5px; }
+  .tip {
+    margin-top: 12px; background: #fffaf0; border: 1px solid #ffe6b8; border-radius: 10px;
+    padding: 10px 12px; font-size: 12px; color: #8a6d3b; line-height: 18px;
+  }
+  .tip b { color: #b8860b; font-weight: 600; }
+  .waybill-card {
+    background: #fff; border: 1px solid #edf0f6; border-radius: 12px;
+    padding: 12px; box-shadow: 0 1px 4px rgba(25,25,25,.04);
+  }
+  .waybill-photo {
+    height: 84px; border-radius: 10px; overflow: hidden; margin-bottom: 10px;
+    background: linear-gradient(135deg, #f6f7fb, #e8edf8);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--seal); font-size: 12px;
+  }
+  .waybill-photo::before {
+    content: "快递面单照片";
+    display: block;
+  }
+  .waybill-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 5px 0; font-size: 12px;
+  }
+  .waybill-row span:first-child { color: var(--seal); }
+  .waybill-row span:last-child { color: var(--carbon); font-weight: 600; }
+
+  /* 链接输入 */
+  .link-row { margin-top: 12px; display: flex; gap: 8px; }
+  .link-row input {
+    flex: 1; min-width: 0; height: 38px; border: 1px solid #e6e9f2; border-radius: 10px;
+    padding: 0 12px; font-size: 13px; outline: none; background: #fff;
+  }
+  .link-row input::placeholder { color: #aab0bc; }
+  .link-row .parse-btn {
+    flex-shrink: 0; height: 38px; padding: 0 14px; border: none; border-radius: 10px;
+    background: var(--pool-500); color: #fff; font-size: 13px; cursor: pointer;
+  }
+  .manual-fill {
+    width: 100%; height: 40px; margin-top: 10px;
+    border: 1px solid #dce4fb; border-radius: 10px;
+    background: var(--pool-050); color: var(--pool-500);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .src-tabs {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 16px;
+    color: #9aa0ad;
+    text-align: center;
+  }
+
+  .upload-hint {
+    margin-top: 12px; background: #f7f9ff; border: 1px solid #e3e9fb;
+    border-radius: 10px; padding: 9px 10px;
+  }
+  .upload-hint-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 7px;
+  }
+  .upload-hint-title { font-size: 12px; font-weight: 600; color: var(--carbon); }
+  .upload-hint-tip { font-size: 11px; color: var(--seal); line-height: 16px; margin-bottom: 8px; }
+  .detail-link {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 12px; cursor: pointer; padding: 0;
+  }
+  .type-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+  .type-item {
+    background: #fff; border-radius: 999px; border: 1px solid #edf0f6;
+    padding: 4px 8px; font-size: 11px; line-height: 15px; color: var(--carbon);
+    display: inline-flex; align-items: center;
+  }
+  .example-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .example-card {
+    background: #fff; border: 1px solid #edf0f6; border-radius: 10px;
+    padding: 8px; min-height: 88px;
+  }
+  .example-thumb {
+    height: 42px; border-radius: 8px; margin-bottom: 6px;
+    overflow: hidden; background: #f4f6fa;
+  }
+  .example-thumb img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+  }
+  .example-name { font-size: 12px; font-weight: 600; color: var(--carbon); }
+  .example-desc { font-size: 10px; color: var(--seal); line-height: 14px; margin-top: 2px; }
+  .examples-mask {
+    position: absolute; inset: 0; z-index: 35;
+    background: rgba(25,25,25,.42);
+    display: none; align-items: flex-end;
+  }
+  .examples-mask.show { display: flex; }
+  .examples-modal {
+    width: 100%; max-height: 76%; background: #fff;
+    border-radius: 18px 18px 0 0; overflow: hidden;
+    box-shadow: 0 -8px 28px rgba(25,25,25,.12);
+  }
+  .examples-head {
+    height: 52px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: .5px solid #eef0f4;
+  }
+  .examples-title { font-size: 16px; font-weight: 600; color: var(--carbon); }
+  .examples-close {
+    border: none; background: #f4f6fa; color: var(--seal);
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    font-size: 18px; line-height: 28px;
+  }
+  .examples-body {
+    padding: 14px 16px 18px; max-height: 580px; overflow-y: auto;
+  }
+  .examples-body::-webkit-scrollbar { display: none; }
+  .examples-note {
+    font-size: 12px; color: var(--seal); line-height: 18px;
+    background: #f7f9ff; border: 1px solid #e3e9fb;
+    border-radius: 10px; padding: 9px 10px; margin-bottom: 12px;
+  }
+
+  /* 已上传缩略图（用户气泡内） */
+  .thumbs { display: flex; gap: 6px; align-items: center; }
+  .thumbs .t {
+    width: 34px; height: 34px; border-radius: 8px; background: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+
+  /* 疑似商品卡 */
+  .prod { display: flex; gap: 12px; align-items: center; }
+  .prod .pimg {
+    width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0;
+    background: radial-gradient(circle at 50% 35%, #e9edf7, #cdd6ea);
+    display: flex; align-items: center; justify-content: center; font-size: 30px;
+  }
+  .prod .ptag { font-size: 11px; color: var(--pool-500); }
+  .prod .pname { font-size: 14px; font-weight: 600; color: var(--carbon); margin-top: 2px; }
+  .prod .pmeta { font-size: 12px; color: var(--seal); margin-top: 3px; }
+
+  /* 字段提取卡 */
+  .extract-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-bottom: .5px solid #eef0f4;
+  }
+  .extract-head .eh-title { font-size: 14px; font-weight: 600; }
+  .progress-pill {
+    font-size: 11px; color: var(--kiwi); background: #eaf6f2; border: 1px solid #c9ecdc;
+    border-radius: 20px; padding: 2px 10px;
+  }
+  .fields { padding: 6px 14px 12px; }
+  .field { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: .5px solid #f3f4f7; }
+  .field:last-child { border-bottom: none; }
+  .field .fk { width: 96px; flex-shrink: 0; font-size: 12px; color: var(--seal); line-height: 18px; }
+  .field .fv { flex: 1; font-size: 13px; color: var(--carbon); line-height: 18px; word-break: break-all; }
+  .field .fv.miss { color: #ff7a45; }
+  .field .badge-ok { color: var(--kiwi); font-size: 13px; flex-shrink: 0; }
+  .field .badge-miss { color: #ff7a45; font-size: 11px; flex-shrink: 0; background: #fff1ea; border-radius: 4px; padding: 1px 5px; }
+  .edit-fields {
+    margin: 4px 14px 14px; width: calc(100% - 28px);
+    height: 38px; border: none; border-radius: 10px;
+    background: var(--pool-050); color: var(--pool-500);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .edit-fields span { font-weight: 400; color: var(--seal); margin-right: 4px; }
+
+  /* ===== 字段编辑浮窗 ===== */
+  .edit-mask {
+    position: absolute; inset: 0; z-index: 40;
+    background: rgba(25,25,25,.42);
+    display: none; align-items: flex-end;
+  }
+  .edit-mask.show { display: flex; }
+  .edit-modal {
+    width: 100%; max-height: 78%; background: #fff;
+    border-radius: 18px 18px 0 0; overflow: hidden;
+    box-shadow: 0 -8px 28px rgba(25,25,25,.12);
+  }
+  .edit-modal-head {
+    height: 52px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: .5px solid #eef0f4;
+  }
+  .edit-modal-title { font-size: 16px; font-weight: 600; color: var(--carbon); }
+  .edit-close {
+    border: none; background: #f4f6fa; color: var(--seal);
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    font-size: 18px; line-height: 28px;
+  }
+  .edit-modal-body {
+    max-height: 540px; overflow-y: auto; padding: 12px 16px 16px;
+  }
+  .edit-modal-body::-webkit-scrollbar { display: none; }
+  .edit-note {
+    font-size: 12px; color: var(--seal); line-height: 18px;
+    background: #f7f9ff; border: 1px solid #e3e9fb;
+    border-radius: 10px; padding: 9px 10px; margin-bottom: 12px;
+  }
+  .edit-grid { display: flex; flex-direction: column; gap: 12px; }
+  .edit-section {
+    border: 1px solid #edf0f6; border-radius: 12px;
+    overflow: hidden; background: #fff;
+  }
+  .edit-section-title {
+    background: #f7f9ff; color: #24407a;
+    font-size: 12px; font-weight: 700;
+    padding: 9px 11px;
+    border-bottom: .5px solid #edf0f6;
+  }
+  .edit-section-body { padding: 10px 11px 12px; display: flex; flex-direction: column; gap: 10px; }
+  .edit-item label {
+    display: block; font-size: 12px; color: var(--seal); margin-bottom: 5px;
+  }
+  .edit-control {
+    width: 100%; height: 38px; border: 1px solid #e1e5ee;
+    border-radius: 9px; padding: 0 10px;
+    font-size: 13px; color: var(--carbon); outline: none;
+    background: #fff;
+  }
+  .edit-control:focus {
+    border-color: var(--pool-500);
+    box-shadow: 0 0 0 3px rgba(65,105,225,.1);
+  }
+  .edit-modal-actions {
+    display: flex; gap: 10px; padding: 12px 16px 16px;
+    border-top: .5px solid #eef0f4;
+  }
+  .edit-action {
+    flex: 1; height: 42px; border-radius: 12px; border: 1px solid #e1e5ee;
+    background: #fff; color: var(--seal); font-size: 14px; cursor: pointer;
+  }
+  .edit-action.primary {
+    border-color: var(--pool-500); background: var(--pool-500); color: #fff;
+    font-weight: 600;
+  }
+
+  /* 动作 chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fff; border: 1px solid #e1e5ee; border-radius: 20px;
+    padding: 8px 13px; font-size: 13px; color: var(--carbon); cursor: pointer;
+    box-shadow: 0 1px 3px rgba(25,25,25,.04);
+  }
+  .chip-btn.primary { background: var(--pool-500); color: #fff; border-color: var(--pool-500); }
+  .chip-btn .ci { font-size: 13px; }
+
+  /* 选择类型卡片按钮 */
+  .choice { display: flex; flex-direction: column; gap: 10px; }
+  .choice-btn {
+    display: flex; align-items: center; text-align: left; cursor: pointer;
+    background: #fff; border: 1px solid #e6e9f2; border-radius: 12px; padding: 12px;
+  }
+  .choice-btn .cb-name { font-size: 14px; font-weight: 600; color: var(--carbon); display: flex; align-items: center; gap: 6px; }
+  .choice-btn .cb-rec { font-size: 10px; color: var(--kiwi); background: #eaf6f2; border-radius: 4px; padding: 1px 6px; font-weight: 400; }
+  .choice-btn .cb-desc { font-size: 12px; color: var(--seal); margin-top: 3px; line-height: 17px; }
+
+  /* 选择字段卡片 */
+  .select-card {
+    background: #fff; border: 1px solid #e6e9f2; border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(25,25,25,.04);
+    padding: 13px;
+  }
+  .select-card-title {
+    font-size: 13px; font-weight: 600; color: var(--carbon);
+    margin-bottom: 6px;
+  }
+  .select-card-desc {
+    font-size: 11px; color: var(--seal); line-height: 16px;
+    margin-bottom: 10px;
+  }
+  .select-control {
+    width: 100%; height: 40px;
+    border: 1px solid #dce4fb; border-radius: 10px;
+    background: #f7f9ff;
+    padding: 0 11px;
+    color: var(--carbon); font-size: 13px; outline: none;
+  }
+  .select-confirm {
+    width: 100%; height: 38px; margin-top: 10px;
+    border: none; border-radius: 10px;
+    background: var(--pool-500); color: #fff;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* typing 指示 */
+  .typing { display: inline-flex; gap: 4px; align-items: center; padding: 2px 0; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: #c2c7d0; animation: blink 1.2s infinite; }
+  .typing i:nth-child(2){ animation-delay: .2s; } .typing i:nth-child(3){ animation-delay: .4s; }
+  @keyframes blink { 0%,60%,100%{ opacity:.3; transform: translateY(0);} 30%{ opacity:1; transform: translateY(-2px);} }
+
+  /* ===== 底部输入栏 ===== */
+  .inputbar {
+    flex-shrink: 0; background: #fff; border-top: .5px solid #eef0f4;
+    padding: 10px 14px calc(12px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 10px;
+  }
+  .inputbar .mic { width: 24px; height: 24px; color: var(--seal); flex-shrink: 0; }
+  .inputbar .box {
+    flex: 1; height: 38px; background: #f4f6fa; border-radius: 19px;
+    border: none; outline: none;
+    padding: 0 14px; font-size: 14px; color: var(--carbon);
+  }
+  .inputbar .box::placeholder { color: #aab0bc; }
+  .send-btn {
+    flex-shrink: 0; height: 34px; min-width: 54px;
+    border: none; border-radius: 17px;
+    background: var(--pool-500); color: #fff;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <!-- 状态栏 -->
+    <div class="statusbar">
+      <div class="time">9:41</div>
+      <div class="indicators">
+        <img src="assets/signal.svg" alt="" width="18" height="12" />
+        <img src="assets/wifi.svg" alt="" width="17" height="12" />
+        <img src="assets/battery.svg" alt="" width="27" height="13" />
+      </div>
+    </div>
+
+    <!-- 导航 -->
+    <div class="navbar">
+      <a href="index.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <div class="nav-center">
+        <div class="nav-title">下单助手 <span class="ai-badge">AI</span></div>
+        <div class="nav-sub">智能创建检测订单</div>
+      </div>
+      <div class="nav-capsule">
+        <img src="assets/share.svg" alt="" />
+        <div class="divider"></div>
+        <img src="assets/home.svg" alt="" />
+      </div>
+    </div>
+
+    <!-- 聊天区 -->
+    <div class="chat" id="chat">
+      <!-- 机器人欢迎 -->
+      <div class="row bot">
+        <img class="avatar bot" src="assets/robot.png" alt="下单助手" />
+        <div class="bubble">你好，我是下单助手 🤖<br>在开始之前，请先告诉我本次的需求类型～</div>
+      </div>
+
+      <!-- 选择类型卡片 -->
+      <div class="row bot" id="typeCard">
+        <img class="avatar bot" src="assets/robot.png" alt="下单助手" />
+        <div class="wide">
+          <div class="panel panel-pad">
+            <div class="panel-title">请选择本次需求类型</div>
+            <div class="choice">
+              <div class="choice-btn" onclick="pickType('first')">
+                <div>
+                  <div class="cb-name">首次测试</div>
+                  <div class="cb-desc">全新产品，第一次创建检测订单</div>
+                </div>
+              </div>
+              <div class="choice-btn" onclick="pickType('retest')">
+                <div>
+                  <div class="cb-name">重测 <span class="cb-rec">推荐选历史 Test</span></div>
+                  <div class="cb-desc">基于以往的测试重新检测，复用历史 Test 信息</div>
+                </div>
+              </div>
+              <div class="choice-btn" onclick="pickType('reorder')">
+                <div>
+                  <div class="cb-name">再次下单 <span class="cb-rec">推荐选历史 Order</span></div>
+                  <div class="cb-desc">复用以往订单，快速再次提交</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 资料示例浮窗 -->
+    <div class="examples-mask" id="uploadExamples" onclick="closeUploadExamples(event)">
+      <div class="examples-modal" onclick="event.stopPropagation()">
+        <div class="examples-head">
+          <div class="examples-title">资料示例</div>
+          <button class="examples-close" onclick="closeUploadExamples()" aria-label="关闭">×</button>
+        </div>
+        <div class="examples-body">
+          <div class="examples-note">以下是可上传资料的照片示例。资料越完整，AI 自动识别字段越准确。</div>
+          <div class="example-grid">
+            <div class="example-card">
+              <div class="example-thumb"><img src="assets/example-spec.jpg" alt="Product Spec / 规格书"></div>
+              <div class="example-name">Product Spec / 规格书</div>
+              <div class="example-desc">产品名称、SKU、材质、年龄段、尺寸</div>
+            </div>
+            <div class="example-card">
+              <div class="example-thumb"><img src="assets/example-photo.jpg" alt="Product Photos"></div>
+              <div class="example-name">Product Photos</div>
+              <div class="example-desc">产品正面、细节、铭牌、配件照片</div>
+            </div>
+            <div class="example-card">
+              <div class="example-thumb"><img src="assets/example-packaging.jpg" alt="Packaging / Label"></div>
+              <div class="example-name">Packaging / Label</div>
+              <div class="example-desc">包装六面图、标签、警告语、条码</div>
+            </div>
+            <div class="example-card">
+              <div class="example-thumb"><img src="assets/example-invoice.jpg" alt="PO / PI / Invoice"></div>
+              <div class="example-name">PO / PI / Invoice</div>
+              <div class="example-desc">采购单号、供应商、数量、收货信息</div>
+            </div>
+            <div class="example-card">
+              <div class="example-thumb"><img src="assets/example-report.jpg" alt="旧测试报告"></div>
+              <div class="example-name">旧测试报告</div>
+              <div class="example-desc">历史测试项目、标准、结果、实验室信息</div>
+            </div>
+            <div class="example-card">
+              <div class="example-thumb"><img src="assets/example-link.jpg" alt="商品链接"></div>
+              <div class="example-name">商品链接</div>
+              <div class="example-desc">Amazon、TEMU、Shopify 商品页链接</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 字段编辑浮窗 -->
+    <div class="edit-mask" id="fieldEditor" onclick="closeFieldEditor(event)">
+      <div class="edit-modal" onclick="event.stopPropagation()">
+        <div class="edit-modal-head">
+          <div class="edit-modal-title">表单填写</div>
+          <button class="edit-close" onclick="closeFieldEditor()" aria-label="关闭">×</button>
+        </div>
+        <div class="edit-modal-body">
+          <div class="edit-note">已复用历史信息作为默认值。你可以在这里补充或修改表单字段，空字段保存后仍会保持「待确认」。</div>
+          <div class="edit-grid" id="fieldEditorGrid"></div>
+        </div>
+        <div class="edit-modal-actions">
+          <button class="edit-action" onclick="closeFieldEditor()">取消</button>
+          <button class="edit-action primary" onclick="saveFieldEditor()">保存修改</button>
+        </div>
+      </div>
+    </div>
+
+    <input id="waybillCamera" type="file" accept="image/*" capture="environment" hidden onchange="processWaybillPhoto()" />
+
+    <!-- 输入栏 -->
+    <div class="inputbar">
+      <svg class="mic" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input class="box" id="chatInput" type="text" placeholder="请输入您的消息..." onkeydown="handleInputKey(event)" />
+      <button class="send-btn" type="button" onclick="sendChatInput()">发送</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const chatInput = document.getElementById('chatInput');
+    const BOT_AVATAR = '<img class="avatar bot" src="assets/robot.png" alt="下单助手" />';
+    let pendingInput = null;
+    function scrollBottom(){ chat.scrollTop = chat.scrollHeight; }
+
+    function userMsg(html){
+      const row = document.createElement('div');
+      row.className = 'row user';
+      row.innerHTML = '<div class="avatar me">🧑</div><div class="bubble">'+html+'</div>';
+      chat.appendChild(row); scrollBottom();
+    }
+    function botMsg(html, wide){
+      const row = document.createElement('div');
+      row.className = 'row bot';
+      row.innerHTML = BOT_AVATAR + (wide ? '<div class="wide">'+html+'</div>' : '<div class="bubble">'+html+'</div>');
+      chat.appendChild(row); scrollBottom();
+      return row;
+    }
+    function botTyping(){
+      return botMsg('<span class="typing"><i></i><i></i><i></i></span>', false);
+    }
+
+    function waitForInput(context){
+      pendingInput = context;
+      setTimeout(()=> chatInput.focus(), 50);
+    }
+
+    function handleInputKey(event){
+      if(event.key === 'Enter') sendChatInput();
+    }
+
+    function sendChatInput(){
+      const value = chatInput.value.trim();
+      if(!value) return;
+      chatInput.value = '';
+      userMsg(escapeHtml(value));
+      if(!pendingInput){
+        botMsg('收到，我会把这条信息作为补充说明记录下来。', false);
+        return;
+      }
+      const context = pendingInput;
+      pendingInput = null;
+      if(context.type === 'manual'){
+        answerManualText(context.item, value);
+      } else if(context.type === 'missing'){
+        answerMissingText(context.item, value);
+      } else if(context.type === 'reuseShipping'){
+        answerReuseShippingText(value);
+      } else {
+        botMsg('已记录 ✅', false);
+      }
+    }
+
+    // 1) 选择需求类型
+    function pickType(type){
+      document.getElementById('typeCard').style.display = 'none';
+      if(type === 'first'){
+        userMsg('首次测试');
+        const t = botTyping();
+        setTimeout(()=>{ t.remove(); askUpload(); }, 700);
+      } else if(type === 'retest'){
+        userMsg('重测');
+        const t = botTyping();
+        setTimeout(()=>{ t.remove();
+          botMsg('好的～已为你匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
+          botMsg('<div class="panel panel-pad"><div class="panel-title">历史 Test</div>'+
+            histItem('T-25617004','实验室检测 · Toys')+histItem('T-25590011','EN71 · Toys')+'</div>', true);
+        }, 700);
+      } else {
+        userMsg('再次下单');
+        const t = botTyping();
+        setTimeout(()=>{ t.remove();
+          botMsg('好的～已为你匹配到历史订单，请选择要复用的 Order：', false);
+          botMsg('<div class="panel panel-pad"><div class="panel-title">历史 Order</div>'+
+            histItem('Q202349103','PSI 装运前检测 · Toys')+histItem('Q202310887','实验室检测 · Toys')+'</div>', true);
+        }, 700);
+      }
+    }
+    function histItem(id, desc){
+      return '<div class="choice-btn" style="margin-bottom:8px" onclick="reuse(\''+id+'\')"><div><div class="cb-name">'+id+'</div><div class="cb-desc">'+desc+'</div></div></div>';
+    }
+    const reusePrefills = {
+      'T-25617004': {
+        sourceType: '历史 Test',
+        sourceDesc: '实验室检测 · Toys',
+        fields: {
+          'Product Name': '智能机器人玩具',
+          'SKU': 'RBT-2025-X9',
+          'Manufacturer': '深圳市智创玩具有限公司',
+          'Country of Origin': 'China (中国)',
+          'Material/Fibre Content': 'ABS / PC 塑料',
+          'Supplier': 'Shenzhen Zhichuang Co., Ltd.',
+          'Purchase Order Number': 'PO-7845120',
+          'Carrier': 'DHL',
+          'Tracking Number': 'DHL-8572-4490-CN',
+          'Age Grade': '3岁以上',
+          'Test Standard': 'EN71（欧盟）'
+        }
+      },
+      'T-25590011': {
+        sourceType: '历史 Test',
+        sourceDesc: 'EN71 · Toys',
+        fields: {
+          'Product Name': '儿童积木玩具',
+          'SKU': 'BLOCK-EN71-001',
+          'Manufacturer': '东莞启明玩具有限公司',
+          'Country of Origin': 'China (中国)',
+          'Material/Fibre Content': 'ABS / PP 塑料',
+          'Supplier': 'Qiming Toy Supplier Co., Ltd.',
+          'Purchase Order Number': 'PO-25590011',
+          'Carrier': '',
+          'Tracking Number': '',
+          'Age Grade': '3岁以上',
+          'Test Standard': 'EN71（欧盟）'
+        }
+      },
+      'Q202349103': {
+        sourceType: '历史 Order',
+        sourceDesc: 'PSI 装运前检测 · Toys',
+        fields: {
+          'Product Name': 'Toys 装运前检测',
+          'SKU': 'Q202349103',
+          'Manufacturer': 'QIMA Toy Factory',
+          'Country of Origin': 'China (中国)',
+          'Material/Fibre Content': 'ABS / Metal Parts',
+          'Supplier': 'QIMA Toy Supplier',
+          'Purchase Order Number': 'PI-Q202349103',
+          'Carrier': '',
+          'Tracking Number': '',
+          'Age Grade': '6岁以上',
+          'Test Standard': 'PSI Inspection'
+        }
+      },
+      'Q202310887': {
+        sourceType: '历史 Order',
+        sourceDesc: '实验室检测 · Toys',
+        fields: {
+          'Product Name': '智能机器人玩具',
+          'SKU': 'Q202310887',
+          'Manufacturer': '深圳市智创玩具有限公司',
+          'Country of Origin': 'China (中国)',
+          'Material/Fibre Content': 'ABS / PC 塑料',
+          'Supplier': 'Shenzhen Zhichuang Co., Ltd.',
+          'Purchase Order Number': 'PO-202310887',
+          'Carrier': 'FedEx',
+          'Tracking Number': 'FDX-202310887',
+          'Age Grade': '3岁以上',
+          'Test Standard': 'ASTM F963（美国）'
+        }
+      }
+    };
+
+    function reuse(id){
+      userMsg('复用 '+id);
+      const t = botTyping();
+      setTimeout(()=>{
+        t.remove();
+        const prefill = reusePrefills[id] || reusePrefills['T-25617004'];
+        manualIndex = manualQuestions.length;
+        Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
+        Object.assign(manualAnswers, prefill.fields);
+        botMsg('已载入 <b>'+id+'</b> 的信息 ✅ 正在为你预填订单表单…', false);
+        const t2 = botTyping();
+        setTimeout(()=>{
+          t2.remove();
+          botMsg('已基于'+prefill.sourceType+'「<b>'+id+'</b>」预填完成。请检查以下信息，缺失或不准确的字段可以继续编辑。', false);
+          botMsg(reuseOrderCard(id, prefill), true);
+          botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()"><span class="ci">🛒</span> 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()"><span class="ci">✏️</span> 编辑字段</button><button class="chip-btn" onclick="continueReuseMissing()"><span class="ci">➕</span> 补充缺失项</button></div></div>', true);
+        }, 700);
+      }, 700);
+    }
+
+    function reuseOrderCard(id, prefill){
+      const fields = prefill.fields;
+      return '<div class="panel">'+
+        '<div class="extract-head"><div class="eh-title">预填订单信息</div><div class="progress-pill">来自 '+prefill.sourceType+'</div></div>'+
+        '<div class="fields">'+
+          field('Source ID', id, true)+
+          field('Service', prefill.sourceDesc, true)+
+          field('Product Name', fields['Product Name'], !!fields['Product Name'])+
+          field('SKU', fields['SKU'], !!fields['SKU'])+
+          field('Manufacturer', fields['Manufacturer'], !!fields['Manufacturer'])+
+          field('Country of Origin', fields['Country of Origin'], !!fields['Country of Origin'])+
+          field('Material/Fibre Content', fields['Material/Fibre Content'], !!fields['Material/Fibre Content'])+
+          field('Supplier', fields['Supplier'], !!fields['Supplier'])+
+          field('Purchase Order Number', fields['Purchase Order Number'], !!fields['Purchase Order Number'])+
+          field('Carrier', fields['Carrier'], !!fields['Carrier'])+
+          field('Tracking Number', fields['Tracking Number'], !!fields['Tracking Number'])+
+          field('Age Grade', fields['Age Grade'], !!fields['Age Grade'])+
+          field('Test Standard', fields['Test Standard'], !!fields['Test Standard'])+
+        '</div><button class="edit-fields" onclick="openFieldEditor()"><span>需要调整？</span>去编辑</button>'+
+      '</div>';
+    }
+
+    function continueReuseMissing(){
+      userMsg('补充缺失项');
+      if(manualAnswers['Carrier'] && manualAnswers['Tracking Number']){
+        botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
+        return;
+      }
+      botMsg('历史记录里没有完整物流信息。请补充本批样品的<b>物流承运商（Carrier）</b>与<b>运单号（Tracking No.）</b>，也可以拍照识别快递面单。', false);
+      botMsg('请直接输入，例如：<b>DHL DHL-8572-4490-CN</b>。如果想拍照识别，可以输入“拍照识别”。', false);
+      waitForInput({ type:'reuseShipping' });
+    }
+
+    function answerReuseShipping(btn, value){
+      const row = btn.closest('.row'); if(row) row.remove();
+      userMsg(value);
+      if(value === '打开相机拍照识别面单'){
+        openWaybillCamera('manual');
+        return;
+      }
+      if(value === '手动填写快递信息'){
+        manualAnswers['Carrier'] = 'DHL';
+        manualAnswers['Tracking Number'] = 'DHL-8572-4490-CN';
+        setFieldValue('Carrier', manualAnswers['Carrier']);
+        setFieldValue('Tracking Number', manualAnswers['Tracking Number']);
+        botMsg('已补充物流信息 ✅ 请再次确认订单信息。', false);
+        return;
+      }
+      botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+    }
+
+    function answerReuseShippingText(value){
+      if(/拍照|相机|识别/.test(value)){
+        openWaybillCamera('manual');
+        return;
+      }
+      if(/暂无|稍后|没有|待补/.test(value)){
+        botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+        return;
+      }
+      const parts = value.split(/[，,;；\s]+/).filter(Boolean);
+      if(parts.length >= 2){
+        manualAnswers['Carrier'] = parts[0];
+        manualAnswers['Tracking Number'] = parts.slice(1).join(' ');
+      } else {
+        manualAnswers['Carrier'] = value;
+      }
+      setFieldValue('Carrier', manualAnswers['Carrier']);
+      if(manualAnswers['Tracking Number']){
+        setFieldValue('Tracking Number', manualAnswers['Tracking Number']);
+      }
+      botMsg('已补充物流信息 ✅ 请再次确认订单信息。', false);
+    }
+
+    // 2) 首次测试 → 请求上传资料 / 链接
+    function askUpload(){
+      botMsg('收到！这是一次<b>全新产品</b>的检测。<br>请上传任意产品相关资料，或粘贴商品链接，我来自动识别并填写表单 👇', false);
+      const card =
+        '<div class="panel panel-pad">'+
+          '<div class="panel-title">上传产品资料</div>'+
+          '<div class="dropzone" onclick="doUpload()">'+
+            '<div class="up-ic">☁️</div>'+
+            '<div class="up-main">点击上传或拖拽文件到此处</div>'+
+            '<div class="up-sub">支持规格书、PO/PI/Invoice、包装/标签、产品照片、旧测试报告等</div>'+
+          '</div>'+
+          '<div class="src-tabs">支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB</div>'+
+          '<div class="upload-hint">'+
+            '<div class="upload-hint-head"><span class="upload-hint-title">可上传 / 粘贴的信息</span><button class="detail-link" onclick="showUploadExamples()">查看详情</button></div>'+
+            '<div class="upload-hint-tip">资料越完整，可自动识别的字段越多。</div>'+
+            '<div class="type-grid">'+
+              '<div class="type-item">Product Spec</div>'+
+              '<div class="type-item">Product Photos</div>'+
+              '<div class="type-item">Packaging / Label</div>'+
+              '<div class="type-item">PO / PI</div>'+
+              '<div class="type-item">Invoice</div>'+
+              '<div class="type-item">旧测试报告</div>'+
+              '<div class="type-item">Amazon Link</div>'+
+              '<div class="type-item">TEMU / Shopify</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 链接"><button class="parse-btn" onclick="doParse()">解析</button></div>'+
+          '<button class="manual-fill" onclick="startManualFill()">暂无资料，直接填写</button>'+
+        '</div>';
+      botMsg(card, true);
+    }
+
+    function showUploadExamples(){
+      document.getElementById('uploadExamples').classList.add('show');
+    }
+
+    function closeUploadExamples(){
+      document.getElementById('uploadExamples').classList.remove('show');
+    }
+
+    function doUpload(){
+      userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div>');
+      runRecognize('图片/文档');
+    }
+    function doParse(){
+      const v = (document.getElementById('linkIn')||{}).value || '';
+      userMsg('🔗 商品链接：'+(v && v.length>4 ? v.slice(0,28)+'…' : 'amazon.com/dp/B0XXXXX…'));
+      runRecognize('商品链接');
+    }
+
+    const manualQuestions = [
+      { key:'Product Name', q:'好的，我们直接填写。请先告诉我<b>产品名称（Product Name）</b>。', options:['智能机器人玩具','儿童积木玩具','黑色复合面料'] },
+      { key:'SKU', q:'请填写或选择<b>SKU / 款号</b>。', options:['RBT-2025-X9','SKU-TOY-001','暂不确定'] },
+      { key:'Manufacturer', q:'请提供<b>制造商（Manufacturer）</b>。', options:['深圳市智创玩具有限公司','供应商即制造商','暂不确定'] },
+      { key:'Country of Origin', q:'请选择<b>原产国（Country of Origin）</b>。', options:['China (中国)','Vietnam (越南)','India (印度)'], control:'select', selectTitle:'原产国 / Country of Origin', selectDesc:'请选择产品实际生产或加工所在国家/地区。' },
+      { key:'Material/Fibre Content', q:'请提供<b>材质 / 成分（Material/Fibre Content）</b>。', options:['ABS / PC 塑料','100% Cotton','Polyester / Spandex'] },
+      { key:'Supplier', q:'请提供<b>供应商（Supplier）</b>。', options:['Shenzhen Zhichuang Co., Ltd.','同制造商','稍后补充'] },
+      { key:'Purchase Order Number', q:'请填写<b>PO / PI / Invoice 编号</b>。', options:['PO-7845120','PI-2026-001','暂无编号'] },
+      { key:'Shipping', q:'如果已经寄出样品，可以拍摄快递面单，我会读取<b>快递公司</b>和<b>运单号</b>。', options:['打开相机拍照识别面单','手动填写快递信息','暂无，稍后补充'] },
+      { key:'Age Grade', q:'请选择<b>适用年龄（Age Grade）</b>。', options:['3岁以上','6岁以上','14岁以上'], control:'select', selectTitle:'适用年龄 / Age Grade', selectDesc:'请选择产品标签或销售页面标注的适用年龄。' },
+      { key:'Test Standard', q:'请选择目标市场或测试标准。', options:['EN71（欧盟）','ASTM F963（美国）','暂不确定'], control:'select', selectTitle:'目标市场 / 测试标准', selectDesc:'请选择本次检测希望覆盖的主要市场或标准。' }
+    ];
+    let manualIndex = 0;
+    const manualAnswers = {};
+
+    function startManualFill(){
+      userMsg('暂无资料，直接填写');
+      manualIndex = 0;
+      Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('没问题～我会用对话方式帮你逐项填写订单信息。请直接在底部输入框中填写答案，之后也能再编辑。', false); askManualField(); }, 650);
+    }
+
+    function askManualField(){
+      if(manualIndex >= manualQuestions.length){ finishManualFill(); return; }
+      const item = manualQuestions[manualIndex];
+      botMsg(item.q, false);
+      waitForInput({ type:'manual', item });
+    }
+
+    function selectFieldCard(item, source){
+      const selectId = 'select-' + source + '-' + String(item.key || item.q).replace(/[^a-zA-Z0-9]/g, '-');
+      return '<div class="select-card">'+
+        '<div class="select-card-title">'+(item.selectTitle || item.key || '请选择')+'</div>'+
+        '<div class="select-card-desc">'+(item.selectDesc || '请从下拉框中选择一个选项，然后点击确定。')+'</div>'+
+        '<select class="select-control" id="'+selectId+'">'+
+          item.options.map(opt => '<option value="'+escapeHtml(opt)+'">'+escapeHtml(opt)+'</option>').join('')+
+        '</select>'+
+        '<button class="select-confirm" onclick="confirmSelectField(this,\''+source+'\',\''+escapeJs(item.key || '')+'\')">确定</button>'+
+      '</div>';
+    }
+
+    function confirmSelectField(btn, source, key){
+      const card = btn.closest('.select-card');
+      const select = card ? card.querySelector('select') : null;
+      if(!select) return;
+      if(source === 'manual'){
+        answerManualField(btn, select.value);
+      } else {
+        answerMissing(btn, select.value, key);
+      }
+    }
+
+    function answerManualField(btn, value){
+      const row = btn.closest('.row'); if(row) row.remove();
+      const item = manualQuestions[manualIndex];
+      if(item.key === 'Shipping' && value === '打开相机拍照识别面单'){
+        openWaybillCamera('manual');
+        return;
+      }
+      if(item.key === 'Shipping' && value === '手动填写快递信息'){
+        manualAnswers['Carrier'] = 'DHL';
+        manualAnswers['Tracking Number'] = 'DHL-8572-4490-CN';
+      }
+      manualAnswers[item.key] = value;
+      manualIndex++;
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askManualField(); }, 500);
+    }
+
+    function answerManualText(item, value){
+      if(item.key === 'Shipping'){
+        if(/拍照|相机|识别/.test(value)){
+          openWaybillCamera('manual');
+          return;
+        }
+        const parts = value.split(/[，,;；\s]+/).filter(Boolean);
+        if(parts.length >= 2){
+          manualAnswers['Carrier'] = parts[0];
+          manualAnswers['Tracking Number'] = parts.slice(1).join(' ');
+        } else {
+          manualAnswers['Carrier'] = value;
+        }
+      } else {
+        manualAnswers[item.key] = value;
+      }
+      manualIndex++;
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askManualField(); }, 500);
+    }
+
+    function finishManualFill(){
+      const t = botTyping();
+      setTimeout(()=>{ t.remove();
+        botMsg('已根据你的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
+        botMsg(manualOrderCard(), true);
+        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()"><span class="ci">🛒</span> 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()"><span class="ci">✏️</span> 编辑字段</button></div></div>', true);
+      }, 650);
+    }
+
+    function manualOrderCard(){
+      return '<div class="panel">'+
+        '<div class="extract-head"><div class="eh-title">订单信息确认</div><div class="progress-pill">待提交</div></div>'+
+        '<div class="fields">'+
+          field('Product Name', manualAnswers['Product Name'] || '', !!manualAnswers['Product Name'])+
+          field('SKU', manualAnswers['SKU'] || '', !!manualAnswers['SKU'])+
+          field('Manufacturer', manualAnswers['Manufacturer'] || '', !!manualAnswers['Manufacturer'])+
+          field('Country of Origin', manualAnswers['Country of Origin'] || '', !!manualAnswers['Country of Origin'])+
+          field('Material/Fibre Content', manualAnswers['Material/Fibre Content'] || '', !!manualAnswers['Material/Fibre Content'])+
+          field('Supplier', manualAnswers['Supplier'] || '', !!manualAnswers['Supplier'])+
+          field('Purchase Order Number', manualAnswers['Purchase Order Number'] || '', !!manualAnswers['Purchase Order Number'])+
+          field('Carrier', manualAnswers['Carrier'] || '', !!manualAnswers['Carrier'])+
+          field('Tracking Number', manualAnswers['Tracking Number'] || '', !!manualAnswers['Tracking Number'])+
+          field('Age Grade', manualAnswers['Age Grade'] || '', !!manualAnswers['Age Grade'])+
+          field('Test Standard', manualAnswers['Test Standard'] || '', !!manualAnswers['Test Standard'])+
+        '</div><button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
+      '</div>';
+    }
+
+    function escapeJs(str){
+      return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    }
+
+    // 3) AI 识别 → 字段提取卡 + 进度 + 缺失确认
+    function runRecognize(src){
+      const t = botTyping();
+      setTimeout(()=>{ t.remove();
+        botMsg('收到！'+src+'上传成功 ✅<br>我已开始识别商品信息，请稍候…', false);
+        const t2 = botTyping();
+        setTimeout(()=>{ t2.remove();
+          // 疑似商品
+          botMsg('<div class="panel panel-pad"><div class="prod"><div class="pimg">🤖</div>'+
+            '<div><div class="ptag">疑似商品</div><div class="pname">智能机器人玩具</div>'+
+            '<div class="pmeta">品牌：未知 ｜ 类别：玩具 Toys</div></div></div></div>', true);
+          // 字段提取卡
+          botMsg(extractCard(), true);
+          // 总结 + 缺失确认
+          botMsg('识别完成！已自动完成 <b>8/11（73%）</b> 字段填写 🎉<br>还有 <b>4</b> 项需要你确认，我们逐项补齐 👇', false);
+          askMissing();
+        }, 1100);
+      }, 700);
+    }
+
+    function field(k, v, ok){
+      if(ok) return '<div class="field" data-field="'+k+'"><div class="fk">'+k+'</div><div class="fv">'+v+'</div><div class="badge-ok">✓</div></div>';
+      return '<div class="field" data-field="'+k+'"><div class="fk">'+k+'</div><div class="fv miss">待确认</div><div class="badge-miss">缺失</div></div>';
+    }
+    function extractCard(){
+      return '<div class="panel">'+
+        '<div class="extract-head"><div class="eh-title">已识别的表单字段</div><div class="progress-pill">已完成 73%</div></div>'+
+        '<div class="fields">'+
+          field('Product Name','智能机器人玩具', true)+
+          field('SKU','RBT-2025-X9', true)+
+          field('Manufacturer','深圳市智创玩具有限公司', true)+
+          field('Country of Origin','China (中国)', true)+
+          field('Material/Fibre Content','ABS / PC 塑料', true)+
+          field('Supplier','Shenzhen Zhichuang Co., Ltd.', true)+
+          field('Purchase Order Number','PO-7845120', true)+
+          field('EAN/UPC','6 901234 567890', true)+
+          field('Age Grade','', false)+
+          field('Carrier','', false)+
+          field('Tracking Number','', false)+
+          field('Test Standard','', false)+
+        '</div>'+
+        '<button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
+      '</div>';
+    }
+
+    const editableSections = [
+      {
+        title: '产品信息',
+        fields: [
+          { name:'Product Name', fallback:'智能机器人玩具' },
+          { name:'SKU', fallback:'RBT-2025-X9' },
+          { name:'Material/Fibre Content', fallback:'ABS / PC 塑料' },
+          { name:'Age Grade', fallback:'', type:'select', options:['', '3岁以上', '6岁以上', '14岁以上'] },
+          { name:'Country of Origin', fallback:'China (中国)', type:'select', options:['China (中国)', 'Vietnam (越南)', 'India (印度)'] }
+        ]
+      },
+      {
+        title: '供应商与订单',
+        fields: [
+          { name:'Manufacturer', fallback:'深圳市智创玩具有限公司' },
+          { name:'Supplier', fallback:'Shenzhen Zhichuang Co., Ltd.' },
+          { name:'Purchase Order Number', fallback:'PO-7845120' },
+          { name:'EAN/UPC', fallback:'6 901234 567890' },
+          { name:'Test Standard', fallback:'', type:'select', options:['', 'EN71（欧盟）', 'ASTM F963（美国）', 'CPSIA', '暂不确定'] }
+        ]
+      },
+      {
+        title: '样品与物流',
+        fields: [
+          { name:'Carrier', fallback:'', type:'select', options:['', 'DHL', 'FedEx', 'UPS', 'TNT', '暂无，稍后补充'] },
+          { name:'Tracking Number', fallback:'' }
+        ]
+      }
+    ];
+
+    function openFieldEditor(){
+      const grid = document.getElementById('fieldEditorGrid');
+      grid.innerHTML = editableSections.map(section =>
+        '<div class="edit-section">'+
+          '<div class="edit-section-title">'+section.title+'</div>'+
+          '<div class="edit-section-body">'+
+            section.fields.map(renderEditField).join('')+
+          '</div>'+
+        '</div>'
+      ).join('');
+      document.getElementById('fieldEditor').classList.add('show');
+    }
+
+    function renderEditField(field){
+      const current = getFieldValue(field.name) || manualAnswers[field.name] || field.fallback || '';
+      if(field.type === 'select'){
+        const options = field.options.map(opt => {
+          const selected = opt === current ? ' selected' : '';
+          const label = opt || '请选择';
+          return '<option value="'+escapeHtml(opt)+'"'+selected+'>'+escapeHtml(label)+'</option>';
+        }).join('');
+        return '<div class="edit-item">'+
+          '<label>'+field.name+'</label>'+
+          '<select class="edit-control" data-field-name="'+field.name+'">'+options+'</select>'+
+        '</div>';
+      }
+      return '<div class="edit-item">'+
+        '<label>'+field.name+'</label>'+
+        '<input class="edit-control" data-field-name="'+field.name+'" value="'+escapeHtml(current)+'" placeholder="请输入 '+field.name+'">'+
+      '</div>';
+    }
+
+    function closeFieldEditor(){
+      document.getElementById('fieldEditor').classList.remove('show');
+    }
+
+    function getFieldValue(name){
+      const field = document.querySelector('.field[data-field="'+cssEscape(name)+'"] .fv');
+      if(!field) return '';
+      return field.classList.contains('miss') ? '' : field.textContent.trim();
+    }
+
+    function saveFieldEditor(){
+      const inputs = document.querySelectorAll('#fieldEditorGrid input, #fieldEditorGrid select, #fieldEditorGrid textarea');
+      let filledCount = 0;
+      inputs.forEach(input => {
+        const name = input.dataset.fieldName;
+        const value = input.value.trim();
+        manualAnswers[name] = value;
+        const field = document.querySelector('.field[data-field="'+cssEscape(name)+'"]');
+        if(!field) {
+          if(value) filledCount++;
+          return;
+        }
+        const valueNode = field.querySelector('.fv');
+        const statusNode = field.querySelector('.badge-ok, .badge-miss');
+        if(value){
+          valueNode.textContent = value;
+          valueNode.classList.remove('miss');
+          statusNode.className = 'badge-ok';
+          statusNode.textContent = '✓';
+          filledCount++;
+        } else {
+          valueNode.textContent = '待确认';
+          valueNode.classList.add('miss');
+          statusNode.className = 'badge-miss';
+          statusNode.textContent = '缺失';
+        }
+      });
+      closeFieldEditor();
+      userMsg('已编辑识别字段');
+      const completion = Math.round((filledCount / inputs.length) * 100);
+      botMsg('已保存修改 ✅<br>当前表单完成度约 <b>'+completion+'%</b>，我会以更新后的字段继续确认。', false);
+    }
+
+    let waybillOrigin = '';
+    function openWaybillCamera(origin){
+      waybillOrigin = origin || '';
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('请对准快递面单拍照，尽量让运单号和快递公司完整入镜。', false); }, 300);
+      const input = document.getElementById('waybillCamera');
+      input.value = '';
+      input.click();
+      // 原型演示：即使浏览器环境没有真实相机选择，也模拟一次识别结果。
+      setTimeout(()=>{ processWaybillPhoto(true); }, 900);
+    }
+
+    function processWaybillPhoto(fromDemo){
+      if(!waybillOrigin) return;
+      userMsg('已拍摄快递面单照片');
+      const t = botTyping();
+      setTimeout(()=>{ t.remove();
+        const carrier = 'DHL';
+        const tracking = 'DHL-8572-4490-CN';
+        manualAnswers['Carrier'] = carrier;
+        manualAnswers['Tracking Number'] = tracking;
+        setFieldValue('Carrier', carrier);
+        setFieldValue('Tracking Number', tracking);
+        botMsg('<div class="waybill-card"><div class="waybill-photo"></div><div class="waybill-row"><span>Carrier</span><span>'+carrier+'</span></div><div class="waybill-row"><span>Tracking Number</span><span>'+tracking+'</span></div></div>', true);
+        botMsg('已从面单照片中识别出快递信息 ✅', false);
+        if(waybillOrigin === 'manual'){
+          manualIndex++;
+          waybillOrigin = '';
+          askManualField();
+        } else if(waybillOrigin === 'missing'){
+          mi++;
+          waybillOrigin = '';
+          askMissing();
+        }
+      }, 800);
+    }
+
+    function setFieldValue(name, value){
+      const field = document.querySelector('.field[data-field="'+cssEscape(name)+'"]');
+      if(!field) return;
+      const valueNode = field.querySelector('.fv');
+      const statusNode = field.querySelector('.badge-ok, .badge-miss');
+      valueNode.textContent = value;
+      valueNode.classList.remove('miss');
+      statusNode.className = 'badge-ok';
+      statusNode.textContent = '✓';
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function cssEscape(str){
+      if(window.CSS && CSS.escape) return CSS.escape(str);
+      return String(str).replace(/"/g, '\\"');
+    }
+
+    // 4) 对话式逐项确认缺失字段
+    const missingQueue = [
+      { key:'Age Grade', q: '这款机器人玩具的<b>适用年龄（Age Grade）</b>是？', options:['3岁以上','6岁以上','14岁以上'], control:'select', selectTitle:'适用年龄 / Age Grade', selectDesc:'请选择产品标签或销售页面标注的适用年龄。' },
+      { key:'Test Standard', q: '请问期望的<b>测试标准 / 目标市场</b>是？（如 EN71、ASTM F963、CPSIA）', options:['EN71（欧盟）','ASTM F963（美国）','暂不确定'], control:'select', selectTitle:'目标市场 / 测试标准', selectDesc:'请选择本次检测希望覆盖的主要市场或标准。' },
+      { key:'Shipping', q: '本批货的<b>物流承运商（Carrier）</b>与<b>运单号（Tracking No.）</b>方便提供吗？也可以直接拍照识别快递面单。', ph:['打开相机拍照识别面单','现在填写','暂无，稍后补充'] }
+    ];
+    let mi = 0;
+    function askMissing(){
+      if(mi >= missingQueue.length){ finishConfirm(); return; }
+      const item = missingQueue[mi];
+      botMsg(item.q, false);
+      if(item.key === 'Age Grade'){
+        botMsg(selectFieldCard(item, 'missing'), true);
+        return;
+      }
+      waitForInput({ type:'missing', item });
+    }
+    function answerMissing(btn, val, key){
+      // 移除该组 chips
+      const wide = btn.closest('.row'); if(wide) wide.remove();
+      userMsg(val);
+      if(val === '打开相机拍照识别面单'){
+        openWaybillCamera('missing');
+        return;
+      }
+      if(key){
+        setFieldValue(key, val);
+      }
+      mi++;
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askMissing(); }, 600);
+    }
+
+    function answerMissingText(item, value){
+      if(item.key === 'Shipping'){
+        if(/拍照|相机|识别/.test(value)){
+          openWaybillCamera('missing');
+          return;
+        }
+        const parts = value.split(/[，,;；\s]+/).filter(Boolean);
+        if(parts.length >= 2){
+          setFieldValue('Carrier', parts[0]);
+          setFieldValue('Tracking Number', parts.slice(1).join(' '));
+          manualAnswers['Carrier'] = parts[0];
+          manualAnswers['Tracking Number'] = parts.slice(1).join(' ');
+        } else {
+          setFieldValue('Carrier', value);
+          manualAnswers['Carrier'] = value;
+        }
+      } else {
+        setFieldValue(item.key, value);
+        manualAnswers[item.key] = value;
+      }
+      mi++;
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askMissing(); }, 600);
+    }
+
+    function finishConfirm(){
+      const t = botTyping();
+      setTimeout(()=>{ t.remove();
+        botMsg('太好了！信息已全部补齐，<b>表单完成度 100%</b> 🎉<br>下一步请确认订单信息，确认无误后即可去下单。', false);
+        const chips = '<div class="chips">'+
+          '<button class="chip-btn primary" onclick="confirmOrderInfo()"><span class="ci">✅</span> 确认订单信息</button>'+
+          '<button class="chip-btn" onclick="placeOrder()"><span class="ci">🛒</span> 去下单</button>'+
+          '<button class="chip-btn" onclick="reedit()"><span class="ci">✏️</span> 补充商品信息</button>'+
+          '<button class="chip-btn" onclick="reupload()"><span class="ci">🔄</span> 更换资料</button>'+
+          '</div>';
+        botMsg('<div style="width:268px">'+chips+'</div>', true);
+      }, 700);
+    }
+    function confirmOrderInfo(){
+      userMsg('确认订单信息');
+      const t = botTyping();
+      setTimeout(()=>{ t.remove();
+        botMsg(orderSummaryCard(), true);
+        botMsg('请确认以上订单信息是否正确。确认后我会帮你提交检测订单。', false);
+        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()"><span class="ci">🛒</span> 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()"><span class="ci">✏️</span> 返回编辑字段</button></div></div>', true);
+      }, 700);
+    }
+    function orderSummaryCard(){
+      return '<div class="panel">'+
+        '<div class="extract-head"><div class="eh-title">订单信息确认</div><div class="progress-pill">待提交</div></div>'+
+        '<div class="fields">'+
+          field('Product Name', getFieldValue('Product Name') || '智能机器人玩具', true)+
+          field('SKU', getFieldValue('SKU') || 'RBT-2025-X9', true)+
+          field('Supplier', getFieldValue('Supplier') || 'Shenzhen Zhichuang Co., Ltd.', true)+
+          field('Test Standard', getFieldValue('Test Standard') || 'EN71（欧盟）', true)+
+          field('Age Grade', getFieldValue('Age Grade') || '3岁以上', true)+
+          field('Purchase Order Number', getFieldValue('Purchase Order Number') || 'PO-7845120', true)+
+        '</div>'+
+      '</div>';
+    }
+    function placeOrder(){
+      userMsg('去下单');
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('已生成订单草稿 ✅<br>正在进入下单确认页，请最后检查服务、样品和联系人信息。', false); }, 700);
+    }
+    function reedit(){ userMsg('补充商品信息'); botMsg('好的，请直接在下方输入需要补充或修改的内容～', false); }
+    function reupload(){ userMsg('更换资料'); askUpload(); }
+  </script>
+</body>
+</html>

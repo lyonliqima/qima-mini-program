@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>QIMA 小程序 - 订单</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --carbon: #191919;
+    --seal: #737373;
+    --pool-500: #4169e1;
+    --pool-100: #e6ecfb;
+    --pool-050: #f2f5fd;
+    --qima-red: #e4002b;
+    --border: #dedede;
+    --kiwi: #1f9d6b;
+  }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Inter, sans-serif;
+    background: #c9ced8;
+    color: var(--carbon);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body { display: flex; justify-content: center; }
+
+  /* ===== 手机外壳（固定高度，列表内部滚动）===== */
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
+  .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .07; left: 230px; top: -130px; transform: rotate(30deg); }
+  .blob-3 { width: 129px; height: 119px; background: #a086c4; opacity: .12; left: -70px; top: 0; transform: rotate(-30deg); }
+  .blob-4 { width: 129px; height: 119px; background: #ff9a7f; opacity: .12; left: -120px; top: 0; transform: rotate(-30deg); }
+
+  /* ===== 状态栏 ===== */
+  .statusbar {
+    position: relative; z-index: 2;
+    height: 47px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 27px 0 0;
+  }
+  .statusbar .time { width: 134px; text-align: center; font-weight: 600; font-size: 17px; letter-spacing: -.4px; padding-top: 4px; }
+  .statusbar .indicators { display: flex; align-items: center; gap: 7px; padding-top: 4px; }
+  .statusbar .indicators img { display: block; }
+
+  /* ===== 导航栏（标题居中）===== */
+  .navbar {
+    position: relative; z-index: 2;
+    height: 44px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 17px;
+  }
+  .navbar .back { width: 12px; height: 20px; }
+  .navbar .title {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 17px; font-weight: 600; letter-spacing: -.34px; color: var(--carbon);
+  }
+  .nav-capsule {
+    width: 83px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,.7); border: .5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around; position: relative;
+  }
+  .nav-capsule img { width: 17px; height: 17px; }
+  .nav-capsule .divider { width: 1px; height: 18px; background: #d2d2d2; }
+
+  /* ===== 筛选区 ===== */
+  .filterbar { position: relative; z-index: 2; padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 10px; }
+  .filter-row1 { display: flex; align-items: center; gap: 8px; }
+  .chip {
+    display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+    height: 36px; padding: 0 10px; border-radius: 8px;
+    background: #fff; border: 1px solid #e6e9f2;
+    font-size: 12px; color: var(--carbon); white-space: nowrap;
+  }
+  .chip .caret { color: var(--seal); }
+  .search {
+    flex: 1; min-width: 0; height: 36px; border-radius: 8px;
+    background: #fff; border: 1px solid #e6e9f2;
+    display: flex; align-items: center; gap: 6px; padding: 0 10px;
+  }
+  .search svg { color: #9aa0ad; flex-shrink: 0; }
+  .search input {
+    border: none; outline: none; background: transparent; width: 100%;
+    font-size: 13px; color: var(--carbon);
+  }
+  .search input::placeholder { color: #aab0bc; }
+  .filter-btn {
+    flex-shrink: 0; height: 36px; padding: 0 12px; border-radius: 8px;
+    background: var(--pool-050); color: var(--pool-500);
+    display: flex; align-items: center; gap: 4px; font-size: 13px;
+    border: 1px solid #dce4fb;
+  }
+  .filter-row2 { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; }
+  .selector { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--seal); }
+  .selector .caret { color: #aab0bc; }
+
+  /* ===== 列表滚动区 ===== */
+  .list {
+    position: relative; z-index: 1; flex: 1; overflow-y: auto;
+    padding: 4px 16px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .list::-webkit-scrollbar { display: none; }
+
+  /* ===== 订单卡片 ===== */
+  .ocard {
+    display: block;
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(25,25,25,.08);
+    padding: 14px 16px 12px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .ocard-head { display: flex; align-items: center; justify-content: space-between; }
+  .ocard-head .left { display: flex; align-items: center; gap: 6px; }
+  .ocard-head .left img { width: 16px; height: 16px; }
+  .ocard-head .left .lbl { font-size: 14px; color: var(--carbon); }
+  .ocard-head .left .num { font-size: 15px; font-weight: 600; color: var(--carbon); }
+  .status {
+    font-size: 12px; height: 24px; line-height: 24px; padding: 0 10px; border-radius: 6px;
+  }
+  .status.blue { background: var(--pool-050); color: var(--pool-500); border: 1px solid #dce4fb; }
+  .status.green { background: #eaf6f2; color: var(--kiwi); border: 1px solid #c9ecdc; }
+
+  .ocard-dates { display: flex; gap: 8px; margin-top: 12px; }
+  .date-pill {
+    display: flex; align-items: center; gap: 5px;
+    background: #f4f6fa; border-radius: 6px; padding: 5px 8px;
+    font-size: 11px; color: var(--seal); white-space: nowrap;
+  }
+  .date-pill svg { color: #9aa0ad; flex-shrink: 0; }
+
+  .ocard-product { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .thumb {
+    position: relative; width: 64px; height: 64px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+  }
+  .thumb.fabric-black { background: linear-gradient(135deg, #34343a 0%, #0e0e12 100%); }
+  .thumb.fabric-denim { background: linear-gradient(135deg, #2c3656 0%, #10162a 100%); }
+  .thumb.fabric-grey { background: linear-gradient(135deg, #5a5f6b 0%, #2c303a 100%); }
+  .thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px);
+  }
+  .ribbon {
+    position: absolute; top: 9px; right: -20px; z-index: 2;
+    transform: rotate(45deg);
+    background: var(--kiwi); color: #fff;
+    font-size: 9px; line-height: 14px; padding: 0 22px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  }
+  .pinfo { flex: 1; min-width: 0; }
+  .pinfo .pname { font-size: 15px; color: var(--carbon); font-weight: 500; }
+  .pinfo .psub { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .pinfo .ptag { background: #f3f4f6; color: var(--seal); font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+  .pinfo .pval { font-size: 13px; color: var(--carbon); }
+  .ocard-product .chev { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .ocard-foot { margin-top: 12px; padding-top: 10px; border-top: .5px solid #eef0f4; }
+  .ocard-foot span { color: var(--pool-500); font-size: 13px; }
+
+  /* ===== 底部 Tab Bar ===== */
+  .tabbar {
+    position: relative; z-index: 3;
+    width: 100%; height: 71.5px; flex-shrink: 0;
+    background: #fff; border-radius: 12px 12px 0 0;
+    box-shadow: 0 -1px 6px rgba(0,0,0,.06);
+    display: flex; align-items: flex-start;
+  }
+  .tab {
+    flex: 1; height: 71px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 10px 0 20px; text-decoration: none;
+  }
+  .tab img { width: 22px; height: 22px; }
+  .tab .label { font-size: 10px; letter-spacing: .1px; color: var(--seal); }
+  .tab.active .label { color: var(--pool-500); }
+  /* 中间「下单」：蓝色文字，无图标 */
+  .tab.center .label { color: var(--pool-500); }
+  .tab .icon-spacer { width: 20.2px; height: 15px; }
+
+  /* 中间悬浮 + 按钮 */
+  .fab {
+    position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%);
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--pool-500);
+    box-shadow: 0 6px 16px rgba(65,105,225,.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .fab img { width: 24px; height: 24px; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <!-- 状态栏 -->
+    <div class="statusbar">
+      <div class="time">9:41</div>
+      <div class="indicators">
+        <img src="assets/signal.svg" alt="" width="18" height="12" />
+        <img src="assets/wifi.svg" alt="" width="17" height="12" />
+        <img src="assets/battery.svg" alt="" width="27" height="13" />
+      </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="navbar">
+      <a href="index.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <div class="title">订单</div>
+      <div class="nav-capsule">
+        <img src="assets/share.svg" alt="" />
+        <div class="divider"></div>
+        <img src="assets/home.svg" alt="" />
+      </div>
+    </div>
+
+    <!-- 筛选区 -->
+    <div class="filterbar">
+      <div class="filter-row1">
+        <div class="chip">
+          样品标称信息
+          <svg class="caret" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="search">
+          <svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="请输入搜索关键词" />
+        </div>
+        <div class="filter-btn">
+          <svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 3h12M4.5 8h7M6.5 13h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          筛选
+        </div>
+      </div>
+      <div class="filter-row2">
+        <div class="selector">
+          qimatest-Sally Xu
+          <svg class="caret" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="selector">
+          2026年度
+          <svg class="caret" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 订单列表 -->
+    <div class="list">
+      <!-- 卡片 1 -->
+      <a class="ocard" href="order-detail.html?order=08008571">
+        <div class="ocard-head">
+          <div class="left">
+            <img src="assets/order_icon.svg" alt="" />
+            <span class="lbl">申请单号：</span>
+            <span class="num">08008571</span>
+          </div>
+          <div class="status blue">待录入数据</div>
+        </div>
+        <div class="ocard-dates">
+          <div class="date-pill">
+            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            下单日期 2026-06-03
+          </div>
+          <div class="date-pill">
+            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            预计报告日期 2026-06-05
+          </div>
+        </div>
+        <div class="ocard-product">
+          <div class="thumb fabric-black"></div>
+          <div class="pinfo">
+            <div class="pname">黑色复合面料</div>
+            <div class="psub"><span class="ptag">样品数量</span><span class="pval">10cm×80cm</span></div>
+          </div>
+          <img class="chev" src="assets/chevron_row.svg" alt="" />
+        </div>
+        <div class="ocard-foot"><span>查看全部</span></div>
+      </a>
+
+      <!-- 卡片 2 -->
+      <a class="ocard" href="order-detail.html?order=080082671">
+        <div class="ocard-head">
+          <div class="left">
+            <img src="assets/order_icon.svg" alt="" />
+            <span class="lbl">申请单号：</span>
+            <span class="num">080082671</span>
+          </div>
+          <div class="status green">报告已完成</div>
+        </div>
+        <div class="ocard-dates">
+          <div class="date-pill">
+            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            下单日期 2026-06-03
+          </div>
+          <div class="date-pill">
+            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            报告日期 2026-06-03
+          </div>
+        </div>
+        <div class="ocard-product">
+          <div class="thumb fabric-denim">
+            <span class="ribbon">合格</span>
+          </div>
+          <div class="pinfo">
+            <div class="pname">黑色机织面料</div>
+            <div class="psub"><span class="ptag">数号</span><span class="pval">T-26356800-11-R</span></div>
+          </div>
+          <img class="chev" src="assets/chevron_row.svg" alt="" />
+        </div>
+        <div class="ocard-foot"><span>查看全部</span></div>
+      </a>
+
+      <!-- 卡片 3 -->
+      <a class="ocard" href="order-detail.html?order=08008536">
+        <div class="ocard-head">
+          <div class="left">
+            <img src="assets/order_icon.svg" alt="" />
+            <span class="lbl">申请单号：</span>
+            <span class="num">08008536</span>
+          </div>
+          <div class="status blue">待录入数据</div>
+        </div>
+        <div class="ocard-dates">
+          <div class="date-pill">
+            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            下单日期 2026-06-02
+          </div>
+          <div class="date-pill">
+            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            预计报告日期 2026-06-05
+          </div>
+        </div>
+        <div class="ocard-product">
+          <div class="thumb fabric-grey"></div>
+          <div class="pinfo">
+            <div class="pname">灰色针织面料</div>
+            <div class="psub"><span class="ptag">样品数量</span><span class="pval">15cm×60cm</span></div>
+          </div>
+          <img class="chev" src="assets/chevron_row.svg" alt="" />
+        </div>
+        <div class="ocard-foot"><span>查看全部</span></div>
+      </a>
+    </div>
+
+    <!-- 底部 Tab Bar -->
+    <div class="tabbar">
+      <a class="tab" href="index.html">
+        <img src="assets/tab_home.svg" alt="" />
+        <span class="label">首页</span>
+      </a>
+      <a class="tab active" href="orders.html">
+        <img src="assets/tab_order_active.svg" alt="" />
+        <span class="label">订单</span>
+      </a>
+      <a class="tab center" href="#">
+        <span class="icon-spacer"></span>
+        <span class="label">下单</span>
+      </a>
+      <a class="tab" href="#">
+        <img src="assets/tab_report.svg" alt="" />
+        <span class="label">报告</span>
+      </a>
+      <a class="tab" href="#">
+        <img src="assets/tab_me.svg" alt="" />
+        <span class="label">我的</span>
+      </a>
+      <!-- 中间悬浮按钮 -->
+      <div class="fab"><img src="assets/fab_add.svg" alt="下单" /></div>
+    </div>
+  </div>
+</body>
+</html>

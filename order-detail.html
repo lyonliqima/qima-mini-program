@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>QIMA 小程序 - 订单详情</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --carbon: #191919;
+    --seal: #737373;
+    --pool-500: #4169e1;
+    --pool-100: #e6ecfb;
+    --pool-050: #f2f5fd;
+    --qima-red: #e4002b;
+    --border: #dedede;
+    --kiwi: #1f9d6b;
+  }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Inter, sans-serif;
+    background: #c9ced8;
+    color: var(--carbon);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body { display: flex; justify-content: center; }
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
+  .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .07; left: 230px; top: -130px; transform: rotate(30deg); }
+  .blob-3 { width: 129px; height: 119px; background: #a086c4; opacity: .12; left: -70px; top: 0; transform: rotate(-30deg); }
+  .blob-4 { width: 129px; height: 119px; background: #ff9a7f; opacity: .12; left: -120px; top: 0; transform: rotate(-30deg); }
+
+  .statusbar {
+    position: relative; z-index: 2;
+    height: 47px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 27px 0 0;
+  }
+  .statusbar .time { width: 134px; text-align: center; font-weight: 600; font-size: 17px; letter-spacing: -.4px; padding-top: 4px; }
+  .statusbar .indicators { display: flex; align-items: center; gap: 7px; padding-top: 4px; }
+  .statusbar .indicators img { display: block; }
+
+  .navbar {
+    position: relative; z-index: 2;
+    height: 44px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 17px;
+  }
+  .navbar .back { width: 12px; height: 20px; display: block; }
+  .navbar .title {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 17px; font-weight: 600; letter-spacing: -.34px; color: var(--carbon);
+  }
+  .nav-capsule {
+    width: 83px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,.7); border: .5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around; position: relative;
+  }
+  .nav-capsule img { width: 17px; height: 17px; }
+  .nav-capsule .divider { width: 1px; height: 18px; background: #d2d2d2; }
+
+  .detail-scroll {
+    position: relative; z-index: 1;
+    flex: 1; overflow-y: auto;
+    padding: 8px 16px 24px;
+  }
+  .detail-scroll::-webkit-scrollbar { display: none; }
+  .summary-card {
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(25,25,25,.08);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .summary-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .order-title { font-size: 18px; font-weight: 700; color: var(--carbon); line-height: 26px; }
+  .order-sub { font-size: 12px; color: var(--seal); margin-top: 4px; line-height: 18px; }
+  .status {
+    flex-shrink: 0;
+    height: 25px; line-height: 25px;
+    padding: 0 10px; border-radius: 7px;
+    font-size: 12px;
+  }
+  .status.blue { background: var(--pool-050); color: var(--pool-500); border: 1px solid #dce4fb; }
+  .status.green { background: #eaf6f2; color: var(--kiwi); border: 1px solid #c9ecdc; }
+  .status.orange { background: #fef0ee; color: #ff5f4e; border: 1px solid #ffd8d2; }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .metric {
+    background: #f7f8fb; border-radius: 10px;
+    padding: 10px;
+  }
+  .metric .label { font-size: 11px; color: var(--seal); line-height: 16px; }
+  .metric .value { font-size: 13px; color: var(--carbon); line-height: 20px; margin-top: 2px; font-weight: 500; }
+
+  .section-card {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(25,25,25,.06);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .section-head {
+    height: 38px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px;
+    background: #eaf0ff;
+    color: #24407a;
+    font-size: 13px; font-weight: 700;
+  }
+  .section-head::before {
+    content: "";
+    width: 14px; height: 14px; border-radius: 4px;
+    background: var(--pool-500);
+    box-shadow: inset 0 0 0 4px #dbe5ff;
+  }
+  .info-list { padding: 12px 14px; }
+  .info-row {
+    display: flex; gap: 12px;
+    padding: 9px 0;
+    border-bottom: .5px solid #eef0f4;
+    font-size: 12px; line-height: 18px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .label {
+    width: 112px; flex-shrink: 0;
+    color: var(--seal);
+  }
+  .info-row .value { flex: 1; color: var(--carbon); font-weight: 500; }
+  .info-row .value.muted { color: var(--seal); font-weight: 400; }
+  .info-row.full { flex-direction: column; gap: 5px; }
+  .info-row.full .label { width: auto; }
+  .sub-note {
+    margin-top: 6px;
+    color: var(--seal);
+    font-size: 11px;
+    line-height: 16px;
+  }
+  .product-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px;
+  }
+  .thumb {
+    position: relative; width: 64px; height: 64px;
+    border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    background: linear-gradient(135deg, #34343a 0%, #0e0e12 100%);
+  }
+  .thumb.denim { background: linear-gradient(135deg, #2c3656 0%, #10162a 100%); }
+  .thumb.grey { background: linear-gradient(135deg, #5a5f6b 0%, #2c303a 100%); }
+  .thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px);
+  }
+  .product-info { min-width: 0; flex: 1; }
+  .product-name { font-size: 15px; font-weight: 600; line-height: 22px; }
+  .product-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+  .pill {
+    background: #f3f4f6; color: var(--seal);
+    font-size: 11px; line-height: 18px;
+    padding: 0 7px; border-radius: 5px;
+  }
+  .table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .table th {
+    background: #f3f4f6; color: var(--seal);
+    text-align: left; font-weight: 600;
+    padding: 9px 10px;
+  }
+  .table td {
+    color: var(--carbon);
+    border-top: .5px solid #eef0f4;
+    padding: 9px 10px;
+    vertical-align: top;
+  }
+  .table .check { width: 18px; color: var(--pool-500); }
+  .inline-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <div class="statusbar">
+      <div class="time">9:41</div>
+      <div class="indicators">
+        <img src="assets/signal.svg" alt="" width="18" height="12" />
+        <img src="assets/wifi.svg" alt="" width="17" height="12" />
+        <img src="assets/battery.svg" alt="" width="27" height="13" />
+      </div>
+    </div>
+
+    <div class="navbar">
+      <a href="orders.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <div class="title">订单详情</div>
+      <div class="nav-capsule">
+        <img src="assets/share.svg" alt="" />
+        <div class="divider"></div>
+        <img src="assets/home.svg" alt="" />
+      </div>
+    </div>
+
+    <main class="detail-scroll">
+      <section class="summary-card">
+        <div class="summary-top">
+          <div>
+            <div class="order-title" id="orderTitle">Lab-Testing</div>
+            <div class="order-sub" id="orderSubtitle">Order Ref: T-25617004</div>
+          </div>
+          <div class="status blue" id="statusBadge">进行中</div>
+        </div>
+        <div class="summary-grid">
+          <div class="metric">
+            <div class="label">申请单号</div>
+            <div class="value" id="applicationNo">08008571</div>
+          </div>
+          <div class="metric">
+            <div class="label">预计报告日期</div>
+            <div class="value" id="reportDate">2026-06-05</div>
+          </div>
+          <div class="metric">
+            <div class="label">服务类型</div>
+            <div class="value" id="serviceType">实验室检测</div>
+          </div>
+          <div class="metric">
+            <div class="label">产品类别</div>
+            <div class="value" id="category">Toys</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">基本信息</div>
+        <div class="info-list">
+          <div class="info-row"><div class="label">订单参考编号</div><div class="value" id="referenceNo">T-25617004</div></div>
+          <div class="info-row"><div class="label">申请单号</div><div class="value" id="applicationNoDetail">08008571</div></div>
+          <div class="info-row"><div class="label">本次测试类型</div><div class="value" id="testType">首次测试</div></div>
+          <div class="info-row"><div class="label">服务类型</div><div class="value" id="serviceTypeDetail">实验室检测</div></div>
+          <div class="info-row"><div class="label">订单状态</div><div class="value" id="orderStatusText">进行中</div></div>
+          <div class="info-row"><div class="label">下单日期</div><div class="value" id="orderDate">2026-06-03</div></div>
+          <div class="info-row"><div class="label">预计报告日期</div><div class="value" id="reportDateDetail">2026-06-05</div></div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">客户与项目信息</div>
+        <div class="info-list">
+          <div class="info-row"><div class="label">客户</div><div class="value" id="customerName">qimatest-Sally Xu</div></div>
+          <div class="info-row"><div class="label">联系人</div><div class="value" id="contactName">Sally Xu</div></div>
+          <div class="info-row"><div class="label">关联项目</div><div class="value" id="projectName">TEMU Hardware - Seller Pay（商家付款）</div></div>
+          <div class="info-row"><div class="label">付款方</div><div class="value" id="payer">Seller Pay</div></div>
+          <div class="info-row"><div class="label">目标市场</div><div class="value" id="targetMarket">欧盟，美国</div></div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">产品信息</div>
+        <div class="product-card">
+          <div class="thumb" id="productThumb"></div>
+          <div class="product-info">
+            <div class="product-name" id="productName">黑色复合面料</div>
+            <div class="product-meta">
+              <span class="pill" id="sampleQty">10cm×80cm</span>
+              <span class="pill" id="modelNo">T-25617004</span>
+              <span class="pill" id="productCategory">Textile</span>
+            </div>
+          </div>
+        </div>
+        <div class="info-list">
+          <div class="info-row"><div class="label">产品英文名</div><div class="value" id="productEnglish">Composite fabric</div></div>
+          <div class="info-row"><div class="label">货号 / 型号</div><div class="value" id="skuNo">T-25617004</div></div>
+          <div class="info-row"><div class="label">材质 / 成分</div><div class="value" id="material">Polyester / Spandex</div></div>
+          <div class="info-row"><div class="label">品牌</div><div class="value" id="brand">QIMA Sample</div></div>
+          <div class="info-row"><div class="label">适用年龄</div><div class="value" id="ageGrade">N/A</div></div>
+          <div class="info-row"><div class="label">原产国家或地区</div><div class="value" id="originCountry">中国</div></div>
+          <div class="info-row"><div class="label">销售国家或地区</div><div class="value" id="salesCountry">欧盟，美国</div></div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">供应商与制造商</div>
+        <div class="info-list">
+          <div class="info-row"><div class="label">供应商</div><div class="value" id="supplierName">Shenzhen Zhichuang Co., Ltd.</div></div>
+          <div class="info-row"><div class="label">制造商</div><div class="value" id="manufacturerName">QIMA Sample Manufacturer</div></div>
+          <div class="info-row full"><div class="label">制造商地址</div><div class="value" id="manufacturerAddress">No. 88 Industrial Road, Shenzhen, China</div></div>
+          <div class="info-row"><div class="label">PO / PI / Invoice</div><div class="value" id="poNumber">PO-7845120</div></div>
+          <div class="info-row"><div class="label">EAN / UPC</div><div class="value" id="eanCode">6 901234 567890</div></div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">样品收集</div>
+        <div class="info-list">
+          <div class="info-row full"><div class="label">收集方式</div><div class="value" id="collectionMethod">启迈 QIMA 将在执行产品服务时收集样本</div></div>
+          <div class="info-row"><div class="label">样品数量</div><div class="value" id="sampleQtyDetail">10cm×80cm</div></div>
+          <div class="info-row"><div class="label">样品状态</div><div class="value" id="sampleStatus">待收样</div></div>
+          <div class="info-row"><div class="label">快递公司</div><div class="value" id="courierName">DHL</div></div>
+          <div class="info-row"><div class="label">运单号</div><div class="value" id="trackingNo">DHL-20260603001</div></div>
+          <div class="info-row full"><div class="label">收样备注</div><div class="value muted" id="sampleRemark">请在样品包装外标注订单参考编号。</div></div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">测试项目</div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="check"></th>
+              <th>项目</th>
+              <th>标准</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="check">✓</td>
+              <td>纤维成分</td>
+              <td>ISO 1833</td>
+              <td id="testStatus1">进行中</td>
+            </tr>
+            <tr>
+              <td class="check">✓</td>
+              <td>色牢度</td>
+              <td>ISO 105</td>
+              <td id="testStatus2">待测试</td>
+            </tr>
+            <tr>
+              <td class="check">✓</td>
+              <td>尺寸稳定性</td>
+              <td>ISO 6330</td>
+              <td id="testStatus3">待测试</td>
+            </tr>
+            <tr>
+              <td class="check">✓</td>
+              <td>物理机械性能</td>
+              <td>EN 71 / ASTM</td>
+              <td id="testStatus4">待测试</td>
+            </tr>
+            <tr>
+              <td class="check">✓</td>
+              <td>化学安全</td>
+              <td>REACH / CPSIA</td>
+              <td id="testStatus5">待测试</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">附件与备注</div>
+        <div class="info-list">
+          <div class="info-row full">
+            <div class="label">已上传资料</div>
+            <div class="value">
+              <div class="inline-tags">
+                <span class="pill">Product Spec.pdf</span>
+                <span class="pill">Product Photo.jpg</span>
+                <span class="pill">PO-7845120.pdf</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-row full"><div class="label">备注</div><div class="value muted" id="orderRemark">请优先安排常规安全项目测试，如需补充资料请联系客户。</div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const orders = {
+      '08008571': {
+        title: 'Lab-Testing',
+        subtitle: 'Order Ref: T-25617004',
+        applicationNo: '08008571',
+        status: '待录入数据',
+        statusClass: 'blue',
+        reportDate: '2026-06-05',
+        serviceType: '实验室检测',
+        category: 'Textile',
+        productName: '黑色复合面料',
+        productEnglish: 'Black composite fabric',
+        sampleQty: '10cm×80cm',
+        modelNo: 'T-25617004',
+        orderDate: '2026-06-03',
+        referenceNo: 'T-25617004',
+        testType: '首次测试',
+        projectName: 'TEMU Hardware - Seller Pay（商家付款）',
+        targetMarket: '欧盟，美国',
+        skuNo: 'T-25617004',
+        material: 'Polyester / Spandex',
+        brand: 'QIMA Sample',
+        ageGrade: 'N/A',
+        originCountry: '中国',
+        salesCountry: '欧盟，美国',
+        supplierName: 'Shenzhen Zhichuang Co., Ltd.',
+        manufacturerName: 'QIMA Sample Manufacturer',
+        manufacturerAddress: 'No. 88 Industrial Road, Shenzhen, China',
+        poNumber: 'PO-7845120',
+        eanCode: '6 901234 567890',
+        collectionMethod: '启迈 QIMA 将在执行产品服务时收集样本',
+        sampleStatus: '待收样',
+        courierName: 'DHL',
+        trackingNo: 'DHL-20260603001',
+        sampleRemark: '请在样品包装外标注订单参考编号。',
+        orderRemark: '请优先安排常规纺织品项目测试，如需补充资料请联系客户。',
+        thumbClass: ''
+      },
+      '080082671': {
+        title: 'Lab-Testing',
+        subtitle: 'Order Ref: T-26356800-11-R',
+        applicationNo: '080082671',
+        status: '报告已完成',
+        statusClass: 'green',
+        reportDate: '2026-06-03',
+        serviceType: '实验室检测',
+        category: 'Textile',
+        productName: '黑色机织面料',
+        productEnglish: 'Black woven fabric',
+        sampleQty: '1.5m×2.0m',
+        modelNo: 'T-26356800-11-R',
+        orderDate: '2026-06-03',
+        referenceNo: 'T-26356800-11-R',
+        testType: '重测',
+        projectName: 'TEMU Hardware - Seller Pay（商家付款）',
+        targetMarket: '欧盟',
+        skuNo: 'T-26356800-11-R',
+        material: '100% Polyester',
+        brand: 'QIMA Sample',
+        ageGrade: 'N/A',
+        originCountry: '中国',
+        salesCountry: '欧盟',
+        supplierName: 'Shenzhen Textile Supplier Co., Ltd.',
+        manufacturerName: 'QIMA Textile Factory',
+        manufacturerAddress: 'Baoan District, Shenzhen, Guangdong, China',
+        poNumber: 'PO-26356800',
+        eanCode: 'N/A',
+        collectionMethod: '您或者供应商会寄送样本',
+        sampleStatus: '已收样',
+        courierName: 'FedEx',
+        trackingNo: 'FDX-2635680011',
+        sampleRemark: '样品已到达实验室，报告已完成。',
+        orderRemark: '报告结果通过，等待客户下载报告。',
+        thumbClass: 'denim',
+        testStatus1: '已完成',
+        testStatus2: '已完成',
+        testStatus3: '已完成',
+        testStatus4: '已完成',
+        testStatus5: '已完成'
+      },
+      '08008536': {
+        title: 'Lab-Testing',
+        subtitle: 'Order Ref: T-25617036',
+        applicationNo: '08008536',
+        status: '待录入数据',
+        statusClass: 'blue',
+        reportDate: '2026-06-05',
+        serviceType: '实验室检测',
+        category: 'Textile',
+        productName: '灰色针织面料',
+        productEnglish: 'Grey knitted fabric',
+        sampleQty: '15cm×60cm',
+        modelNo: 'T-25617036',
+        orderDate: '2026-06-02',
+        referenceNo: 'T-25617036',
+        testType: '首次测试',
+        projectName: '通用检测项目',
+        targetMarket: '美国，加拿大',
+        skuNo: 'T-25617036',
+        material: 'Cotton / Spandex',
+        brand: 'QIMA Sample',
+        ageGrade: 'N/A',
+        originCountry: '越南',
+        salesCountry: '美国，加拿大',
+        supplierName: 'Vietnam Fabric Supplier Ltd.',
+        manufacturerName: 'QIMA Knitwear Factory',
+        manufacturerAddress: 'Binh Duong Industrial Zone, Vietnam',
+        poNumber: 'PI-2026-036',
+        eanCode: 'N/A',
+        collectionMethod: '启迈 QIMA 已经拿到了样本',
+        sampleStatus: '已收样',
+        courierName: 'UPS',
+        trackingNo: 'UPS-08008536',
+        sampleRemark: '样品数量满足测试要求。',
+        orderRemark: '等待实验室录入数据。',
+        thumbClass: 'grey'
+      },
+      'T-25617004': {
+        title: 'Lab-Testing',
+        subtitle: 'Order Ref: T-25617004',
+        applicationNo: 'T-25617004',
+        status: '进行中',
+        statusClass: 'blue',
+        reportDate: '2026-06-05',
+        serviceType: '实验室检测',
+        category: 'Toys',
+        productName: 'Toys 产品检测',
+        productEnglish: 'Toy product testing',
+        sampleQty: '样品 3 件',
+        modelNo: 'T-25617004',
+        orderDate: '2026-06-03',
+        referenceNo: 'T-25617004',
+        testType: '首次测试',
+        projectName: '玩具实验室检测项目',
+        targetMarket: '欧盟，美国',
+        skuNo: 'RBT-2025-X9',
+        material: 'ABS / PC 塑料',
+        brand: 'QIMA Toy',
+        ageGrade: '3岁以上',
+        originCountry: '中国',
+        salesCountry: '欧盟，美国',
+        supplierName: 'Shenzhen Zhichuang Co., Ltd.',
+        manufacturerName: '深圳市智创玩具有限公司',
+        manufacturerAddress: '深圳市宝安区工业路 88 号',
+        poNumber: 'PO-7845120',
+        eanCode: '6 901234 567890',
+        collectionMethod: '启迈 QIMA 将在执行产品服务时收集样本',
+        sampleStatus: '待收样',
+        courierName: 'DHL',
+        trackingNo: 'DHL-8572-4490-CN',
+        sampleRemark: '请将玩具主机、配件、包装和说明书一并提供。',
+        orderRemark: '客户要求覆盖 EN71、ASTM F963 和 CPSIA 常规安全项目。',
+        thumbClass: ''
+      },
+      'Q202349103': {
+        title: 'Pre-Shipment Inspection',
+        subtitle: 'Order Ref: Q202349103',
+        applicationNo: 'Q202349103',
+        status: '待确认',
+        statusClass: 'orange',
+        reportDate: '2026-06-06',
+        serviceType: 'PSI 装运前检测',
+        category: 'Toys',
+        productName: 'Toys 装运前检测',
+        productEnglish: 'Toy pre-shipment inspection',
+        sampleQty: '订单批次 1',
+        modelNo: 'Q202349103',
+        orderDate: '2026-06-03',
+        referenceNo: 'Q202349103',
+        testType: '再次下单',
+        projectName: 'PSI 装运前检测项目',
+        targetMarket: '欧盟，美国',
+        skuNo: 'Q202349103',
+        material: 'ABS / Metal Parts',
+        brand: 'QIMA Toy',
+        ageGrade: '6岁以上',
+        originCountry: '中国',
+        salesCountry: '欧盟，美国',
+        supplierName: 'QIMA Toy Supplier',
+        manufacturerName: 'QIMA Toy Factory',
+        manufacturerAddress: 'Dongguan, Guangdong, China',
+        poNumber: 'PI-Q202349103',
+        eanCode: 'N/A',
+        collectionMethod: '您或者供应商会寄送样本',
+        sampleStatus: '待确认',
+        courierName: '待确认',
+        trackingNo: '待确认',
+        sampleRemark: '供应商需确认最终验货时间和地点。',
+        orderRemark: '待客户确认装运前检测排期。',
+        thumbClass: 'denim'
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order') || '08008571';
+    const order = orders[orderId] || orders['08008571'];
+
+    document.getElementById('orderTitle').textContent = order.title;
+    document.getElementById('orderSubtitle').textContent = order.subtitle;
+    document.getElementById('applicationNo').textContent = order.applicationNo;
+    document.getElementById('reportDate').textContent = order.reportDate;
+    document.getElementById('serviceType').textContent = order.serviceType;
+    document.getElementById('category').textContent = order.category;
+    document.getElementById('productName').textContent = order.productName;
+    document.getElementById('sampleQty').textContent = order.sampleQty;
+    document.getElementById('modelNo').textContent = order.modelNo;
+    setText('productCategory', order.category);
+    setText('applicationNoDetail', order.applicationNo);
+    setText('referenceNo', order.referenceNo);
+    setText('testType', order.testType);
+    setText('serviceTypeDetail', order.serviceType);
+    setText('orderStatusText', order.status);
+    setText('orderDate', order.orderDate);
+    setText('reportDateDetail', order.reportDate);
+    setText('projectName', order.projectName);
+    setText('targetMarket', order.targetMarket);
+    setText('productEnglish', order.productEnglish);
+    setText('skuNo', order.skuNo);
+    setText('material', order.material);
+    setText('brand', order.brand);
+    setText('ageGrade', order.ageGrade);
+    setText('originCountry', order.originCountry);
+    setText('salesCountry', order.salesCountry);
+    setText('supplierName', order.supplierName);
+    setText('manufacturerName', order.manufacturerName);
+    setText('manufacturerAddress', order.manufacturerAddress);
+    setText('poNumber', order.poNumber);
+    setText('eanCode', order.eanCode);
+    setText('collectionMethod', order.collectionMethod);
+    setText('sampleQtyDetail', order.sampleQty);
+    setText('sampleStatus', order.sampleStatus);
+    setText('courierName', order.courierName);
+    setText('trackingNo', order.trackingNo);
+    setText('sampleRemark', order.sampleRemark);
+    setText('orderRemark', order.orderRemark);
+
+    const statusBadge = document.getElementById('statusBadge');
+    statusBadge.textContent = order.status;
+    statusBadge.className = `status ${order.statusClass}`;
+
+    const productThumb = document.getElementById('productThumb');
+    productThumb.className = `thumb ${order.thumbClass || ''}`.trim();
+
+    document.getElementById('testStatus1').textContent = order.testStatus1 || '进行中';
+    document.getElementById('testStatus2').textContent = order.testStatus2 || '待测试';
+    document.getElementById('testStatus3').textContent = order.testStatus3 || '待测试';
+    document.getElementById('testStatus4').textContent = order.testStatus4 || '待测试';
+    document.getElementById('testStatus5').textContent = order.testStatus5 || '待测试';
+
+    function setText(id, value){
+      const node = document.getElementById(id);
+      if(node) node.textContent = value || 'N/A';
+    }
+  </script>
+</body>
+</html>
