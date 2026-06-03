@@ -916,7 +916,7 @@
           t2.remove();
           botMsg('已基于'+prefill.sourceType+'「<b>'+id+'</b>」预填完成。请检查以下信息，缺失或不准确的字段可以继续编辑。', false);
           botMsg(reuseOrderCard(id, prefill), true);
-          botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()">'+ciIcon('edit')+' 编辑字段</button><button class="chip-btn" onclick="continueReuseMissing()">'+ciIcon('plus')+' 补充缺失项</button></div></div>', true);
+          botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button><button class="chip-btn" onclick="continueReuseMissing(this)">'+ciIcon('plus')+' 补充缺失项</button></div></div>', true);
         }, 700);
       }, 700);
     }
@@ -943,7 +943,8 @@
       '</div>';
     }
 
-    function continueReuseMissing(){
+    function continueReuseMissing(btn){
+      removeActionRow(btn);
       userMsg('补充缺失项');
       if(manualAnswers['Carrier'] && manualAnswers['Tracking Number']){
         botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
@@ -1363,7 +1364,7 @@
       setTimeout(()=>{ t.remove();
         botMsg('已根据你的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
         botMsg(manualOrderCard(), true);
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
+        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
       }, 650);
     }
 
@@ -1489,7 +1490,13 @@
       }
     ];
 
-    function openFieldEditor(){
+    function removeActionRow(btn){
+      const row = btn ? btn.closest('.row') : null;
+      if(row) row.remove();
+    }
+
+    function openFieldEditor(btn){
+      removeActionRow(btn);
       const grid = document.getElementById('fieldEditorGrid');
       grid.innerHTML = editableSections.map(section =>
         '<div class="edit-section">'+
@@ -1558,7 +1565,7 @@
       const completion = calculateRequiredCompletion();
       botMsg('已保存修改 ✅<br>当前必填字段完成度 <b>'+completion+'%</b>，我会以更新后的字段继续确认。', false);
       if(completion === 100){
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()">'+ciIcon('edit')+' 继续编辑</button></div></div>', true);
+        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 继续编辑</button></div></div>', true);
       }
     }
 
@@ -1724,21 +1731,22 @@
       setTimeout(()=>{ t.remove();
         botMsg('太好了！信息已全部补齐，<b>表单完成度 100%</b> 🎉<br>下一步请确认订单信息，确认无误后即可去下单。', false);
         const chips = '<div class="chips">'+
-          '<button class="chip-btn primary" onclick="confirmOrderInfo()">'+ciIcon('check')+' 确认订单信息</button>'+
-          '<button class="chip-btn" onclick="placeOrder()">'+ciIcon('cart')+' 去下单</button>'+
-          '<button class="chip-btn" onclick="reedit()">'+ciIcon('edit')+' 补充商品信息</button>'+
-          '<button class="chip-btn" onclick="reupload()">'+ciIcon('refresh')+' 更换资料</button>'+
+          '<button class="chip-btn primary" onclick="confirmOrderInfo(this)">'+ciIcon('check')+' 确认订单信息</button>'+
+          '<button class="chip-btn" onclick="placeOrder(this)">'+ciIcon('cart')+' 去下单</button>'+
+          '<button class="chip-btn" onclick="reedit(this)">'+ciIcon('edit')+' 补充商品信息</button>'+
+          '<button class="chip-btn" onclick="reupload(this)">'+ciIcon('refresh')+' 更换资料</button>'+
           '</div>';
         botMsg('<div style="width:268px">'+chips+'</div>', true);
       }, 700);
     }
-    function confirmOrderInfo(){
+    function confirmOrderInfo(btn){
+      removeActionRow(btn);
       userMsg('确认订单信息');
       const t = botTyping();
       setTimeout(()=>{ t.remove();
         botMsg(orderSummaryCard(), true);
         botMsg('请确认以上订单信息是否正确。确认后我会帮你提交检测订单。', false);
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder()">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor()">'+ciIcon('edit')+' 返回编辑字段</button></div></div>', true);
+        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 返回编辑字段</button></div></div>', true);
       }, 700);
     }
     function orderSummaryCard(){
@@ -1759,7 +1767,8 @@
         '</div>'+
       '</div>';
     }
-    function placeOrder(){
+    function placeOrder(btn){
+      removeActionRow(btn);
       document.getElementById('orderConfirmBody').innerHTML = readonlyOrderConfirmCard();
       document.getElementById('orderConfirmModal').classList.add('show');
     }
@@ -1801,8 +1810,8 @@
         '</div>'+
       '</div>';
     }
-    function reedit(){ userMsg('补充商品信息'); botMsg('好的，请直接在下方输入需要补充或修改的内容～', false); }
-    function reupload(){ userMsg('更换资料'); askUpload(); }
+    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); botMsg('好的，请直接在下方输入需要补充或修改的内容～', false); }
+    function reupload(btn){ removeActionRow(btn); userMsg('更换资料'); askUpload(); }
   </script>
 </body>
 </html>
