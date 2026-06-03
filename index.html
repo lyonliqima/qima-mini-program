@@ -232,10 +232,11 @@
   .opt.primary { background: var(--pool-050); border-color: #dce4fb; }
   .opt .opt-ic {
     width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
   }
-  .opt.primary .opt-ic { background: var(--pool-100); }
-  .opt.plain .opt-ic { background: #f4f6fa; }
+  .opt .opt-ic svg { width: 22px; height: 22px; }
+  .opt.primary .opt-ic { background: var(--pool-100); color: var(--pool-500); }
+  .opt.plain .opt-ic { background: #f4f6fa; color: var(--seal); }
   .opt .opt-body { flex: 1; min-width: 0; }
   .opt .opt-name { font-size: 15px; font-weight: 600; color: var(--carbon); display: flex; align-items: center; gap: 6px; }
   .opt .opt-badge { font-size: 10px; color: var(--pool-500); background: var(--pool-100); border-radius: 4px; padding: 1px 6px; font-weight: 400; }
@@ -503,7 +504,11 @@
         <div class="sheet-sub">请选择适合你的创建订单方式</div>
 
         <a class="opt primary" href="order-chat.html">
-          <div class="opt-ic">⚡</div>
+          <div class="opt-ic">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13 2L5 13h6l-1 9 9-12h-6l1-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <div class="opt-body">
             <div class="opt-name">快速下单 <span class="opt-badge">AI 推荐</span></div>
             <div class="opt-desc">上传资料或商品链接，AI 自动识别并填写表单</div>
@@ -512,7 +517,13 @@
         </a>
 
         <div class="opt plain" onclick="openDetailForm()">
-          <div class="opt-ic">📝</div>
+          <div class="opt-ic">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 11l7-7 1 1-7 7-3 1 1-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 15h6M8 18h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="opt-body">
             <div class="opt-name">详细填表</div>
             <div class="opt-desc">手动逐项填写完整的检测订单信息</div>
@@ -615,7 +626,7 @@
             </div>
           </div>
 
-          <div class="form-row">
+          <div class="form-row shipping-field" style="display: none;">
             <div class="form-label">快递公司</div>
             <select class="form-select">
               <option value="" disabled selected>请选择快递公司</option>
@@ -626,12 +637,12 @@
             </select>
           </div>
 
-          <div class="form-row">
+          <div class="form-row shipping-field" style="display: none;">
             <div class="form-label">运单号</div>
             <input class="form-input" type="text" placeholder="请输入运单号">
           </div>
 
-          <div class="form-row">
+          <div class="form-row shipping-field" style="display: none;">
             <div class="form-label">备注</div>
             <textarea class="form-textarea" placeholder="请输入备注信息"></textarea>
             <div class="char-count">0 / 3600</div>
@@ -667,10 +678,17 @@
     function toggleRefNumber() {
       const selectedValue = document.querySelector('input[name="sampleMethod"]:checked').value;
       const refNumberRow = document.getElementById('refNumberRow');
+      const shippingFields = document.querySelectorAll('.shipping-field');
       if (selectedValue === 'collect') {
         refNumberRow.style.display = 'flex';
+        shippingFields.forEach((field) => {
+          field.style.display = 'none';
+        });
       } else {
         refNumberRow.style.display = 'none';
+        shippingFields.forEach((field) => {
+          field.style.display = 'block';
+        });
       }
     }
   </script>
