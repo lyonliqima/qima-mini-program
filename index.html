@@ -113,6 +113,10 @@
     position: absolute; left: 0; top: 0; width: 99px; height: 91px;
     object-fit: cover;
   }
+  .quick-card .art-vector {
+    position: absolute; left: -2.5px; top: 39.5px;
+    width: 67.5px; height: 38px;
+  }
   .quick-card .art.book { left: -36px; top: -16px; width: 120px; height: 120px; }
   .quick-card .title { position: absolute; left: 90px; top: 11px; font-size: 12px; font-weight: 500; line-height: 22.5px; }
   .quick-card .sub { position: absolute; left: 90px; top: 31px; font-size: 10px; color: rgba(99,99,99,.8); line-height: 18px; }
@@ -304,11 +308,44 @@
     font-size: 12px; color: var(--carbon);
   }
   .radio-line input, .check-line input { accent-color: var(--pool-500); }
+  .selected-country-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 10px;
+  }
+  .selected-country-list:empty { display: none; }
+  .selected-country-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 9px 0 11px;
+    border-radius: 14px; background: var(--pool-050); color: var(--pool-500);
+    font-size: 12px; line-height: 28px;
+  }
+  .selected-country-chip button {
+    width: 16px; height: 16px; border: none; border-radius: 50%;
+    background: rgba(65,105,225,.12); color: var(--pool-500);
+    line-height: 16px; cursor: pointer;
+  }
+  .country-search {
+    position: relative; margin-top: 10px;
+  }
+  .country-results {
+    position: absolute; left: 0; right: 0; top: 42px; z-index: 5;
+    max-height: 148px; overflow-y: auto;
+    background: #fff; border: 1px solid #dcdfe6; border-radius: 8px;
+    box-shadow: 0 8px 18px rgba(25,25,25,.1);
+    display: none;
+  }
+  .country-results.show { display: block; }
+  .country-option {
+    width: 100%; border: none; background: #fff; text-align: left;
+    padding: 10px 11px; font-size: 13px; color: var(--carbon);
+    cursor: pointer;
+  }
+  .country-option:hover { background: var(--pool-050); color: var(--pool-500); }
   .inline-form-row {
     display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px;
   }
   .inline-label {
-    width: fit-content; flex-shrink: 0; padding-top: 0;
+    width: fit-content; flex-shrink: 0; padding-top: 12px;
     font-size: 13px; color: var(--seal); line-height: 20px;
   }
   .inline-label .req { color: #e4002b; }
@@ -325,6 +362,100 @@
     background: var(--pool-100); color: var(--pool-500);
     font-size: 15px; cursor: pointer; padding: 0 18px;
   }
+  .optional-inline {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .optional-inline .form-input { flex: 1; min-width: 0; }
+  .optional-link {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 12px; cursor: pointer; white-space: nowrap;
+  }
+  .upload-optional-btn {
+    width: 100%; height: 40px; border: 1px solid #dce4fb;
+    border-radius: 10px; background: var(--pool-100); color: var(--pool-500);
+    font-size: 12px; cursor: pointer;
+  }
+  .contact-note {
+    font-size: 11px; color: var(--seal); line-height: 16px;
+    margin-bottom: 9px;
+  }
+  .contact-type-row {
+    display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 9px;
+  }
+  .contact-type-row label {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--carbon);
+  }
+  .add-contact-btn {
+    height: 34px; margin-top: 10px; padding: 0 14px;
+    border: none; border-radius: 8px; background: var(--pool-100);
+    color: var(--pool-500); font-size: 12px; cursor: pointer;
+  }
+  .optional-fields { display: none; }
+  .detail-body.show-optional .optional-fields { display: block; }
+  .supplier-mask {
+    position: absolute; inset: 0; z-index: 80;
+    background: rgba(25,25,25,.28);
+    display: none; align-items: center; justify-content: center;
+    padding: 18px;
+  }
+  .supplier-mask.show { display: flex; }
+  .supplier-modal {
+    width: 100%; max-height: 78%; background: #fff;
+    border-radius: 14px; box-shadow: 0 10px 30px rgba(25,25,25,.18);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .supplier-head {
+    height: 54px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .supplier-title { font-size: 18px; font-weight: 600; color: var(--carbon); }
+  .supplier-close {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 30px; line-height: 30px; cursor: pointer;
+  }
+  .supplier-body { padding: 0 16px 12px; overflow-y: auto; }
+  .supplier-search {
+    height: 38px; border-bottom: 1px solid #e1e5ee;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--seal); margin-bottom: 12px;
+  }
+  .supplier-search input {
+    border: none; outline: none; flex: 1; min-width: 0;
+    font-size: 13px; color: var(--carbon);
+  }
+  .supplier-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  .supplier-table th {
+    background: #f5f5f5; text-align: left; color: var(--carbon);
+    padding: 9px 8px; font-weight: 600;
+  }
+  .supplier-table td {
+    border-bottom: 1px solid #eef0f4;
+    padding: 10px 8px; color: var(--carbon);
+  }
+  .supplier-row { cursor: pointer; }
+  .supplier-row.selected td { background: var(--pool-050); color: var(--pool-500); }
+  .supplier-empty { text-align: center; color: var(--seal); padding: 18px 8px; }
+  .supplier-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 16px 16px; border-top: .5px solid #eef0f4;
+  }
+  .supplier-add {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 13px; cursor: pointer; padding: 0;
+  }
+  .supplier-actions { display: flex; align-items: center; gap: 10px; }
+  .supplier-cancel {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 13px; cursor: pointer;
+  }
+  .supplier-select {
+    min-width: 76px; height: 38px; border: none; border-radius: 10px;
+    background: var(--pool-500); color: #fff; font-size: 13px; cursor: pointer;
+  }
+  .supplier-select:disabled { background: #f0f0f0; color: #c4c4c4; cursor: default; }
   .form-section-title {
     margin: 20px -22px 16px; padding: 12px 22px 8px;
     border-top: .5px solid #eef0f4;
@@ -344,6 +475,35 @@
     background: var(--pool-500); border-color: var(--pool-500); color: #fff;
     font-weight: 600;
   }
+  .review-body {
+    flex: 1; overflow-y: auto; padding: 20px 22px 96px;
+    display: none;
+  }
+  .review-body.show { display: block; }
+  .review-card {
+    border: 1px solid #eef0f4; border-radius: 12px;
+    background: #fff; overflow: hidden;
+  }
+  .review-intro {
+    margin-bottom: 14px; padding: 12px 14px;
+    border-radius: 12px; background: var(--pool-050);
+    color: #24407a; font-size: 12px; line-height: 18px;
+  }
+  .review-section {
+    padding: 14px; border-bottom: .5px solid #eef0f4;
+  }
+  .review-section:last-child { border-bottom: none; }
+  .review-section-title {
+    font-size: 13px; font-weight: 700; color: var(--carbon);
+    margin-bottom: 10px;
+  }
+  .review-row {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 7px 0; font-size: 12px; line-height: 18px;
+  }
+  .review-row span:first-child { color: var(--seal); flex-shrink: 0; }
+  .review-row span:last-child { color: var(--carbon); text-align: right; }
+  .review-empty { color: #a0a6b1 !important; }
 </style>
 </head>
 <body>
@@ -401,6 +561,7 @@
             <div class="go"><img src="assets/arrow_card.svg" alt="" /></div>
           </div>
           <div class="quick-card">
+            <img class="art-vector" src="assets/image39-vector.svg" alt="" />
             <img class="art book" src="assets/image39.png" alt="" />
             <div class="title">查看报告</div>
             <div class="sub">3份报告已生成</div>
@@ -423,7 +584,7 @@
           <a class="order-row" href="order-detail.html?order=T-25617004">
             <div>
               <div class="oid">T-25617004</div>
-              <div class="odesc">实验室检测 · Toys</div>
+              <div class="odesc">实验室检测 · 玩具</div>
             </div>
             <div class="right">
               <div class="tag progress">进行中</div>
@@ -433,7 +594,7 @@
           <a class="order-row" href="order-detail.html?order=Q202349103">
             <div>
               <div class="oid">Q202349103</div>
-              <div class="odesc">PSI 装运前检测 · Toys</div>
+              <div class="odesc">装运前检验 · 玩具</div>
             </div>
             <div class="right">
               <div class="tag pending">待确认</div>
@@ -455,7 +616,7 @@
             <div class="notif-icon blue"><img src="assets/notif_doc.svg" alt="" /></div>
             <div class="notif-body">
               <div class="ntitle">下单成功提醒 <span class="dot"></span></div>
-              <div class="nsub">产品: Toys | PSI 装运前检测</div>
+              <div class="nsub">产品：玩具 | 装运前检验</div>
               <div class="ntime">星期日 15:32</div>
             </div>
           </div>
@@ -471,7 +632,7 @@
       </div>
     </div>
 
-    <!-- 底部 Tab Bar -->
+    <!-- 底部标签栏 -->
     <div class="tabbar">
       <a class="tab active" href="index.html">
         <img src="assets/tab_home.svg" alt="" />
@@ -510,8 +671,8 @@
             </svg>
           </div>
           <div class="opt-body">
-            <div class="opt-name">快速下单 <span class="opt-badge">AI 推荐</span></div>
-            <div class="opt-desc">上传资料或商品链接，AI 自动识别并填写表单</div>
+            <div class="opt-name">快速下单 <span class="opt-badge">智能推荐</span></div>
+            <div class="opt-desc">上传资料或商品链接，智能识别并填写表单</div>
           </div>
           <svg class="opt-arrow" width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
@@ -543,7 +704,7 @@
           <button class="detail-close" onclick="closeDetailForm()" aria-label="关闭">×</button>
         </div>
 
-        <div class="detail-body">
+        <div class="detail-body" id="detailEditBody">
           <div class="form-row">
             <div class="form-label">本次测试类型 <span class="req">*</span> <span class="info">i</span></div>
             <div class="radio-stack">
@@ -555,14 +716,14 @@
 
           <div class="form-row">
             <div class="form-label">产品名称 <span class="req">*</span></div>
-            <input class="form-input" type="text" placeholder="请输入产品名称">
+            <input class="form-input" id="productNameInput" type="text" placeholder="请输入产品名称">
           </div>
 
           <div class="form-row">
             <div class="form-label">关联项目 <span class="req">*</span></div>
-            <select class="form-select">
+            <select class="form-select" id="projectSelect">
               <option value="" disabled selected>请选择关联项目</option>
-              <option>TEMU Hardware - Seller Pay（商家付款）</option>
+              <option>TEMU 硬件 - 商家付款</option>
               <option>玩具实验室检测项目</option>
               <option>通用检测项目</option>
             </select>
@@ -570,7 +731,7 @@
 
           <div class="form-row">
             <div class="form-label">原产国家或地区 <span class="req">*</span> <span class="info">i</span></div>
-            <select class="form-select">
+            <select class="form-select" id="originCountrySelect">
               <option value="" disabled selected>请选择原产国家或地区</option>
               <option>奥兰群岛</option>
               <option>中国</option>
@@ -582,28 +743,118 @@
           <div class="form-row">
             <div class="form-label">销售国家或地区 <span class="req">*</span> <span class="info">i</span></div>
             <div class="check-stack">
-              <label class="check-line"><input type="checkbox"> 欧盟</label>
-              <label class="check-line"><input type="checkbox"> 美国</label>
-              <label class="check-line"><input type="checkbox"> 澳大利亚</label>
-              <label class="check-line"><input type="checkbox"> 加拿大</label>
-              <label class="check-line"><input type="checkbox"> 南非</label>
+              <label class="check-line"><input type="checkbox" value="欧盟" onchange="toggleSalesCountry(this)"> 欧盟</label>
+              <label class="check-line"><input type="checkbox" value="美国" onchange="toggleSalesCountry(this)"> 美国</label>
+              <label class="check-line"><input type="checkbox" value="澳大利亚" onchange="toggleSalesCountry(this)"> 澳大利亚</label>
+              <label class="check-line"><input type="checkbox" value="加拿大" onchange="toggleSalesCountry(this)"> 加拿大</label>
+              <label class="check-line"><input type="checkbox" value="南非" onchange="toggleSalesCountry(this)"> 南非</label>
             </div>
-            <input class="form-input" type="text" placeholder="请输入或搜索其他国家/地区" style="margin-top:10px;">
+            <div class="selected-country-list" id="selectedSalesCountries"></div>
+            <div class="country-search">
+              <input class="form-input" id="salesCountrySearch" type="text" placeholder="请输入或搜索其他国家/地区" autocomplete="off" oninput="renderCountryResults()" onfocus="renderCountryResults()">
+              <div class="country-results" id="countryResults"></div>
+            </div>
           </div>
 
           <div class="form-row">
             <div class="form-label">货号 / 型号 <span class="req">*</span></div>
-            <input class="form-input" type="text" placeholder="请输入货号或型号">
+            <input class="form-input" id="skuInput" type="text" placeholder="请输入货号或型号">
           </div>
 
           <div class="form-row">
             <div class="form-label">制造商 <span class="req">*</span></div>
-            <input class="form-input" type="text" placeholder="请输入制造商名称">
+            <input class="form-input" id="manufacturerInput" type="text" placeholder="请输入制造商名称">
           </div>
 
           <div class="form-row">
             <div class="form-label">制造商地址 <span class="req">*</span></div>
-            <input class="form-input" type="text" placeholder="请输入制造商地址">
+            <input class="form-input" id="manufacturerAddressInput" type="text" placeholder="请输入制造商地址">
+          </div>
+
+          <div class="optional-fields" id="optionalFields">
+          <div class="form-section-title" id="optionalInfoSection">添加信息（可选）</div>
+
+          <div class="form-row">
+            <div class="form-label">供应商</div>
+            <div class="optional-inline">
+              <input class="form-input" id="supplierInput" type="text" placeholder="请选择或添加供应商" readonly>
+              <button class="optional-link" type="button" onclick="openSupplierPicker()">选择或添加</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">产品参考号码</div>
+            <input class="form-input" id="productRefInput" type="text" placeholder="请输入产品参考号码">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">订单号码</div>
+            <input class="form-input" id="orderNumberInput" type="text" placeholder="请输入订单号码">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">SKU</div>
+            <input class="form-input" id="optionalSkuInput" type="text" placeholder="请输入 SKU">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">适用年龄</div>
+            <select class="form-select" id="ageGradeSelect">
+              <option value="" disabled selected>请选择</option>
+              <option>0-3 岁</option>
+              <option>3-6 岁</option>
+              <option>6-14 岁</option>
+              <option>14 岁以上</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">Fibre content</div>
+            <input class="form-input" id="fibreContentInput" type="text" placeholder="请输入 Fibre content">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">Sun lens cat. #</div>
+            <input class="form-input" id="sunLensInput" type="text" placeholder="请输入 Sun lens cat. #">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">EAN/SKU/Code-number</div>
+            <input class="form-input" id="codeNumberInput" type="text" placeholder="请输入 EAN/SKU/Code-number">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">UFI</div>
+            <input class="form-input" id="ufiInput" type="text" placeholder="请输入 UFI">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">Material for food contact Part</div>
+            <input class="form-input" id="foodContactInput" type="text" placeholder="请输入 Material for food contact Part">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">备注</div>
+            <textarea class="form-textarea" id="optionalRemarkInput" placeholder="请输入备注"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">附件 <span class="info">i</span></div>
+            <button class="upload-optional-btn" type="button">附档文件至此处或点击上传文件</button>
+          </div>
+
+          <div class="form-section-title">附加联系人（可选）</div>
+
+          <div class="form-row">
+            <div class="contact-note">以下联系人将会收到与此订单相关的邮件</div>
+            <input class="form-input" id="extraContactEmailInput" type="email" placeholder="请输入电子邮箱地址" value="850600530@qq.com;">
+            <div class="contact-type-row">
+              <label><input type="radio" name="contactMailType" checked> 所有邮件</label>
+              <label><input type="radio" name="contactMailType"> 仅收取报告</label>
+              <label><input type="radio" name="contactMailType"> 仅收取付款通知</label>
+              <label><input type="radio" name="contactMailType"> 仅收取报价</label>
+            </div>
+            <button class="add-contact-btn" type="button">添加联系人</button>
           </div>
 
           <div class="form-section-title">样品收集（可选）</div>
@@ -620,7 +871,7 @@
           </div>
 
           <div class="inline-form-row" id="refNumberRow">
-            <div class="inline-label">产品检验订单参考编号<span class="req">*</span></div>
+            <div class="inline-label">产品检验订单参考编号</div>
             <div class="inline-control">
               <button class="select-ref-btn" type="button">选择</button>
             </div>
@@ -647,11 +898,77 @@
             <textarea class="form-textarea" placeholder="请输入备注信息"></textarea>
             <div class="char-count">0 / 3600</div>
           </div>
+          </div>
         </div>
 
-        <div class="detail-actions">
+        <div class="review-body" id="orderReviewBody">
+          <div class="review-intro">请确认以下下单信息。你也可以返回继续填写非必填项，补充样品收集、快递或备注信息。</div>
+          <div class="review-card">
+            <div class="review-section">
+              <div class="review-section-title">必填信息</div>
+              <div class="review-row"><span>本次测试类型</span><span id="reviewTestType">-</span></div>
+              <div class="review-row"><span>产品名称</span><span id="reviewProductName">-</span></div>
+              <div class="review-row"><span>关联项目</span><span id="reviewProject">-</span></div>
+              <div class="review-row"><span>原产国家或地区</span><span id="reviewOriginCountry">-</span></div>
+              <div class="review-row"><span>销售国家或地区</span><span id="reviewSalesCountries">-</span></div>
+              <div class="review-row"><span>货号 / 型号</span><span id="reviewSku">-</span></div>
+              <div class="review-row"><span>制造商</span><span id="reviewManufacturer">-</span></div>
+              <div class="review-row"><span>制造商地址</span><span id="reviewManufacturerAddress">-</span></div>
+            </div>
+            <div class="review-section">
+              <div class="review-section-title">非必填项</div>
+              <div class="review-row"><span>供应商</span><span id="reviewSupplier">未填写</span></div>
+              <div class="review-row"><span>产品参考号码</span><span id="reviewProductRef">未填写</span></div>
+              <div class="review-row"><span>订单号码</span><span id="reviewOrderNumber">未填写</span></div>
+              <div class="review-row"><span>适用年龄</span><span id="reviewAgeGrade">未填写</span></div>
+              <div class="review-row"><span>备注</span><span id="reviewOptionalRemark">未填写</span></div>
+              <div class="review-row"><span>附加联系人</span><span id="reviewExtraContact">未填写</span></div>
+              <div class="review-row"><span>样品收集方式</span><span id="reviewSampleMethod">-</span></div>
+              <div class="review-row"><span>产品检验订单参考编号</span><span id="reviewRefNumber">待选择</span></div>
+              <div class="review-row"><span>快递信息 / 备注</span><span id="reviewShippingInfo">未填写</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-actions" id="detailEditActions">
           <button class="detail-action" onclick="closeDetailForm()">取消</button>
           <button class="detail-action primary" onclick="submitDetailForm()">提交下单</button>
+        </div>
+        <div class="detail-actions" id="orderReviewActions" style="display: none;">
+          <button class="detail-action" onclick="continueOptionalFields()">继续填写</button>
+          <button class="detail-action primary" onclick="confirmOrder()">确认下单</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="supplier-mask" id="supplierPicker" onclick="closeSupplierPicker(event)">
+      <div class="supplier-modal" onclick="event.stopPropagation()">
+        <div class="supplier-head">
+          <div class="supplier-title">选择供应商</div>
+          <button class="supplier-close" type="button" onclick="closeSupplierPicker()" aria-label="关闭">×</button>
+        </div>
+        <div class="supplier-body">
+          <div class="supplier-search">
+            <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input id="supplierSearch" type="text" placeholder="搜索" oninput="renderSupplierRows()" />
+          </div>
+          <table class="supplier-table">
+            <thead>
+              <tr>
+                <th>供应商名称</th>
+                <th>地址</th>
+                <th>主要联系人</th>
+              </tr>
+            </thead>
+            <tbody id="supplierRows"></tbody>
+          </table>
+        </div>
+        <div class="supplier-foot">
+          <button class="supplier-add" type="button" onclick="addSupplierFromSearch()">添加新供应商?</button>
+          <div class="supplier-actions">
+            <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()">取消</button>
+            <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled>选择</button>
+          </div>
         </div>
       </div>
     </div>
@@ -666,15 +983,236 @@
     }
     function openDetailForm() {
       closeOrderSheet();
+      showDetailEditMode();
       document.getElementById('detailForm').classList.add('show');
     }
     function closeDetailForm() {
       document.getElementById('detailForm').classList.remove('show');
     }
     function submitDetailForm() {
-      closeDetailForm();
-      alert('订单信息已提交');
+      renderOrderReview();
+      document.querySelector('.detail-title').textContent = '确认下单';
+      document.getElementById('detailEditBody').style.display = 'none';
+      document.getElementById('detailEditActions').style.display = 'none';
+      document.getElementById('orderReviewBody').classList.add('show');
+      document.getElementById('orderReviewActions').style.display = 'flex';
     }
+
+    function showDetailEditMode(showOptional = false) {
+      document.querySelector('.detail-title').textContent = '下单';
+      const detailEditBody = document.getElementById('detailEditBody');
+      detailEditBody.style.display = 'block';
+      detailEditBody.classList.toggle('show-optional', showOptional);
+      document.getElementById('detailEditActions').style.display = 'flex';
+      document.getElementById('orderReviewBody').classList.remove('show');
+      document.getElementById('orderReviewActions').style.display = 'none';
+    }
+
+    function continueOptionalFields() {
+      showDetailEditMode(true);
+      requestAnimationFrame(() => {
+        const detailEditBody = document.getElementById('detailEditBody');
+        const optionalInfoSection = document.getElementById('optionalInfoSection');
+        detailEditBody.scrollTo({
+          top: optionalInfoSection.offsetTop - detailEditBody.offsetTop - 8,
+          behavior: 'smooth'
+        });
+      });
+    }
+
+    function confirmOrder() {
+      window.location.href = 'order-success.html';
+    }
+
+    function getFieldValue(id) {
+      const field = document.getElementById(id);
+      if (!field || !field.value) return '';
+      return field.value.trim();
+    }
+
+    function getSelectedText(id) {
+      const select = document.getElementById(id);
+      if (!select || !select.value) return '';
+      return select.options[select.selectedIndex].textContent.trim();
+    }
+
+    function getCheckedLabel(name) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.parentElement.textContent.trim() : '';
+    }
+
+    function setReviewValue(id, value, fallback = '未填写') {
+      const target = document.getElementById(id);
+      const text = value || fallback;
+      target.textContent = text;
+      target.classList.toggle('review-empty', !value);
+    }
+
+    function renderOrderReview() {
+      setReviewValue('reviewTestType', getCheckedLabel('testType'));
+      setReviewValue('reviewProductName', getFieldValue('productNameInput'));
+      setReviewValue('reviewProject', getSelectedText('projectSelect'));
+      setReviewValue('reviewOriginCountry', getSelectedText('originCountrySelect'));
+      setReviewValue('reviewSalesCountries', Array.from(selectedSalesCountries).join('、'));
+      setReviewValue('reviewSku', getFieldValue('skuInput'));
+      setReviewValue('reviewManufacturer', getFieldValue('manufacturerInput'));
+      setReviewValue('reviewManufacturerAddress', getFieldValue('manufacturerAddressInput'));
+      setReviewValue('reviewSupplier', getFieldValue('supplierInput'));
+      setReviewValue('reviewProductRef', getFieldValue('productRefInput'));
+      setReviewValue('reviewOrderNumber', getFieldValue('orderNumberInput'));
+      setReviewValue('reviewAgeGrade', getSelectedText('ageGradeSelect'));
+      setReviewValue('reviewOptionalRemark', getFieldValue('optionalRemarkInput'));
+      setReviewValue('reviewExtraContact', getFieldValue('extraContactEmailInput'));
+      setReviewValue('reviewSampleMethod', getCheckedLabel('sampleMethod'));
+      setReviewValue('reviewRefNumber', '', '待选择');
+      setReviewValue('reviewShippingInfo', '', '未填写');
+    }
+    const supplierOptions = [
+      { name: 'Shenzhen Zhichuang Co., Ltd.', address: '深圳市宝安区工业路 88 号', contact: 'Sally Xu' },
+      { name: 'Qiming Toy Supplier Co., Ltd.', address: '东莞市松山湖科技园', contact: 'David Chen' },
+      { name: 'QIMA Toy Supplier', address: 'Dongguan, Guangdong, China', contact: 'Amy Li' },
+      { name: '同制造商', address: '与制造商信息一致', contact: '-' }
+    ];
+    let selectedSupplier = null;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function escapeJs(value) {
+      return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function openSupplierPicker() {
+      selectedSupplier = null;
+      document.getElementById('supplierSearch').value = '';
+      document.getElementById('supplierSelectBtn').disabled = true;
+      renderSupplierRows();
+      document.getElementById('supplierPicker').classList.add('show');
+    }
+
+    function closeSupplierPicker() {
+      document.getElementById('supplierPicker').classList.remove('show');
+    }
+
+    function renderSupplierRows() {
+      const keyword = (document.getElementById('supplierSearch').value || '').trim().toLowerCase();
+      const rows = document.getElementById('supplierRows');
+      const matched = supplierOptions.filter((item) =>
+        item.name.toLowerCase().includes(keyword) ||
+        item.address.toLowerCase().includes(keyword) ||
+        item.contact.toLowerCase().includes(keyword)
+      );
+      if (!matched.length) {
+        rows.innerHTML = '<tr><td class="supplier-empty" colspan="3">无数据</td></tr>';
+        return;
+      }
+      rows.innerHTML = matched.map((item) =>
+        '<tr class="supplier-row' + (selectedSupplier && selectedSupplier.name === item.name ? ' selected' : '') + '" onclick="selectSupplier(\'' + escapeJs(item.name) + '\')">' +
+          '<td>' + escapeHtml(item.name) + '</td>' +
+          '<td>' + escapeHtml(item.address) + '</td>' +
+          '<td>' + escapeHtml(item.contact) + '</td>' +
+        '</tr>'
+      ).join('');
+    }
+
+    function selectSupplier(name) {
+      selectedSupplier = supplierOptions.find((item) => item.name === name) || null;
+      document.getElementById('supplierSelectBtn').disabled = !selectedSupplier;
+      renderSupplierRows();
+    }
+
+    function confirmSupplierSelection() {
+      if (!selectedSupplier) return;
+      document.getElementById('supplierInput').value = selectedSupplier.name;
+      closeSupplierPicker();
+    }
+
+    function addSupplierFromSearch() {
+      const supplierName = document.getElementById('supplierSearch').value.trim();
+      if (!supplierName) return;
+      document.getElementById('supplierInput').value = supplierName;
+      closeSupplierPicker();
+    }
+
+    const salesCountries = ['欧盟', '美国', '澳大利亚', '加拿大', '南非', '中国', '越南', '印度', '英国', '德国', '法国', '意大利', '西班牙', '日本', '韩国', '新加坡', '马来西亚', '泰国', '墨西哥', '巴西'];
+    const selectedSalesCountries = new Set();
+
+    function syncSalesCountryCheckbox(country, checked) {
+      document.querySelectorAll('.check-stack input[type="checkbox"]').forEach((checkbox) => {
+        if (checkbox.value === country) {
+          checkbox.checked = checked;
+        }
+      });
+    }
+
+    function renderSelectedSalesCountries() {
+      const container = document.getElementById('selectedSalesCountries');
+      container.innerHTML = Array.from(selectedSalesCountries).map((country) => `
+        <span class="selected-country-chip">
+          ${country}
+          <button type="button" aria-label="移除${country}" onclick="removeSalesCountry('${country}')">×</button>
+        </span>
+      `).join('');
+    }
+
+    function addSalesCountry(country) {
+      if (!country) return;
+      selectedSalesCountries.add(country);
+      syncSalesCountryCheckbox(country, true);
+      renderSelectedSalesCountries();
+      document.getElementById('salesCountrySearch').value = '';
+      document.getElementById('countryResults').classList.remove('show');
+    }
+
+    function removeSalesCountry(country) {
+      selectedSalesCountries.delete(country);
+      syncSalesCountryCheckbox(country, false);
+      renderSelectedSalesCountries();
+      renderCountryResults();
+    }
+
+    function toggleSalesCountry(checkbox) {
+      if (checkbox.checked) {
+        addSalesCountry(checkbox.value);
+      } else {
+        removeSalesCountry(checkbox.value);
+      }
+    }
+
+    function renderCountryResults() {
+      const input = document.getElementById('salesCountrySearch');
+      const results = document.getElementById('countryResults');
+      const keyword = input.value.trim().toLowerCase();
+      const matches = salesCountries
+        .filter((country) => country.toLowerCase().includes(keyword))
+        .filter((country) => !selectedSalesCountries.has(country))
+        .slice(0, 6);
+
+      if (!keyword || matches.length === 0) {
+        results.classList.remove('show');
+        results.innerHTML = '';
+        return;
+      }
+
+      results.innerHTML = matches.map((country) => (
+        `<button class="country-option" type="button" onmousedown="addSalesCountry('${country}')">${country}</button>`
+      )).join('');
+      results.classList.add('show');
+    }
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.country-search')) {
+        document.getElementById('countryResults').classList.remove('show');
+      }
+    });
+
     function toggleRefNumber() {
       const selectedValue = document.querySelector('input[name="sampleMethod"]:checked').value;
       const refNumberRow = document.getElementById('refNumberRow');

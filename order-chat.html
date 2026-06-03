@@ -97,6 +97,24 @@
   }
   .panel-pad { padding: 14px; }
   .panel-title { font-size: 14px; font-weight: 600; color: var(--carbon); margin-bottom: 12px; }
+  .history-search {
+    display: flex; align-items: center; gap: 8px;
+    height: 36px; margin-bottom: 10px; padding: 0 10px;
+    border: 1px solid #e1e5ee; border-radius: 10px;
+    background: #f7f9ff; color: var(--seal);
+  }
+  .history-search svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .history-search input {
+    flex: 1; min-width: 0; border: none; outline: none;
+    background: transparent; color: var(--carbon); font-size: 13px;
+  }
+  .history-search input::placeholder { color: #aab0bc; }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-empty {
+    display: none; padding: 12px 0 2px;
+    color: var(--seal); font-size: 12px; text-align: center;
+  }
+  .history-empty.show { display: block; }
 
   /* 上传区 */
   .dropzone {
@@ -525,6 +543,15 @@
   .shipping-method-text { display: block; width: 100%; }
   .shipping-method-title { display: block; font-size: 13px; color: var(--carbon); line-height: 19px; }
   .shipping-method-desc { display: block; font-size: 11px; color: var(--seal); line-height: 16px; margin-top: 2px; }
+  .readonly-choice {
+    border: 1px solid #dce4fb; border-radius: 12px;
+    background: var(--pool-050); padding: 11px 12px;
+  }
+  .readonly-choice-label { font-size: 11px; color: var(--seal); line-height: 16px; }
+  .readonly-choice-value {
+    margin-top: 3px; font-size: 13px; font-weight: 600;
+    color: var(--pool-500); line-height: 19px;
+  }
   .shipping-form { display: flex; flex-direction: column; gap: 10px; }
   .shipping-label { display: block; font-size: 12px; color: var(--seal); margin-bottom: 5px; }
   .shipping-textarea {
@@ -814,21 +841,50 @@
         const t = botTyping();
         setTimeout(()=>{ t.remove();
           botMsg('好的～已为你匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
-          botMsg('<div class="panel panel-pad"><div class="panel-title">历史 Test</div>'+
-            histItem('T-25617004','实验室检测 · Toys')+histItem('T-25590011','EN71 · Toys')+'</div>', true);
+          botMsg(renderHistoryPanel('历史 Test', historyTests, '搜索 Test 编号、服务或产品'), true);
         }, 700);
       } else {
         userMsg('再次下单');
         const t = botTyping();
         setTimeout(()=>{ t.remove();
           botMsg('好的～已为你匹配到历史订单，请选择要复用的 Order：', false);
-          botMsg('<div class="panel panel-pad"><div class="panel-title">历史 Order</div>'+
-            histItem('Q202349103','PSI 装运前检测 · Toys')+histItem('Q202310887','实验室检测 · Toys')+'</div>', true);
+          botMsg(renderHistoryPanel('历史 Order', historyOrders, '搜索 Order 编号、服务或产品'), true);
         }, 700);
       }
     }
     function histItem(id, desc){
-      return '<div class="choice-btn" style="margin-bottom:8px" onclick="reuse(\''+id+'\')"><div><div class="cb-name">'+id+'</div><div class="cb-desc">'+desc+'</div></div></div>';
+      return '<div class="choice-btn history-item" data-keyword="'+escapeHtml((id+' '+desc).toLowerCase())+'" onclick="reuse(\''+id+'\')"><div><div class="cb-name">'+id+'</div><div class="cb-desc">'+desc+'</div></div></div>';
+    }
+    const historyTests = [
+      { id: 'T-25617004', desc: '实验室检测 · Toys' },
+      { id: 'T-25590011', desc: 'EN71 · Toys' },
+      { id: 'T-25581208', desc: 'CPSIA · Children Toys' }
+    ];
+    const historyOrders = [
+      { id: 'Q202349103', desc: 'PSI 装运前检测 · Toys' },
+      { id: 'Q202310887', desc: '实验室检测 · Toys' }
+    ];
+    function renderHistoryPanel(title, items, placeholder) {
+      return '<div class="panel panel-pad history-panel">'+
+        '<div class="panel-title">'+title+'</div>'+
+        '<div class="history-search">'+
+          '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'+
+          '<input type="text" placeholder="'+placeholder+'" oninput="filterHistoryItems(this)" autocomplete="off">'+
+        '</div>'+
+        '<div class="history-list">'+items.map((item) => histItem(item.id, item.desc)).join('')+'</div>'+
+        '<div class="history-empty">没有匹配的历史记录</div>'+
+      '</div>';
+    }
+    function filterHistoryItems(input) {
+      const panel = input.closest('.history-panel');
+      const keyword = input.value.trim().toLowerCase();
+      let visibleCount = 0;
+      panel.querySelectorAll('.history-item').forEach((item) => {
+        const matched = item.dataset.keyword.includes(keyword);
+        item.style.display = matched ? 'flex' : 'none';
+        if (matched) visibleCount += 1;
+      });
+      panel.querySelector('.history-empty').classList.toggle('show', visibleCount === 0);
     }
     const reusePrefills = {
       'T-25617004': {
@@ -1207,16 +1263,17 @@
     }
 
     function shippingMethodButton(value, title, desc, source){
-      return '<button class="shipping-method" type="button" onclick="selectSampleCollection(\''+value+'\', \''+escapeJs(title)+'\', \''+escapeJs(source || 'manual')+'\')">'+
+      return '<button class="shipping-method" type="button" onclick="selectSampleCollection(\''+value+'\', \''+escapeJs(title)+'\', \''+escapeJs(source || 'manual')+'\', this)">'+
         '<span class="shipping-method-text"><span class="shipping-method-title">'+title+'</span><span class="shipping-method-desc">'+desc+'</span></span>'+
       '</button>';
     }
 
-    function selectSampleCollection(value, label, source){
+    function selectSampleCollection(value, label, source, btn){
       const flowSource = source || 'manual';
       userMsg(escapeHtml(label));
       manualAnswers['Sample Collection Method'] = label;
       setFieldValue('Sample Collection Method', label);
+      renderReadonlySampleCollection(btn, label);
       if(value === 'collect'){
         if(flowSource === 'missing'){
           mi++;
@@ -1231,6 +1288,17 @@
       }
       botMsg('请补充物流信息。你可以拍照识别快递面单，也可以手动填写。', false);
       botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn" onclick="chooseShippingInput(\'photo\', this, \''+flowSource+'\')">拍照识别面单</button><button class="chip-btn" onclick="chooseShippingInput(\'manual\', this, \''+flowSource+'\')">手动填写物流</button><button class="chip-btn" onclick="chooseShippingInput(\'skip\', this, \''+flowSource+'\')">稍后补充</button></div></div>', true);
+    }
+
+    function renderReadonlySampleCollection(btn, label){
+      const card = btn ? btn.closest('.select-card') : null;
+      if(!card) return;
+      card.innerHTML =
+        '<div class="select-card-title">样品收集方式</div>'+
+        '<div class="readonly-choice">'+
+          '<div class="readonly-choice-label">已选择</div>'+
+          '<div class="readonly-choice-value">'+escapeHtml(label)+'</div>'+
+        '</div>';
     }
 
     function chooseShippingInput(type, btn, source){
