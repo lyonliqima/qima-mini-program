@@ -124,6 +124,17 @@
   .dropzone .up-ic { font-size: 26px; color: var(--pool-500); }
   .dropzone .up-main { font-size: 13px; color: var(--carbon); margin-top: 8px; }
   .dropzone .up-sub { font-size: 11px; color: #9aa0ad; margin-top: 5px; }
+  .uploaded-files {
+    display: none; flex-direction: column; gap: 7px;
+    margin-top: 10px;
+  }
+  .uploaded-files.show { display: flex; }
+  .uploaded-file {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; border: 1px solid #edf0f6; border-radius: 10px;
+    background: #fff; font-size: 12px; color: var(--carbon);
+  }
+  .uploaded-file span:last-child { color: var(--seal); font-size: 11px; }
   .tip {
     margin-top: 12px; background: #fffaf0; border: 1px solid #ffe6b8; border-radius: 10px;
     padding: 10px 12px; font-size: 12px; color: #8a6d3b; line-height: 18px;
@@ -151,15 +162,21 @@
   .waybill-row span:last-child { color: var(--carbon); font-weight: 600; }
 
   /* 链接输入 */
-  .link-row { margin-top: 12px; display: flex; gap: 8px; }
+  .link-row {
+    margin-top: 12px; display: flex; flex-direction: column;
+    align-items: stretch; gap: 8px;
+  }
   .link-row input {
-    flex: 1; min-width: 0; height: 38px; border: 1px solid #e6e9f2; border-radius: 10px;
+    width: 100%; height: 38px; border: 1px solid #e6e9f2; border-radius: 10px;
     padding: 0 12px; font-size: 13px; outline: none; background: #fff;
   }
   .link-row input::placeholder { color: #aab0bc; }
   .link-row .parse-btn {
-    flex-shrink: 0; height: 38px; padding: 0 14px; border: none; border-radius: 10px;
+    width: 100%; height: 40px; padding: 0 18px; border: none; border-radius: 10px;
     background: var(--pool-500); color: #fff; font-size: 13px; cursor: pointer;
+  }
+  .link-row .parse-btn:disabled {
+    background: #edf0f6; color: #aab0bc; cursor: default;
   }
   .manual-fill {
     width: 100%; height: 40px; margin-top: 10px;
@@ -1054,6 +1071,7 @@
 
     // 2) 首次测试 → 请求上传资料 / 链接
     function askUpload(){
+      hasUploadedFiles = false;
       botMsg('收到！这是一次<b>全新产品</b>的检测。<br>请上传任意产品相关资料，或粘贴商品链接，我来自动识别并填写表单 👇', false);
       const card =
         '<div class="panel panel-pad">'+
@@ -1063,6 +1081,7 @@
             '<div class="up-main">点击上传或拖拽文件到此处</div>'+
             '<div class="up-sub">支持规格书、PO/PI/Invoice、包装/标签、产品照片、旧测试报告等</div>'+
           '</div>'+
+          '<div class="uploaded-files" id="uploadedFiles"></div>'+
           '<div class="src-tabs">支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB</div>'+
           '<div class="upload-hint">'+
             '<div class="upload-hint-head"><span class="upload-hint-title">可上传 / 粘贴的信息</span><button class="detail-link" onclick="showUploadExamples()">查看详情</button></div>'+
@@ -1078,7 +1097,7 @@
               '<div class="type-item">TEMU / Shopify</div>'+
             '</div>'+
           '</div>'+
-          '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 链接"><button class="parse-btn" onclick="doParse()">解析</button></div>'+
+          '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 链接" oninput="updateParseButtonState()"><button class="parse-btn" id="parseBtn" onclick="doParse()" disabled>开始解析</button></div>'+
           '<button class="manual-fill" onclick="startManualFill()">暂无资料，直接填写</button>'+
         '</div>';
       botMsg(card, true);
@@ -1092,14 +1111,39 @@
       document.getElementById('uploadExamples').classList.remove('show');
     }
 
+    let hasUploadedFiles = false;
+
     function doUpload(){
-      userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div>');
-      runRecognize('图片/文档');
+      hasUploadedFiles = true;
+      const uploadedFiles = document.getElementById('uploadedFiles');
+      uploadedFiles.innerHTML =
+        '<div class="uploaded-file"><span>🧸 产品照片.jpg</span><span>已上传</span></div>'+
+        '<div class="uploaded-file"><span>📄 产品规格书.pdf</span><span>已上传</span></div>'+
+        '<div class="uploaded-file"><span>🧾 采购单.pdf</span><span>已上传</span></div>';
+      uploadedFiles.classList.add('show');
+      updateParseButtonState();
     }
     function doParse(){
       const v = (document.getElementById('linkIn')||{}).value || '';
-      userMsg('🔗 商品链接：'+(v && v.length>4 ? v.slice(0,28)+'…' : 'amazon.com/dp/B0XXXXX…'));
+      if(!hasUploadedFiles && !v.trim()) return;
+      if(hasUploadedFiles && v.trim()){
+        userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div><div style="margin-top:6px">🔗 商品链接：'+escapeHtml(v.slice(0,28))+'…</div>');
+        runRecognize('图片/文档和商品链接');
+        return;
+      }
+      if(hasUploadedFiles){
+        userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div>');
+        runRecognize('图片/文档');
+        return;
+      }
+      userMsg('🔗 商品链接：'+(v.length>4 ? escapeHtml(v.slice(0,28))+'…' : 'amazon.com/dp/B0XXXXX…'));
       runRecognize('商品链接');
+    }
+
+    function updateParseButtonState(){
+      const linkValue = (document.getElementById('linkIn') || {}).value || '';
+      const parseBtn = document.getElementById('parseBtn');
+      if(parseBtn) parseBtn.disabled = !hasUploadedFiles && !linkValue.trim();
     }
 
     const manualQuestions = [
