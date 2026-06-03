@@ -1319,15 +1319,12 @@
       setFieldValue('Sample Collection Method', label);
       renderReadonlySampleCollection(btn, label);
       if(value === 'collect'){
-        if(flowSource === 'missing'){
-          mi++;
-          const t = botTyping();
-          setTimeout(()=>{ t.remove(); botMsg('已记录样品收集方式 ✅', false); askMissing(); }, 500);
-          return;
-        }
-        manualIndex++;
         const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已记录样品收集方式 ✅', false); askManualField(); }, 500);
+        setTimeout(()=>{
+          t.remove();
+          botMsg('请再选择本次要参考的<b>产品检验订单参考编号</b>。', false);
+          botMsg(refNumberCard(flowSource), true);
+        }, 500);
         return;
       }
       botMsg('请补充物流信息。你可以拍照识别快递面单，也可以手动填写。', false);
@@ -1342,6 +1339,51 @@
         '<div class="readonly-choice">'+
           '<div class="readonly-choice-label">已选择</div>'+
           '<div class="readonly-choice-value">'+escapeHtml(label)+'</div>'+
+        '</div>';
+    }
+
+    function refNumberCard(source){
+      const cardSource = source || 'manual';
+      return '<div class="select-card ref-card">'+
+        '<div class="select-card-title">产品检验订单参考编号</div>'+
+        '<div class="select-card-desc">请选择一个历史 Test / Order 作为本次收集样本的参考。</div>'+
+        '<div class="history-list">'+
+          refNumberItem('T-25617004', '实验室检测 · Toys', cardSource)+
+          refNumberItem('T-25590011', 'EN71 · Toys', cardSource)+
+          refNumberItem('Q202349103', 'PSI 装运前检测 · Toys', cardSource)+
+        '</div>'+
+      '</div>';
+    }
+
+    function refNumberItem(id, desc, source){
+      return '<button class="choice-btn history-item" type="button" onclick="selectRefNumber(\''+escapeJs(id)+'\', \''+escapeJs(desc)+'\', \''+escapeJs(source || 'manual')+'\', this)"><div><div class="cb-name">'+id+'</div><div class="cb-desc">'+desc+'</div></div></button>';
+    }
+
+    function selectRefNumber(id, desc, source, btn){
+      const flowSource = source || 'manual';
+      userMsg(escapeHtml(id));
+      manualAnswers['Product Inspection Order Reference Number'] = id;
+      renderReadonlyRefNumber(btn, id, desc);
+      if(flowSource === 'missing'){
+        mi++;
+        const t = botTyping();
+        setTimeout(()=>{ t.remove(); botMsg('已记录参考编号 ✅', false); askMissing(); }, 500);
+        return;
+      }
+      manualIndex++;
+      const t = botTyping();
+      setTimeout(()=>{ t.remove(); botMsg('已记录参考编号 ✅', false); askManualField(); }, 500);
+    }
+
+    function renderReadonlyRefNumber(btn, id, desc){
+      const card = btn ? btn.closest('.select-card') : null;
+      if(!card) return;
+      card.innerHTML =
+        '<div class="select-card-title">产品检验订单参考编号</div>'+
+        '<div class="readonly-choice">'+
+          '<div class="readonly-choice-label">已选择</div>'+
+          '<div class="readonly-choice-value">'+escapeHtml(id)+'</div>'+
+          '<div class="shipping-method-desc">'+escapeHtml(desc)+'</div>'+
         '</div>';
     }
 
@@ -1580,7 +1622,7 @@
 
     const editableSections = [
       {
-        title: 'Section 2',
+        title: '基本信息',
         fields: [
           { name:'Product Name', fallback:'智能机器人玩具' },
           { name:'Program', fallback:'TEMU Hardware- Seller Pay（商家付款，测试后退款）', type:'select', options:['TEMU Hardware- Seller Pay（商家付款，测试后退款）', 'TEMU Toys- Seller Pay', 'Amazon Seller Program'] },
