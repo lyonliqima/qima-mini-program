@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>QIMA 小程序 - 下单成功</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --carbon: #191919;
+    --seal: #737373;
+    --pool-500: #4169e1;
+    --pool-100: #e6ecfb;
+    --pool-050: #f2f5fd;
+    --border: #dedede;
+    --kiwi: #1f9d6b;
+  }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Inter, sans-serif;
+    background: #c9ced8;
+    color: var(--carbon);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body { display: flex; justify-content: center; }
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
+  .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .07; left: 230px; top: -130px; transform: rotate(30deg); }
+  .blob-3 { width: 129px; height: 119px; background: #a086c4; opacity: .12; left: -70px; top: 0; transform: rotate(-30deg); }
+  .statusbar {
+    position: relative; z-index: 2;
+    height: 47px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 27px 0 0;
+  }
+  .statusbar .time { width: 134px; text-align: center; font-weight: 600; font-size: 17px; letter-spacing: -.4px; padding-top: 4px; }
+  .statusbar .indicators { display: flex; align-items: center; gap: 7px; padding-top: 4px; }
+  .statusbar .indicators img { display: block; }
+  .navbar {
+    position: relative; z-index: 2;
+    height: 44px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 17px;
+  }
+  .navbar .back { width: 12px; height: 20px; display: block; }
+  .navbar .title {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 17px; font-weight: 600; letter-spacing: -.34px;
+  }
+  .nav-capsule {
+    width: 83px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,.7); border: .5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around;
+  }
+  .nav-capsule img { width: 17px; height: 17px; }
+  .nav-capsule .divider { width: 1px; height: 18px; background: #d2d2d2; }
+  .content {
+    position: relative; z-index: 1;
+    flex: 1;
+    padding: 42px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .success-card {
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(25,25,25,.08);
+    padding: 34px 22px 24px;
+    text-align: center;
+  }
+  .success-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    margin: 0 auto 18px;
+    background: #eaf6f2;
+    color: var(--kiwi);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px; font-weight: 700;
+  }
+  .success-title { font-size: 22px; font-weight: 700; line-height: 31px; }
+  .success-desc { margin-top: 8px; font-size: 13px; line-height: 20px; color: var(--seal); }
+  .summary {
+    margin-top: 22px;
+    background: #f7f9ff;
+    border: 1px solid #e3e9fb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 7px 0;
+    font-size: 13px; line-height: 19px;
+  }
+  .summary-row span:first-child { color: var(--seal); }
+  .summary-row span:last-child { color: var(--carbon); font-weight: 600; text-align: right; }
+  .actions {
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .action {
+    width: 100%; height: 46px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    font-size: 15px; font-weight: 600;
+  }
+  .action.primary { background: var(--pool-500); color: #fff; box-shadow: 0 6px 16px rgba(65,105,225,.28); }
+  .action.secondary { background: #fff; color: var(--pool-500); border: 1px solid #dce4fb; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="statusbar">
+      <div class="time">9:41</div>
+      <div class="indicators">
+        <img src="assets/signal.svg" alt="" width="18" height="12" />
+        <img src="assets/wifi.svg" alt="" width="17" height="12" />
+        <img src="assets/battery.svg" alt="" width="27" height="13" />
+      </div>
+    </div>
+
+    <div class="navbar">
+      <a href="order-chat.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <div class="title">下单成功</div>
+      <div class="nav-capsule">
+        <img src="assets/share.svg" alt="" />
+        <div class="divider"></div>
+        <img src="assets/home.svg" alt="" />
+      </div>
+    </div>
+
+    <main class="content">
+      <section class="success-card">
+        <div class="success-icon">✓</div>
+        <div class="success-title">下单成功</div>
+        <div class="success-desc">检测订单已提交，QIMA 团队将继续处理样品收集、测试安排和报告生成。</div>
+        <div class="summary">
+          <div class="summary-row"><span>订单参考编号</span><span>T-25617004</span></div>
+          <div class="summary-row"><span>服务类型</span><span>实验室检测</span></div>
+          <div class="summary-row"><span>订单状态</span><span>待录入数据</span></div>
+          <div class="summary-row"><span>预计报告日期</span><span>2026-06-05</span></div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <a class="action primary" href="orders.html">查看订单管理</a>
+        <a class="action secondary" href="index.html">返回首页</a>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
