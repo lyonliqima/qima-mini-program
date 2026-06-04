@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>QIMA 小程序 - 首页</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --carbon: #191919;
+    --seal: #737373;
+    --pool-500: #4169e1;
+    --pool-100: #e6ecfb;
+    --pool-050: #f2f5fd;
+    --qima-red: #e4002b;
+    --border: #dedede;
+  }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Inter, sans-serif;
+    background: #c9ced8;
+    color: var(--carbon);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ===== 手机外壳 ===== */
+  .phone {
+    position: relative;
+    width: 390px;
+    min-height: 844px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  /* 装饰光晕 */
+  .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
+  .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .08; left: 230px; top: -120px; transform: rotate(30deg); }
+  .blob-2 { width: 139px; height: 129px; background: #ff8e61; opacity: .08; left: 300px; top: 10px; transform: rotate(30deg); }
+  .blob-3 { width: 129px; height: 119px; background: #a086c4; opacity: .13; left: -60px; top: 20px; transform: rotate(-30deg); }
+  .blob-4 { width: 129px; height: 119px; background: #ff9a7f; opacity: .13; left: -110px; top: 20px; transform: rotate(-30deg); }
+
+  .top { position: relative; z-index: 1; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+  .section, .cards-wrap { width: 100%; }
+
+  /* ===== 状态栏 ===== */
+  .statusbar {
+    height: 47px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 27px 0 0;
+  }
+  .statusbar .time {
+    width: 134px; text-align: center;
+    font-weight: 600; font-size: 17px; letter-spacing: -.4px;
+    padding-top: 4px;
+  }
+  .statusbar .indicators { display: flex; align-items: center; gap: 7px; padding-top: 4px; }
+  .statusbar .indicators img { display: block; }
+
+  /* ===== 导航栏 ===== */
+  .navbar {
+    height: 44px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 17px;
+  }
+  .navbar .back { width: 12px; height: 20px; }
+  .navbar .logo { width: 72px; height: 16px; margin-left: 40px; }
+  .nav-capsule {
+    width: 83px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,.7);
+    border: .5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around;
+    position: relative;
+  }
+  .nav-capsule img { width: 17px; height: 17px; }
+  .nav-capsule .divider { width: 1px; height: 18px; background: #d2d2d2; }
+
+  /* ===== 主体内边距 ===== */
+  .section { padding: 0 20px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ===== 问候区 ===== */
+  .greeting { display: flex; align-items: center; justify-content: space-between; }
+  .greeting .hello { font-size: 12px; color: rgba(99,99,99,.8); line-height: 18px; }
+  .greeting .name { font-size: 17px; font-weight: 600; letter-spacing: -.34px; line-height: 25.5px; }
+  .bell {
+    position: relative;
+    width: 47px; height: 26px; border-radius: 12px;
+    background: var(--pool-100);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bell img { width: 16px; height: 16px; }
+  .bell .badge {
+    position: absolute; top: -8px; right: -6px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--qima-red); color: #fff;
+    border-radius: 21px; font-size: 12px; line-height: 16px; text-align: center;
+  }
+
+  /* ===== 快捷卡片 ===== */
+  .quick { display: flex; gap: 12px; }
+  .quick-card {
+    position: relative; flex: 1; height: 91px;
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(25,25,25,.08);
+  }
+  .quick-card .art {
+    position: absolute; left: 0; top: 0; width: 99px; height: 91px;
+    object-fit: cover;
+  }
+  .quick-card .art-vector {
+    position: absolute; left: -2.5px; top: 39.5px;
+    width: 67.5px; height: 38px;
+  }
+  .quick-card .art.book { left: -36px; top: -16px; width: 120px; height: 120px; }
+  .quick-card .title { position: absolute; left: 90px; top: 11px; font-size: 12px; font-weight: 500; line-height: 22.5px; }
+  .quick-card .sub { position: absolute; left: 90px; top: 31px; font-size: 10px; color: rgba(99,99,99,.8); line-height: 18px; }
+  .quick-card .go {
+    position: absolute; left: 90px; top: 58px;
+    width: 36px; height: 20px; border-radius: 12px; background: var(--pool-050);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .quick-card .go img { width: 12px; height: 12px; }
+
+  /* ===== 通用白卡片 ===== */
+  .card {
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(25,25,25,.08);
+    width: 358px;
+  }
+  .card-head {
+    height: 51px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; border-bottom: .5px solid var(--border);
+  }
+  .card-head .left { display: flex; align-items: center; gap: 8px; }
+  .card-head .left img { width: 16px; height: 16px; }
+  .card-head .left span { font-size: 15px; color: var(--carbon); }
+  .card-head .more { display: flex; align-items: center; gap: 2px; color: var(--pool-500); font-size: 13px; }
+  .card-head .more img { width: 14px; height: 14px; }
+
+  .cards-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+  /* 订单行 */
+  .order-row {
+    height: 70.5px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; border-bottom: .5px solid var(--border);
+    color: inherit; text-decoration: none; cursor: pointer;
+  }
+  .order-row:last-child { border-bottom: none; }
+  .order-row .oid { font-size: 14px; color: var(--carbon); line-height: 21px; }
+  .order-row .odesc { font-size: 12px; color: var(--seal); line-height: 18px; margin-top: 3px; }
+  .order-row .right { display: flex; align-items: center; gap: 6px; }
+  .tag { height: 22.5px; border-radius: 6px; font-size: 11px; line-height: 22.5px; padding: 0 8px; }
+  .tag.progress { background: var(--pool-050); color: var(--pool-500); }
+  .tag.pending { background: #fef0ee; color: #ff5f4e; }
+  .order-row .chev { width: 16px; height: 16px; }
+
+  /* 通知行 */
+  .notif-row {
+    height: 85px; display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px 16px 0 16px; border-bottom: .5px solid var(--border);
+  }
+  .notif-row:last-child { border-bottom: none; }
+  .notif-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .notif-icon.blue { background: var(--pool-100); }
+  .notif-icon.green { background: #eaf6f2; }
+  .notif-icon img { width: 16px; height: 16px; }
+  .notif-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .notif-body .ntitle { position: relative; font-size: 14px; color: var(--carbon); line-height: 21px; }
+  .notif-body .dot { position: absolute; right: 0; top: 8px; width: 6px; height: 6px; border-radius: 3px; background: #e5353d; }
+  .notif-body .nsub { font-size: 12px; color: var(--seal); line-height: 18px; }
+  .notif-body .ntime { font-size: 11px; color: var(--seal); line-height: 16.5px; }
+
+  /* ===== 底部 Tab Bar ===== */
+  .tabbar {
+    position: relative; z-index: 1;
+    width: 100%; height: 71.5px;
+    background: #fff;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -1px 6px rgba(0,0,0,.06);
+    display: flex; align-items: flex-start;
+  }
+  .tab {
+    flex: 1; height: 71px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 10px 0 20px;
+  }
+  .tab img { width: 22px; height: 22px; }
+  .tab { text-decoration: none; }
+  .tab .label { font-size: 10px; letter-spacing: .1px; color: var(--seal); }
+  .tab.active .label { color: var(--pool-500); }
+  .tab.placeholder { visibility: hidden; }
+
+  /* 中间悬浮 + 按钮 */
+  .fab {
+    position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%);
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--pool-500);
+    box-shadow: 0 6px 16px rgba(65,105,225,.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .fab img { width: 24px; height: 24px; }
+
+  /* ===== 下单方式选择层（底部弹层）===== */
+  .sheet-mask {
+    position: absolute; inset: 0; z-index: 50;
+    background: rgba(25,25,25,.4);
+    display: flex; align-items: flex-end;
+    opacity: 0; visibility: hidden; transition: opacity .25s;
+  }
+  .sheet-mask.show { opacity: 1; visibility: visible; }
+  .sheet {
+    width: 100%; background: #fff;
+    border-radius: 16px 16px 0 0;
+    padding: 8px 20px calc(20px + env(safe-area-inset-bottom));
+    transform: translateY(100%); transition: transform .28s cubic-bezier(.2,.8,.25,1);
+  }
+  .sheet-mask.show .sheet { transform: translateY(0); }
+  .sheet .grabber { width: 36px; height: 4px; border-radius: 2px; background: #e3e6ec; margin: 0 auto 14px; }
+  .sheet .sheet-title { font-size: 16px; font-weight: 600; color: var(--carbon); text-align: center; }
+  .sheet .sheet-sub { font-size: 12px; color: var(--seal); text-align: center; margin-top: 4px; margin-bottom: 18px; }
+  .opt {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 12px; margin-bottom: 12px;
+    border: 1px solid #eef0f4; text-decoration: none; cursor: pointer;
+  }
+  .opt.primary { background: var(--pool-050); border-color: #dce4fb; }
+  .opt .opt-ic {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .opt .opt-ic svg { width: 22px; height: 22px; }
+  .opt.primary .opt-ic { background: var(--pool-100); color: var(--pool-500); }
+  .opt.plain .opt-ic { background: #f4f6fa; color: var(--seal); }
+  .opt .opt-body { flex: 1; min-width: 0; }
+  .opt .opt-name { font-size: 15px; font-weight: 600; color: var(--carbon); display: flex; align-items: center; gap: 6px; }
+  .opt .opt-badge { font-size: 10px; color: var(--pool-500); background: var(--pool-100); border-radius: 4px; padding: 1px 6px; font-weight: 400; }
+  .opt .opt-desc { font-size: 12px; color: var(--seal); margin-top: 3px; line-height: 17px; }
+  .opt .opt-arrow { color: #c2c7d0; }
+  .sheet .sheet-cancel {
+    text-align: center; font-size: 14px; color: var(--seal);
+    padding: 12px; margin-top: 4px; cursor: pointer;
+  }
+
+  /* ===== 详细填表浮层 ===== */
+  .detail-mask {
+    position: absolute; inset: 0; z-index: 60;
+    background: rgba(25,25,25,.28);
+    opacity: 0; visibility: hidden; transition: opacity .22s;
+  }
+  .detail-mask.show { opacity: 1; visibility: visible; }
+  .detail-panel {
+    position: absolute; left: 0; right: 0; top: 108px; bottom: 0;
+    background: #fff; border-radius: 12px 12px 0 0;
+    display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform .28s cubic-bezier(.2,.8,.25,1);
+    overflow: hidden;
+  }
+  .detail-mask.show .detail-panel { transform: translateY(0); }
+  .detail-head {
+    height: 58px; flex-shrink: 0; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: .5px solid #eef0f4;
+  }
+  .detail-title { font-size: 20px; font-weight: 700; color: var(--carbon); }
+  .detail-close {
+    width: 30px; height: 30px; border-radius: 50%; border: none;
+    background: #f4f6fa; color: var(--seal); font-size: 18px; cursor: pointer;
+  }
+  .detail-body {
+    flex: 1; overflow-y: auto; padding: 18px 22px 96px;
+  }
+  .detail-body::-webkit-scrollbar { display: none; }
+  .form-row { margin-bottom: 16px; }
+  .form-label {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--seal); margin-bottom: 7px;
+  }
+  .form-label .req { color: #e4002b; }
+  .form-label .info {
+    width: 13px; height: 13px; border-radius: 50%;
+    background: var(--pool-500); color: #fff; font-size: 9px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; border: 1px solid #dcdfe6; border-radius: 7px;
+    font-size: 13px; color: var(--carbon); background: #fff;
+    outline: none;
+  }
+  .form-input, .form-select { height: 38px; padding: 0 11px; }
+  .form-textarea { min-height: 82px; padding: 10px 11px; resize: none; line-height: 18px; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--pool-500); box-shadow: 0 0 0 3px rgba(65,105,225,.1);
+  }
+  .radio-stack, .check-stack { display: flex; flex-direction: column; gap: 8px; }
+  .check-stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; row-gap: 8px; }
+  .radio-line, .check-line {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--carbon);
+  }
+  .radio-line input, .check-line input { accent-color: var(--pool-500); }
+  .selected-country-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 10px;
+  }
+  .selected-country-list:empty { display: none; }
+  .selected-country-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 9px 0 11px;
+    border-radius: 14px; background: var(--pool-050); color: var(--pool-500);
+    font-size: 12px; line-height: 28px;
+  }
+  .selected-country-chip button {
+    width: 16px; height: 16px; border: none; border-radius: 50%;
+    background: rgba(65,105,225,.12); color: var(--pool-500);
+    line-height: 16px; cursor: pointer;
+  }
+  .country-search {
+    position: relative; margin-top: 10px;
+  }
+  .country-results {
+    position: absolute; left: 0; right: 0; top: 42px; z-index: 5;
+    max-height: 148px; overflow-y: auto;
+    background: #fff; border: 1px solid #dcdfe6; border-radius: 8px;
+    box-shadow: 0 8px 18px rgba(25,25,25,.1);
+    display: none;
+  }
+  .country-results.show { display: block; }
+  .country-option {
+    width: 100%; border: none; background: #fff; text-align: left;
+    padding: 10px 11px; font-size: 13px; color: var(--carbon);
+    cursor: pointer;
+  }
+  .country-option:hover { background: var(--pool-050); color: var(--pool-500); }
+  .inline-form-row {
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px;
+  }
+  .inline-label {
+    width: fit-content; flex-shrink: 0; padding-top: 12px;
+    font-size: 13px; color: var(--seal); line-height: 20px;
+  }
+  .inline-label .req { color: #e4002b; }
+  .inline-control { flex: 1; min-width: 0; }
+  .inline-control .radio-stack { gap: 13px; }
+  .inline-control .radio-line {
+    font-size: 12px; line-height: 22px;
+  }
+  .inline-control .radio-line input {
+    width: 18px; height: 18px; flex-shrink: 0;
+  }
+  .select-ref-btn {
+    height: 44px; min-width: 78px; border: none; border-radius: 10px;
+    background: var(--pool-100); color: var(--pool-500);
+    font-size: 15px; cursor: pointer; padding: 0 18px;
+  }
+  .optional-inline {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .optional-inline .form-input { flex: 1; min-width: 0; }
+  .optional-link {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 12px; cursor: pointer; white-space: nowrap;
+  }
+  .upload-optional-btn {
+    width: 100%; height: 40px; border: 1px solid #dce4fb;
+    border-radius: 10px; background: var(--pool-100); color: var(--pool-500);
+    font-size: 12px; cursor: pointer;
+  }
+  .contact-note {
+    font-size: 11px; color: var(--seal); line-height: 16px;
+    margin-bottom: 9px;
+  }
+  .contact-type-row {
+    display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 9px;
+  }
+  .contact-type-row label {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--carbon);
+  }
+  .add-contact-btn {
+    height: 34px; margin-top: 10px; padding: 0 14px;
+    border: none; border-radius: 8px; background: var(--pool-100);
+    color: var(--pool-500); font-size: 12px; cursor: pointer;
+  }
+  .optional-fields { display: none; }
+  .detail-body.show-optional .optional-fields { display: block; }
+  .supplier-mask {
+    position: absolute; inset: 0; z-index: 80;
+    background: rgba(25,25,25,.28);
+    display: none; align-items: center; justify-content: center;
+    padding: 18px;
+  }
+  .supplier-mask.show { display: flex; }
+  .supplier-modal {
+    width: 100%; max-height: 78%; background: #fff;
+    border-radius: 14px; box-shadow: 0 10px 30px rgba(25,25,25,.18);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .supplier-head {
+    height: 54px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .supplier-title { font-size: 18px; font-weight: 600; color: var(--carbon); }
+  .supplier-close {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 30px; line-height: 30px; cursor: pointer;
+  }
+  .supplier-body { padding: 0 16px 12px; overflow-y: auto; }
+  .supplier-search {
+    height: 38px; border-bottom: 1px solid #e1e5ee;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--seal); margin-bottom: 12px;
+  }
+  .supplier-search input {
+    border: none; outline: none; flex: 1; min-width: 0;
+    font-size: 13px; color: var(--carbon);
+  }
+  .supplier-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  .supplier-table th {
+    background: #f5f5f5; text-align: left; color: var(--carbon);
+    padding: 9px 8px; font-weight: 600;
+  }
+  .supplier-table td {
+    border-bottom: 1px solid #eef0f4;
+    padding: 10px 8px; color: var(--carbon);
+  }
+  .supplier-row { cursor: pointer; }
+  .supplier-row.selected td { background: var(--pool-050); color: var(--pool-500); }
+  .supplier-empty { text-align: center; color: var(--seal); padding: 18px 8px; }
+  .supplier-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 16px 16px; border-top: .5px solid #eef0f4;
+  }
+  .supplier-add {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 13px; cursor: pointer; padding: 0;
+  }
+  .supplier-actions { display: flex; align-items: center; gap: 10px; }
+  .supplier-cancel {
+    border: none; background: transparent; color: var(--pool-500);
+    font-size: 13px; cursor: pointer;
+  }
+  .supplier-select {
+    min-width: 76px; height: 38px; border: none; border-radius: 10px;
+    background: var(--pool-500); color: #fff; font-size: 13px; cursor: pointer;
+  }
+  .supplier-select:disabled { background: #f0f0f0; color: #c4c4c4; cursor: default; }
+  .form-section-title {
+    margin: 20px -22px 16px; padding: 12px 22px 8px;
+    border-top: .5px solid #eef0f4;
+    font-size: 12px; font-weight: 700; color: #24407a;
+  }
+  .char-count { font-size: 10px; color: var(--seal); margin-top: 3px; }
+  .detail-actions {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 10px; padding: 12px 20px 18px;
+    background: rgba(255,255,255,.94); border-top: .5px solid #eef0f4;
+  }
+  .detail-action {
+    flex: 1; height: 42px; border-radius: 12px; border: 1px solid #e1e5ee;
+    background: #fff; color: var(--seal); font-size: 14px; cursor: pointer;
+  }
+  .detail-action.primary {
+    background: var(--pool-500); border-color: var(--pool-500); color: #fff;
+    font-weight: 600;
+  }
+  .review-body {
+    flex: 1; overflow-y: auto; padding: 20px 22px 96px;
+    display: none;
+  }
+  .review-body.show { display: block; }
+  .review-card {
+    border: 1px solid #eef0f4; border-radius: 12px;
+    background: #fff; overflow: hidden;
+  }
+  .review-intro {
+    margin-bottom: 14px; padding: 12px 14px;
+    border-radius: 12px; background: var(--pool-050);
+    color: #24407a; font-size: 12px; line-height: 18px;
+  }
+  .review-section {
+    padding: 14px; border-bottom: .5px solid #eef0f4;
+  }
+  .review-section:last-child { border-bottom: none; }
+  .review-section-title {
+    font-size: 13px; font-weight: 700; color: var(--carbon);
+    margin-bottom: 10px;
+  }
+  .review-row {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 7px 0; font-size: 12px; line-height: 18px;
+  }
+  .review-row span:first-child { color: var(--seal); flex-shrink: 0; }
+  .review-row span:last-child { color: var(--carbon); text-align: right; }
+  .review-empty { color: #a0a6b1 !important; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <!-- 装饰光晕 -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <div class="top">
+      <!-- 导航 + 状态栏组 -->
+      <div>
+        <!-- 状态栏 -->
+        <div class="statusbar">
+          <div class="time">9:41</div>
+          <div class="indicators">
+            <img src="assets/signal.svg" alt="" width="18" height="12" />
+            <img src="assets/wifi.svg" alt="" width="17" height="12" />
+            <img src="assets/battery.svg" alt="" width="27" height="13" />
+          </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="navbar">
+          <img class="back" src="assets/vector52.svg" alt="返回" />
+          <img class="logo" src="assets/frame207.svg" alt="QIMA" />
+          <div class="nav-capsule">
+            <img src="assets/share.svg" alt="" />
+            <div class="divider"></div>
+            <img src="assets/home.svg" alt="" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 问候区 -->
+      <div class="section">
+        <div class="greeting">
+          <div>
+            <div class="hello">欢迎回来</div>
+            <div class="name">你好，Lyon！</div>
+          </div>
+          <div class="bell">
+            <img src="assets/icon_bell.svg" alt="通知" />
+            <div class="badge">2</div>
+          </div>
+        </div>
+
+        <!-- 快捷卡片 -->
+        <div class="quick">
+          <div class="quick-card" onclick="openOrderSheet()" style="cursor:pointer">
+            <img class="art" src="assets/image38.png" alt="" />
+            <div class="title">下单</div>
+            <div class="sub">快速创建订单</div>
+            <div class="go"><img src="assets/arrow_card.svg" alt="" /></div>
+          </div>
+          <div class="quick-card">
+            <img class="art-vector" src="assets/image39-vector.svg" alt="" />
+            <img class="art book" src="assets/image39.png" alt="" />
+            <div class="title">查看报告</div>
+            <div class="sub">3份报告已生成</div>
+            <div class="go"><img src="assets/arrow_card.svg" alt="" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 卡片区 -->
+      <div class="cards-wrap">
+        <!-- 我的订单 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="left">
+              <img src="assets/order_icon.svg" alt="" />
+              <span>我的订单</span>
+            </div>
+            <div class="more">全部 <img src="assets/chevron1.svg" alt="" /></div>
+          </div>
+          <a class="order-row" href="order-detail.html?order=T-25617004">
+            <div>
+              <div class="oid">T-25617004</div>
+              <div class="odesc">实验室检测 · 玩具</div>
+            </div>
+            <div class="right">
+              <div class="tag progress">进行中</div>
+              <img class="chev" src="assets/chevron_row.svg" alt="" />
+            </div>
+          </a>
+          <a class="order-row" href="order-detail.html?order=Q202349103">
+            <div>
+              <div class="oid">Q202349103</div>
+              <div class="odesc">装运前检验 · 玩具</div>
+            </div>
+            <div class="right">
+              <div class="tag pending">待确认</div>
+              <img class="chev" src="assets/chevron_row.svg" alt="" />
+            </div>
+          </a>
+        </div>
+
+        <!-- 最新通知 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="left">
+              <img src="assets/notif_icon.svg" alt="" />
+              <span>最新通知</span>
+            </div>
+            <div class="more">全部 <img src="assets/chevron1.svg" alt="" /></div>
+          </div>
+          <div class="notif-row">
+            <div class="notif-icon blue"><img src="assets/notif_doc.svg" alt="" /></div>
+            <div class="notif-body">
+              <div class="ntitle">下单成功提醒 <span class="dot"></span></div>
+              <div class="nsub">产品：玩具 | 装运前检验</div>
+              <div class="ntime">星期日 15:32</div>
+            </div>
+          </div>
+          <div class="notif-row">
+            <div class="notif-icon green"><img src="assets/notif_check.svg" alt="" /></div>
+            <div class="notif-body">
+              <div class="ntitle">新的报告提醒 <span class="dot"></span></div>
+              <div class="nsub">报告结果: 通过 | 报告决策: 待决定</div>
+              <div class="ntime">今天 21:26</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部标签栏 -->
+    <div class="tabbar">
+      <a class="tab active" href="index.html">
+        <img src="assets/tab_home.svg" alt="" />
+        <span class="label">首页</span>
+      </a>
+      <a class="tab" href="orders.html">
+        <img src="assets/tab_order.svg" alt="" />
+        <span class="label">订单</span>
+      </a>
+      <div class="tab placeholder">
+        <span class="label">下单</span>
+      </div>
+      <a class="tab" href="#">
+        <img src="assets/tab_report.svg" alt="" />
+        <span class="label">报告</span>
+      </a>
+      <a class="tab" href="#">
+        <img src="assets/tab_me.svg" alt="" />
+        <span class="label">我的</span>
+      </a>
+      <!-- 中间悬浮按钮 -->
+      <div class="fab" onclick="openOrderSheet()" style="cursor:pointer"><img src="assets/fab_add.svg" alt="下单" /></div>
+    </div>
+
+    <!-- 下单方式选择层 -->
+    <div class="sheet-mask" id="orderSheet" onclick="closeOrderSheet(event)">
+      <div class="sheet" onclick="event.stopPropagation()">
+        <div class="grabber"></div>
+        <div class="sheet-title">选择下单方式</div>
+        <div class="sheet-sub">请选择适合你的创建订单方式</div>
+
+        <a class="opt primary" href="order-chat.html">
+          <div class="opt-ic">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13 2L5 13h6l-1 9 9-12h-6l1-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="opt-body">
+            <div class="opt-name">快速下单 <span class="opt-badge">智能推荐</span></div>
+            <div class="opt-desc">上传资料或商品链接，智能识别并填写表单</div>
+          </div>
+          <svg class="opt-arrow" width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+
+        <div class="opt plain" onclick="openDetailForm()">
+          <div class="opt-ic">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 11l7-7 1 1-7 7-3 1 1-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 15h6M8 18h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="opt-body">
+            <div class="opt-name">详细填表</div>
+            <div class="opt-desc">手动逐项填写完整的检测订单信息</div>
+          </div>
+          <svg class="opt-arrow" width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <div class="sheet-cancel" onclick="closeOrderSheet()">取消</div>
+      </div>
+    </div>
+
+    <!-- 详细填表浮层 -->
+    <div class="detail-mask" id="detailForm" onclick="closeDetailForm(event)">
+      <div class="detail-panel" onclick="event.stopPropagation()">
+        <div class="detail-head">
+          <div class="detail-title">下单</div>
+          <button class="detail-close" onclick="closeDetailForm()" aria-label="关闭">×</button>
+        </div>
+
+        <div class="detail-body" id="detailEditBody">
+          <div class="form-row">
+            <div class="form-label">本次测试类型 <span class="req">*</span> <span class="info">i</span></div>
+            <div class="radio-stack">
+              <label class="radio-line"><input type="radio" name="testType" checked> 首次测试</label>
+              <label class="radio-line"><input type="radio" name="testType"> 重测</label>
+              <label class="radio-line"><input type="radio" name="testType"> 再次下单</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">产品名称 <span class="req">*</span></div>
+            <input class="form-input" id="productNameInput" type="text" placeholder="请输入产品名称">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">关联项目 <span class="req">*</span></div>
+            <select class="form-select" id="projectSelect">
+              <option value="" disabled selected>请选择关联项目</option>
+              <option>TEMU 硬件 - 商家付款</option>
+              <option>玩具实验室检测项目</option>
+              <option>通用检测项目</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">原产国家或地区 <span class="req">*</span> <span class="info">i</span></div>
+            <select class="form-select" id="originCountrySelect">
+              <option value="" disabled selected>请选择原产国家或地区</option>
+              <option>奥兰群岛</option>
+              <option>中国</option>
+              <option>越南</option>
+              <option>印度</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">销售国家或地区 <span class="req">*</span> <span class="info">i</span></div>
+            <div class="check-stack">
+              <label class="check-line"><input type="checkbox" value="欧盟" onchange="toggleSalesCountry(this)"> 欧盟</label>
+              <label class="check-line"><input type="checkbox" value="美国" onchange="toggleSalesCountry(this)"> 美国</label>
+              <label class="check-line"><input type="checkbox" value="澳大利亚" onchange="toggleSalesCountry(this)"> 澳大利亚</label>
+              <label class="check-line"><input type="checkbox" value="加拿大" onchange="toggleSalesCountry(this)"> 加拿大</label>
+              <label class="check-line"><input type="checkbox" value="南非" onchange="toggleSalesCountry(this)"> 南非</label>
+            </div>
+            <div class="selected-country-list" id="selectedSalesCountries"></div>
+            <div class="country-search">
+              <input class="form-input" id="salesCountrySearch" type="text" placeholder="请输入或搜索其他国家/地区" autocomplete="off" oninput="renderCountryResults()" onfocus="renderCountryResults()">
+              <div class="country-results" id="countryResults"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">货号 / 型号 <span class="req">*</span></div>
+            <input class="form-input" id="skuInput" type="text" placeholder="请输入货号或型号">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">制造商 <span class="req">*</span></div>
+            <input class="form-input" id="manufacturerInput" type="text" placeholder="请输入制造商名称">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">制造商地址 <span class="req">*</span></div>
+            <input class="form-input" id="manufacturerAddressInput" type="text" placeholder="请输入制造商地址">
+          </div>
+
+          <div class="optional-fields" id="optionalFields">
+          <div class="form-section-title" id="optionalInfoSection">添加信息（可选）</div>
+
+          <div class="form-row">
+            <div class="form-label">供应商</div>
+            <div class="optional-inline">
+              <input class="form-input" id="supplierInput" type="text" placeholder="请选择或添加供应商" readonly>
+              <button class="optional-link" type="button" onclick="openSupplierPicker()">选择或添加</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">产品参考号码</div>
+            <input class="form-input" id="productRefInput" type="text" placeholder="请输入产品参考号码">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">订单号码</div>
+            <input class="form-input" id="orderNumberInput" type="text" placeholder="请输入订单号码">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">SKU</div>
+            <input class="form-input" id="optionalSkuInput" type="text" placeholder="请输入 SKU">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">适用年龄</div>
+            <select class="form-select" id="ageGradeSelect">
+              <option value="" disabled selected>请选择</option>
+              <option>0-3 岁</option>
+              <option>3-6 岁</option>
+              <option>6-14 岁</option>
+              <option>14 岁以上</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">Fibre content</div>
+            <input class="form-input" id="fibreContentInput" type="text" placeholder="请输入 Fibre content">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">Sun lens cat. #</div>
+            <input class="form-input" id="sunLensInput" type="text" placeholder="请输入 Sun lens cat. #">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">EAN/SKU/Code-number</div>
+            <input class="form-input" id="codeNumberInput" type="text" placeholder="请输入 EAN/SKU/Code-number">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">UFI</div>
+            <input class="form-input" id="ufiInput" type="text" placeholder="请输入 UFI">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">Material for food contact Part</div>
+            <input class="form-input" id="foodContactInput" type="text" placeholder="请输入 Material for food contact Part">
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">备注</div>
+            <textarea class="form-textarea" id="optionalRemarkInput" placeholder="请输入备注"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">附件 <span class="info">i</span></div>
+            <button class="upload-optional-btn" type="button">附档文件至此处或点击上传文件</button>
+          </div>
+
+          <div class="form-section-title">附加联系人（可选）</div>
+
+          <div class="form-row">
+            <div class="contact-note">以下联系人将会收到与此订单相关的邮件</div>
+            <input class="form-input" id="extraContactEmailInput" type="email" placeholder="请输入电子邮箱地址" value="850600530@qq.com;">
+            <div class="contact-type-row">
+              <label><input type="radio" name="contactMailType" checked> 所有邮件</label>
+              <label><input type="radio" name="contactMailType"> 仅收取报告</label>
+              <label><input type="radio" name="contactMailType"> 仅收取付款通知</label>
+              <label><input type="radio" name="contactMailType"> 仅收取报价</label>
+            </div>
+            <button class="add-contact-btn" type="button">添加联系人</button>
+          </div>
+
+          <div class="form-section-title">样品收集（可选）</div>
+
+          <div class="inline-form-row">
+            <div class="inline-label">方法</div>
+            <div class="inline-control">
+              <div class="radio-stack">
+                <label class="radio-line"><input type="radio" name="sampleMethod" value="collect" checked onchange="toggleRefNumber()"> 启迈 QIMA 将在执行产品服务时收集样本</label>
+                <label class="radio-line"><input type="radio" name="sampleMethod" value="ship" onchange="toggleRefNumber()"> 您或者供应商会寄送样本</label>
+                <label class="radio-line"><input type="radio" name="sampleMethod" value="received" onchange="toggleRefNumber()"> 启迈 QIMA 已经拿到了样本</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="inline-form-row" id="refNumberRow">
+            <div class="inline-label">产品检验订单参考编号</div>
+            <div class="inline-control">
+              <button class="select-ref-btn" type="button">选择</button>
+            </div>
+          </div>
+
+          <div class="form-row shipping-field" style="display: none;">
+            <div class="form-label">快递公司</div>
+            <select class="form-select">
+              <option value="" disabled selected>请选择快递公司</option>
+              <option>TNT</option>
+              <option>DHL</option>
+              <option>FedEx</option>
+              <option>UPS</option>
+            </select>
+          </div>
+
+          <div class="form-row shipping-field" style="display: none;">
+            <div class="form-label">运单号</div>
+            <input class="form-input" type="text" placeholder="请输入运单号">
+          </div>
+
+          <div class="form-row shipping-field" style="display: none;">
+            <div class="form-label">备注</div>
+            <textarea class="form-textarea" placeholder="请输入备注信息"></textarea>
+            <div class="char-count">0 / 3600</div>
+          </div>
+          </div>
+        </div>
+
+        <div class="review-body" id="orderReviewBody">
+          <div class="review-intro">请确认以下下单信息。你也可以返回继续填写非必填项，补充样品收集、快递或备注信息。</div>
+          <div class="review-card">
+            <div class="review-section">
+              <div class="review-section-title">必填信息</div>
+              <div class="review-row"><span>本次测试类型</span><span id="reviewTestType">-</span></div>
+              <div class="review-row"><span>产品名称</span><span id="reviewProductName">-</span></div>
+              <div class="review-row"><span>关联项目</span><span id="reviewProject">-</span></div>
+              <div class="review-row"><span>原产国家或地区</span><span id="reviewOriginCountry">-</span></div>
+              <div class="review-row"><span>销售国家或地区</span><span id="reviewSalesCountries">-</span></div>
+              <div class="review-row"><span>货号 / 型号</span><span id="reviewSku">-</span></div>
+              <div class="review-row"><span>制造商</span><span id="reviewManufacturer">-</span></div>
+              <div class="review-row"><span>制造商地址</span><span id="reviewManufacturerAddress">-</span></div>
+            </div>
+            <div class="review-section">
+              <div class="review-section-title">非必填项</div>
+              <div class="review-row"><span>供应商</span><span id="reviewSupplier">未填写</span></div>
+              <div class="review-row"><span>产品参考号码</span><span id="reviewProductRef">未填写</span></div>
+              <div class="review-row"><span>订单号码</span><span id="reviewOrderNumber">未填写</span></div>
+              <div class="review-row"><span>适用年龄</span><span id="reviewAgeGrade">未填写</span></div>
+              <div class="review-row"><span>备注</span><span id="reviewOptionalRemark">未填写</span></div>
+              <div class="review-row"><span>附加联系人</span><span id="reviewExtraContact">未填写</span></div>
+              <div class="review-row"><span>样品收集方式</span><span id="reviewSampleMethod">-</span></div>
+              <div class="review-row"><span>产品检验订单参考编号</span><span id="reviewRefNumber">待选择</span></div>
+              <div class="review-row"><span>快递信息 / 备注</span><span id="reviewShippingInfo">未填写</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-actions" id="detailEditActions">
+          <button class="detail-action" onclick="closeDetailForm()">取消</button>
+          <button class="detail-action primary" onclick="submitDetailForm()">提交下单</button>
+        </div>
+        <div class="detail-actions" id="orderReviewActions" style="display: none;">
+          <button class="detail-action" onclick="continueOptionalFields()">继续填写</button>
+          <button class="detail-action primary" onclick="confirmOrder()">确认下单</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="supplier-mask" id="supplierPicker" onclick="closeSupplierPicker(event)">
+      <div class="supplier-modal" onclick="event.stopPropagation()">
+        <div class="supplier-head">
+          <div class="supplier-title">选择供应商</div>
+          <button class="supplier-close" type="button" onclick="closeSupplierPicker()" aria-label="关闭">×</button>
+        </div>
+        <div class="supplier-body">
+          <div class="supplier-search">
+            <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input id="supplierSearch" type="text" placeholder="搜索" oninput="renderSupplierRows()" />
+          </div>
+          <table class="supplier-table">
+            <thead>
+              <tr>
+                <th>供应商名称</th>
+                <th>地址</th>
+                <th>主要联系人</th>
+              </tr>
+            </thead>
+            <tbody id="supplierRows"></tbody>
+          </table>
+        </div>
+        <div class="supplier-foot">
+          <button class="supplier-add" type="button" onclick="addSupplierFromSearch()">添加新供应商?</button>
+          <div class="supplier-actions">
+            <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()">取消</button>
+            <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled>选择</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openOrderSheet() {
+      document.getElementById('orderSheet').classList.add('show');
+    }
+    function closeOrderSheet(e) {
+      document.getElementById('orderSheet').classList.remove('show');
+    }
+    function openDetailForm() {
+      closeOrderSheet();
+      showDetailEditMode();
+      document.getElementById('detailForm').classList.add('show');
+    }
+    function closeDetailForm() {
+      document.getElementById('detailForm').classList.remove('show');
+    }
+    function submitDetailForm() {
+      renderOrderReview();
+      document.querySelector('.detail-title').textContent = '确认下单';
+      document.getElementById('detailEditBody').style.display = 'none';
+      document.getElementById('detailEditActions').style.display = 'none';
+      document.getElementById('orderReviewBody').classList.add('show');
+      document.getElementById('orderReviewActions').style.display = 'flex';
+    }
+
+    function showDetailEditMode(showOptional = false) {
+      document.querySelector('.detail-title').textContent = '下单';
+      const detailEditBody = document.getElementById('detailEditBody');
+      detailEditBody.style.display = 'block';
+      detailEditBody.classList.toggle('show-optional', showOptional);
+      document.getElementById('detailEditActions').style.display = 'flex';
+      document.getElementById('orderReviewBody').classList.remove('show');
+      document.getElementById('orderReviewActions').style.display = 'none';
+    }
+
+    function continueOptionalFields() {
+      showDetailEditMode(true);
+      requestAnimationFrame(() => {
+        const detailEditBody = document.getElementById('detailEditBody');
+        const optionalInfoSection = document.getElementById('optionalInfoSection');
+        detailEditBody.scrollTo({
+          top: optionalInfoSection.offsetTop - detailEditBody.offsetTop - 8,
+          behavior: 'smooth'
+        });
+      });
+    }
+
+    function confirmOrder() {
+      window.location.href = 'order-success.html';
+    }
+
+    function getFieldValue(id) {
+      const field = document.getElementById(id);
+      if (!field || !field.value) return '';
+      return field.value.trim();
+    }
+
+    function getSelectedText(id) {
+      const select = document.getElementById(id);
+      if (!select || !select.value) return '';
+      return select.options[select.selectedIndex].textContent.trim();
+    }
+
+    function getCheckedLabel(name) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.parentElement.textContent.trim() : '';
+    }
+
+    function setReviewValue(id, value, fallback = '未填写') {
+      const target = document.getElementById(id);
+      const text = value || fallback;
+      target.textContent = text;
+      target.classList.toggle('review-empty', !value);
+    }
+
+    function renderOrderReview() {
+      setReviewValue('reviewTestType', getCheckedLabel('testType'));
+      setReviewValue('reviewProductName', getFieldValue('productNameInput'));
+      setReviewValue('reviewProject', getSelectedText('projectSelect'));
+      setReviewValue('reviewOriginCountry', getSelectedText('originCountrySelect'));
+      setReviewValue('reviewSalesCountries', Array.from(selectedSalesCountries).join('、'));
+      setReviewValue('reviewSku', getFieldValue('skuInput'));
+      setReviewValue('reviewManufacturer', getFieldValue('manufacturerInput'));
+      setReviewValue('reviewManufacturerAddress', getFieldValue('manufacturerAddressInput'));
+      setReviewValue('reviewSupplier', getFieldValue('supplierInput'));
+      setReviewValue('reviewProductRef', getFieldValue('productRefInput'));
+      setReviewValue('reviewOrderNumber', getFieldValue('orderNumberInput'));
+      setReviewValue('reviewAgeGrade', getSelectedText('ageGradeSelect'));
+      setReviewValue('reviewOptionalRemark', getFieldValue('optionalRemarkInput'));
+      setReviewValue('reviewExtraContact', getFieldValue('extraContactEmailInput'));
+      setReviewValue('reviewSampleMethod', getCheckedLabel('sampleMethod'));
+      setReviewValue('reviewRefNumber', '', '待选择');
+      setReviewValue('reviewShippingInfo', '', '未填写');
+    }
+    const supplierOptions = [
+      { name: 'Shenzhen Zhichuang Co., Ltd.', address: '深圳市宝安区工业路 88 号', contact: 'Sally Xu' },
+      { name: 'Qiming Toy Supplier Co., Ltd.', address: '东莞市松山湖科技园', contact: 'David Chen' },
+      { name: 'QIMA Toy Supplier', address: 'Dongguan, Guangdong, China', contact: 'Amy Li' },
+      { name: '同制造商', address: '与制造商信息一致', contact: '-' }
+    ];
+    let selectedSupplier = null;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function escapeJs(value) {
+      return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function openSupplierPicker() {
+      selectedSupplier = null;
+      document.getElementById('supplierSearch').value = '';
+      document.getElementById('supplierSelectBtn').disabled = true;
+      renderSupplierRows();
+      document.getElementById('supplierPicker').classList.add('show');
+    }
+
+    function closeSupplierPicker() {
+      document.getElementById('supplierPicker').classList.remove('show');
+    }
+
+    function renderSupplierRows() {
+      const keyword = (document.getElementById('supplierSearch').value || '').trim().toLowerCase();
+      const rows = document.getElementById('supplierRows');
+      const matched = supplierOptions.filter((item) =>
+        item.name.toLowerCase().includes(keyword) ||
+        item.address.toLowerCase().includes(keyword) ||
+        item.contact.toLowerCase().includes(keyword)
+      );
+      if (!matched.length) {
+        rows.innerHTML = '<tr><td class="supplier-empty" colspan="3">无数据</td></tr>';
+        return;
+      }
+      rows.innerHTML = matched.map((item) =>
+        '<tr class="supplier-row' + (selectedSupplier && selectedSupplier.name === item.name ? ' selected' : '') + '" onclick="selectSupplier(\'' + escapeJs(item.name) + '\')">' +
+          '<td>' + escapeHtml(item.name) + '</td>' +
+          '<td>' + escapeHtml(item.address) + '</td>' +
+          '<td>' + escapeHtml(item.contact) + '</td>' +
+        '</tr>'
+      ).join('');
+    }
+
+    function selectSupplier(name) {
+      selectedSupplier = supplierOptions.find((item) => item.name === name) || null;
+      document.getElementById('supplierSelectBtn').disabled = !selectedSupplier;
+      renderSupplierRows();
+    }
+
+    function confirmSupplierSelection() {
+      if (!selectedSupplier) return;
+      document.getElementById('supplierInput').value = selectedSupplier.name;
+      closeSupplierPicker();
+    }
+
+    function addSupplierFromSearch() {
+      const supplierName = document.getElementById('supplierSearch').value.trim();
+      if (!supplierName) return;
+      document.getElementById('supplierInput').value = supplierName;
+      closeSupplierPicker();
+    }
+
+    const salesCountries = ['欧盟', '美国', '澳大利亚', '加拿大', '南非', '中国', '越南', '印度', '英国', '德国', '法国', '意大利', '西班牙', '日本', '韩国', '新加坡', '马来西亚', '泰国', '墨西哥', '巴西'];
+    const selectedSalesCountries = new Set();
+
+    function syncSalesCountryCheckbox(country, checked) {
+      document.querySelectorAll('.check-stack input[type="checkbox"]').forEach((checkbox) => {
+        if (checkbox.value === country) {
+          checkbox.checked = checked;
+        }
+      });
+    }
+
+    function renderSelectedSalesCountries() {
+      const container = document.getElementById('selectedSalesCountries');
+      container.innerHTML = Array.from(selectedSalesCountries).map((country) => `
+        <span class="selected-country-chip">
+          ${country}
+          <button type="button" aria-label="移除${country}" onclick="removeSalesCountry('${country}')">×</button>
+        </span>
+      `).join('');
+    }
+
+    function addSalesCountry(country) {
+      if (!country) return;
+      selectedSalesCountries.add(country);
+      syncSalesCountryCheckbox(country, true);
+      renderSelectedSalesCountries();
+      document.getElementById('salesCountrySearch').value = '';
+      document.getElementById('countryResults').classList.remove('show');
+    }
+
+    function removeSalesCountry(country) {
+      selectedSalesCountries.delete(country);
+      syncSalesCountryCheckbox(country, false);
+      renderSelectedSalesCountries();
+      renderCountryResults();
+    }
+
+    function toggleSalesCountry(checkbox) {
+      if (checkbox.checked) {
+        addSalesCountry(checkbox.value);
+      } else {
+        removeSalesCountry(checkbox.value);
+      }
+    }
+
+    function renderCountryResults() {
+      const input = document.getElementById('salesCountrySearch');
+      const results = document.getElementById('countryResults');
+      const keyword = input.value.trim().toLowerCase();
+      const matches = salesCountries
+        .filter((country) => country.toLowerCase().includes(keyword))
+        .filter((country) => !selectedSalesCountries.has(country))
+        .slice(0, 6);
+
+      if (!keyword || matches.length === 0) {
+        results.classList.remove('show');
+        results.innerHTML = '';
+        return;
+      }
+
+      results.innerHTML = matches.map((country) => (
+        `<button class="country-option" type="button" onmousedown="addSalesCountry('${country}')">${country}</button>`
+      )).join('');
+      results.classList.add('show');
+    }
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.country-search')) {
+        document.getElementById('countryResults').classList.remove('show');
+      }
+    });
+
+    function toggleRefNumber() {
+      const selectedValue = document.querySelector('input[name="sampleMethod"]:checked').value;
+      const refNumberRow = document.getElementById('refNumberRow');
+      const shippingFields = document.querySelectorAll('.shipping-field');
+      if (selectedValue === 'collect') {
+        refNumberRow.style.display = 'flex';
+        shippingFields.forEach((field) => {
+          field.style.display = 'none';
+        });
+      } else {
+        refNumberRow.style.display = 'none';
+        shippingFields.forEach((field) => {
+          field.style.display = 'block';
+        });
+      }
+    }
+  </script><script>document.getElementById('detailForm').classList.add('show');document.querySelector('.detail-title').textContent='确认下单';document.getElementById('detailEditBody').style.display='none';document.getElementById('detailEditActions').style.display='none';document.getElementById('orderReviewBody').classList.add('show');document.getElementById('orderReviewActions').style.display='flex';renderOrderReview();</script>
+</body>
+</html>
