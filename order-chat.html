@@ -124,6 +124,16 @@
   .dropzone .up-ic { font-size: 26px; color: var(--pool-500); }
   .dropzone .up-main { font-size: 13px; color: var(--carbon); margin-top: 8px; }
   .dropzone .up-sub { font-size: 11px; color: #9aa0ad; margin-top: 5px; }
+  .upload-options { display: flex; flex-direction: row; gap: 10px; }
+  .upload-option {
+    flex: 1;
+    border: 1.5px dashed #c5cee8; border-radius: 12px;
+    background: #f7f9ff; padding: 16px 10px; text-align: center; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .upload-option:active { background: #edf1ff; }
+  .upload-option .up-ic { color: var(--pool-500); display: flex; align-items: center; }
+  .upload-option .up-title { font-size: 13px; color: var(--carbon); font-weight: 600; }
   .uploaded-files {
     display: none; flex-direction: column; gap: 7px;
     margin-top: 10px;
@@ -1009,9 +1019,11 @@
           field('Manufacturer', fields['Manufacturer'], !!fields['Manufacturer'])+
           field('Manufacturer Address', fields['Manufacturer Address'], !!fields['Manufacturer Address'])+
           field('Sample Collection Method', fields['Sample Collection Method'], !!fields['Sample Collection Method'])+
-          field('Carrier', fields['Carrier'], !!fields['Carrier'])+
-          field('Tracking Number', fields['Tracking Number'], !!fields['Tracking Number'])+
-          field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'])+
+          (fields['Sample Collection Method'] === '启迈 QIMA 将在执行产品服务时收集样本' ? '' :
+            field('Carrier', fields['Carrier'], !!fields['Carrier'])+
+            field('Tracking Number', fields['Tracking Number'], !!fields['Tracking Number'])+
+            field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'])
+          )+
         '</div><button class="edit-fields" onclick="openFieldEditor()"><span>需要调整？</span>去编辑</button>'+
       '</div>';
     }
@@ -1076,10 +1088,15 @@
       const card =
         '<div class="panel panel-pad">'+
           '<div class="panel-title">上传产品资料</div>'+
-          '<div class="dropzone" onclick="doUpload()">'+
-            '<div class="up-ic">☁️</div>'+
-            '<div class="up-main">点击上传或拖拽文件到此处</div>'+
-            '<div class="up-sub">支持规格书、PO/PI/Invoice、包装/标签、产品照片、旧测试报告等</div>'+
+          '<div class="upload-options">'+
+            '<div class="upload-option" onclick="doUpload()">'+
+              '<div class="up-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>'+
+              '<div class="up-title">相机拍摄</div>'+
+            '</div>'+
+            '<div class="upload-option" onclick="doUpload()">'+
+              '<div class="up-ic"><svg width="20" height="20" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M506.942 345.921c25.259 0 42.134-16.916 42.134-42.107 0-25.477-16.848-41.956-42.134-41.956-25.299 0-50.668 16.48-50.668 41.956 0.028 25.204 25.409 42.107 50.668 42.107v0zM506.942 345.921z" fill="currentColor"/><path d="M271.257 261.857c-25.259 0-50.79 16.48-50.79 41.956 0 25.19 25.532 42.107 50.79 42.107 25.163 0 42.012-16.916 42.012-42.107-0.014-25.477-16.834-41.956-42.012-41.956v0zM271.257 261.857z" fill="currentColor"/><path d="M1010.654 615.492c0-133.202-123.563-246.702-275.237-258.512 0.205-1.652 0.301-3.373-0.068-5.092-30.406-141.79-182.886-248.695-354.7-248.695-194.15 0-352.119 135.387-352.119 301.793 0 89.279 45.574 169.725 131.946 233.158l-30.106 90.508c-1.939 5.885-0.177 12.37 4.506 16.452 2.853 2.458 6.445 3.741 10.076 3.741 2.335 0 4.697-0.546 6.867-1.625l113.036-56.565 13.926 2.827c34.802 7.154 64.853 13.353 101.868 13.353 10.895 0 40.878-3.987 43.404-7.182 40.755 101.99 153.094 175.61 285.273 175.61 33.86 0 68.13-8.164 98.891-15.866l87.136 47.636c2.307 1.257 4.847 1.911 7.359 1.911 3.441 0 6.881-1.161 9.639-3.413 4.847-3.932 6.841-10.404 5.038-16.33l-22.255-74.001c74.602-58.955 115.521-129.488 115.521-199.708v0zM409.798 665.75c-9.626 0.833-19.388 1.243-29.082 1.243-32.686 0-60.334-5.652-92.31-12.26l-18.582-3.755c-3.195-0.683-6.567-0.245-9.503 1.269l-81.687 40.892 21.231-63.775c2.076-6.24-0.205-13.053-5.57-16.821-82.070-57.207-123.659-126.894-123.659-207.093 0-144.179 139.087-261.516 310.067-261.516 151.142 0 284.959 91.955 312.579 214.261-158.475 2.076-286.706 113.487-286.706 250.32 0 19.893 3.018 39.171 8.11 57.767-1.542-0.382-3.168-0.683-4.887-0.532v0zM860.371 788.699c-4.875 3.673-6.935 10.007-5.188 15.852l13.804 45.903-56.647-30.993c-2.157-1.188-4.588-1.803-7.004-1.803-1.188 0-2.389 0.15-3.564 0.464-30.379 7.674-61.822 15.593-92.433 15.593-142.186 0-257.857-97.717-257.857-217.811 0-120.095 115.658-217.771 257.857-217.771 139.469 0 257.325 99.724 257.325 217.771 0 59.87-37.738 121.255-106.291 172.797v0zM616.454 506.006c-16.848 0-33.696 16.971-33.696 33.792 0 16.944 16.848 33.669 33.696 33.669 25.313 0 42.038-16.725 42.038-33.669 0-16.848-16.725-33.792-42.038-33.792v0zM801.58 506.006c-16.603 0-33.451 16.971-33.451 33.792 0 16.944 16.848 33.669 33.451 33.669 25.231 0 42.257-16.725 42.257-33.669 0-16.848-16.998-33.792-42.257-33.792v0z" fill="currentColor"/></svg></div>'+
+              '<div class="up-title">从微信上传</div>'+
+            '</div>'+
           '</div>'+
           '<div class="uploaded-files" id="uploadedFiles"></div>'+
           '<div class="src-tabs">支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB</div>'+
@@ -1881,9 +1898,15 @@
     }
 
     function finishConfirm(){
+      const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '';
+      const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || '';
+      const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '';
+      const needShipping = collectionMethod !== '启迈 QIMA 将在执行产品服务时收集样本';
+      const shippingComplete = !needShipping || (carrier && tracking);
+      const pct = shippingComplete ? 100 : 85;
       const t = botTyping();
       setTimeout(()=>{ t.remove();
-        botMsg('太好了！信息已全部补齐，<b>表单完成度 100%</b> 🎉<br>下一步请确认订单信息，确认无误后即可去下单。', false);
+        botMsg('太好了！信息已全部补齐，<b>表单完成度 '+pct+'%</b> 🎉<br>'+(shippingComplete ? '' : '物流信息尚未填写，确认订单后仍可补充。<br>')+'下一步请确认订单信息，确认无误后即可去下单。', false);
         const chips = '<div class="chips">'+
           '<button class="chip-btn primary" onclick="confirmOrderInfo(this)">'+ciIcon('check')+' 确认订单信息</button>'+
           '<button class="chip-btn" onclick="placeOrder(this)">'+ciIcon('cart')+' 去下单</button>'+
@@ -1958,9 +1981,11 @@
           field('制造商', manufacturer, true)+
           field('制造商地址', manufacturerAddress, true)+
           field('样品收集方式', collectionMethod, true)+
-          field('快递公司', carrier, carrier !== '待确认')+
-          field('运单号', tracking, tracking !== '待确认')+
-          field('物流备注', shippingRemark, !!shippingRemark)+
+          (collectionMethod === '启迈 QIMA 将在执行产品服务时收集样本' ? '' :
+            field('快递公司', carrier, carrier !== '待确认')+
+            field('运单号', tracking, tracking !== '待确认')+
+            field('物流备注', shippingRemark, !!shippingRemark)
+          )+
         '</div>'+
       '</div>';
     }
