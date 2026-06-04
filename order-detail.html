@@ -182,6 +182,10 @@
     padding: 9px 10px;
     vertical-align: top;
   }
+  .table td:nth-child(2) {
+    color: var(--pool-500);
+    text-decoration: underline;
+  }
   .table .check { width: 18px; color: var(--pool-500); }
   .inline-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
@@ -222,14 +226,6 @@
         </div>
         <div class="summary-grid">
           <div class="metric">
-            <div class="label">申请单号</div>
-            <div class="value" id="applicationNo">08008571</div>
-          </div>
-          <div class="metric">
-            <div class="label">预计报告日期</div>
-            <div class="value" id="reportDate">2026-06-05</div>
-          </div>
-          <div class="metric">
             <div class="label">服务类型</div>
             <div class="value" id="serviceType">实验室检测</div>
           </div>
@@ -240,137 +236,229 @@
         </div>
       </section>
 
+      <!-- 基本信息 -->
       <section class="section-card">
         <div class="section-head">基本信息</div>
         <div class="info-list">
-          <div class="info-row"><div class="label">订单参考编号</div><div class="value" id="referenceNo">T-25617004</div></div>
-          <div class="info-row"><div class="label">申请单号</div><div class="value" id="applicationNoDetail">08008571</div></div>
-          <div class="info-row"><div class="label">本次测试类型</div><div class="value" id="testType">首次测试</div></div>
-          <div class="info-row"><div class="label">服务类型</div><div class="value" id="serviceTypeDetail">实验室检测</div></div>
-          <div class="info-row"><div class="label">订单状态</div><div class="value" id="orderStatusText">进行中</div></div>
-          <div class="info-row"><div class="label">下单日期</div><div class="value" id="orderDate">2026-06-03</div></div>
-          <div class="info-row"><div class="label">预计报告日期</div><div class="value" id="reportDateDetail">2026-06-05</div></div>
+          <div class="info-row"><div class="label">此测试为 *</div><div class="value" id="testType">首次测试</div></div>
+          <div class="info-row"><div class="label">测试地点</div><div class="value" id="testingLocation">Hangzhou</div></div>
         </div>
       </section>
 
+      <!-- 供应商信息 -->
       <section class="section-card">
-        <div class="section-head">客户与项目信息</div>
+        <div class="section-head">供应商信息</div>
         <div class="info-list">
-          <div class="info-row"><div class="label">客户</div><div class="value" id="customerName">qimatest-Sally Xu</div></div>
-          <div class="info-row"><div class="label">联系人</div><div class="value" id="contactName">Sally Xu</div></div>
-          <div class="info-row"><div class="label">关联项目</div><div class="value" id="projectName">TEMU Hardware - Seller Pay（商家付款）</div></div>
-          <div class="info-row"><div class="label">付款方</div><div class="value" id="payer">Seller Pay</div></div>
-          <div class="info-row"><div class="label">目标市场</div><div class="value" id="targetMarket">欧盟，美国</div></div>
+          <div class="info-row"><div class="label">供应商</div><div class="value" id="supplierName">None</div></div>
         </div>
       </section>
 
+      <!-- 产品 -->
       <section class="section-card">
-        <div class="section-head">产品信息</div>
+        <div class="section-head">产品</div>
         <div class="product-card">
           <div class="thumb" id="productThumb"></div>
           <div class="product-info">
-            <div class="product-name" id="productName">黑色复合面料</div>
+            <div class="product-name" id="productName">glasses</div>
             <div class="product-meta">
               <span class="pill" id="sampleQty">10cm×80cm</span>
               <span class="pill" id="modelNo">T-25617004</span>
-              <span class="pill" id="productCategory">Textile</span>
+              <span class="pill" id="productCategory">Toys</span>
             </div>
           </div>
         </div>
         <div class="info-list">
-          <div class="info-row"><div class="label">产品英文名</div><div class="value" id="productEnglish">Composite fabric</div></div>
-          <div class="info-row"><div class="label">货号 / 型号</div><div class="value" id="skuNo">T-25617004</div></div>
-          <div class="info-row"><div class="label">材质 / 成分</div><div class="value" id="material">Polyester / Spandex</div></div>
-          <div class="info-row"><div class="label">品牌</div><div class="value" id="brand">QIMA Sample</div></div>
-          <div class="info-row"><div class="label">适用年龄</div><div class="value" id="ageGrade">N/A</div></div>
-          <div class="info-row"><div class="label">原产国家或地区</div><div class="value" id="originCountry">中国</div></div>
-          <div class="info-row"><div class="label">销售国家或地区</div><div class="value" id="salesCountry">欧盟，美国</div></div>
+          <div class="info-row"><div class="label">产品名称 *</div><div class="value" id="productDisplayName">glasses</div></div>
+          <div class="info-row"><div class="label">产品参考号码</div><div class="value" id="productRefNo">None</div></div>
+          <div class="info-row"><div class="label">订购单号码</div><div class="value" id="poNumber">None</div></div>
+          <div class="info-row"><div class="label">SKU</div><div class="value" id="skuValue">None</div></div>
+          <div class="info-row"><div class="label">材料</div><div class="value" id="material">None</div></div>
+          <div class="info-row"><div class="label">适用年龄</div><div class="value" id="ageGrade">For adult use</div></div>
+          <div class="info-row"><div class="label">方案 *</div><div class="value" id="projectName">TEMU Hardware- Seller Pay（商家付款，杂货产品）</div></div>
+          <div class="info-row"><div class="label">原产地 *</div><div class="value" id="originCountry">中国</div></div>
+          <div class="info-row"><div class="label">分发国家或区域 *</div><div class="value" id="salesCountry">European Union</div></div>
+          <div class="info-row"><div class="label">测试地点 *</div><div class="value" id="testingLocation2">QIMA Hangzhou Lab (Local)</div></div>
         </div>
       </section>
 
+      <!-- 测试 -->
       <section class="section-card">
-        <div class="section-head">供应商与制造商</div>
-        <div class="info-list">
-          <div class="info-row"><div class="label">供应商</div><div class="value" id="supplierName">Shenzhen Zhichuang Co., Ltd.</div></div>
-          <div class="info-row"><div class="label">制造商</div><div class="value" id="manufacturerName">QIMA Sample Manufacturer</div></div>
-          <div class="info-row full"><div class="label">制造商地址</div><div class="value" id="manufacturerAddress">No. 88 Industrial Road, Shenzhen, China</div></div>
-          <div class="info-row"><div class="label">PO / PI / Invoice</div><div class="value" id="poNumber">PO-7845120</div></div>
-          <div class="info-row"><div class="label">EAN / UPC</div><div class="value" id="eanCode">6 901234 567890</div></div>
+        <div class="section-head">测试</div>
+        <div class="info-list" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>类别</th>
+                <th>名称</th>
+                <th>价格</th>
+                <th>单位</th>
+              </tr>
+            </thead>
+            <tbody id="testTableBody">
+              <tr>
+                <td>Optional</td>
+                <td>ISO 12312-1:2013+A1:2015-Sunglasses-Construction (4.1)</td>
+                <td>USD 30.9 per unit</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Optional</td>
+                <td>Client-Eyewear-Declaration of Conformity (DoC)</td>
+                <td>USD 78 per unit</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Optional</td>
+                <td>Client-Report-Chinese and English Report Charge</td>
+                <td>USD 27.81 per unit</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Optional</td>
+                <td>EN ISO 12312-1:2013+A1:2015-Sunglasses-Full Requirement</td>
+                <td>USD 288.4 per unit</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
+      <!-- 所需周转时间 & 报价 -->
       <section class="section-card">
-        <div class="section-head">样品收集</div>
+        <div class="section-head">周转时间与报价</div>
         <div class="info-list">
-          <div class="info-row full"><div class="label">收集方式</div><div class="value" id="collectionMethod">启迈 QIMA 将在执行产品服务时收集样本</div></div>
-          <div class="info-row"><div class="label">样品数量</div><div class="value" id="sampleQtyDetail">10cm×80cm</div></div>
-          <div class="info-row"><div class="label">样品状态</div><div class="value" id="sampleStatus">待收样</div></div>
-          <div class="info-row"><div class="label">快递公司</div><div class="value" id="courierName">DHL</div></div>
-          <div class="info-row"><div class="label">运单号</div><div class="value" id="trackingNo">DHL-20260603001</div></div>
-          <div class="info-row full"><div class="label">收样备注</div><div class="value muted" id="sampleRemark">请在样品包装外标注订单参考编号。</div></div>
+          <div class="info-row"><div class="label">所需周转时间</div><div class="value" id="turnaroundTime">7 Day Regular</div></div>
+          <div class="info-row"><div class="label">在启迈 QIMA执行测试前，您需要一份正式报价单吗？*</div><div class="value" id="needQuotation">否</div></div>
         </div>
       </section>
 
+      <!-- 自定义字段 -->
       <section class="section-card">
-        <div class="section-head">测试项目</div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th class="check"></th>
-              <th>项目</th>
-              <th>标准</th>
-              <th>状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="check">✓</td>
-              <td>纤维成分</td>
-              <td>ISO 1833</td>
-              <td id="testStatus1">进行中</td>
-            </tr>
-            <tr>
-              <td class="check">✓</td>
-              <td>色牢度</td>
-              <td>ISO 105</td>
-              <td id="testStatus2">待测试</td>
-            </tr>
-            <tr>
-              <td class="check">✓</td>
-              <td>尺寸稳定性</td>
-              <td>ISO 6330</td>
-              <td id="testStatus3">待测试</td>
-            </tr>
-            <tr>
-              <td class="check">✓</td>
-              <td>物理机械性能</td>
-              <td>EN 71 / ASTM</td>
-              <td id="testStatus4">待测试</td>
-            </tr>
-            <tr>
-              <td class="check">✓</td>
-              <td>化学安全</td>
-              <td>REACH / CPSIA</td>
-              <td id="testStatus5">待测试</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="section-head">自定义字段</div>
+        <div class="info-list">
+          <div class="info-row"><div class="label">SPU ID</div><div class="value" id="spuId">N/A</div></div>
+          <div class="info-row"><div class="label">SKC ID</div><div class="value" id="skcId">N/A</div></div>
+          <div class="info-row"><div class="label">Item #/model #</div><div class="value" id="skuNo">RCR-001</div></div>
+          <div class="info-row"><div class="label">Manufacturer</div><div class="value" id="manufacturerName">Xujiating</div></div>
+          <div class="info-row"><div class="label">Fibre content</div><div class="value" id="fibreContent">None</div></div>
+          <div class="info-row"><div class="label">Color</div><div class="value" id="colorValue">N/A</div></div>
+          <div class="info-row"><div class="label">Product Type</div><div class="value" id="productType">N/A</div></div>
+          <div class="info-row"><div class="label">Sun lens cat. #</div><div class="value" id="sunLensCat">N/A</div></div>
+          <div class="info-row"><div class="label">EAN/SKU/Code-number</div><div class="value" id="eanCode">N/A</div></div>
+          <div class="info-row"><div class="label">Brand name</div><div class="value" id="brand">N/A</div></div>
+          <div class="info-row"><div class="label">Batch Number</div><div class="value" id="batchNumber">N/A</div></div>
+        </div>
       </section>
 
+      <!-- 样本采集 -->
       <section class="section-card">
-        <div class="section-head">附件与备注</div>
+        <div class="section-head">样本采集</div>
         <div class="info-list">
-          <div class="info-row full">
-            <div class="label">已上传资料</div>
-            <div class="value">
-              <div class="inline-tags">
-                <span class="pill">Product Spec.pdf</span>
-                <span class="pill">Product Photo.jpg</span>
-                <span class="pill">PO-7845120.pdf</span>
-              </div>
-            </div>
-          </div>
-          <div class="info-row full"><div class="label">备注</div><div class="value muted" id="orderRemark">请优先安排常规安全项目测试，如需补充资料请联系客户。</div></div>
+          <div class="info-row full"><div class="label">方法</div><div class="value" id="collectionMethod">None</div></div>
+        </div>
+      </section>
+
+      <!-- 附加信息 -->
+      <section class="section-card">
+        <div class="section-head">附加信息</div>
+        <div class="info-list">
+          <div class="info-row full"><div class="label">备注</div><div class="value muted" id="orderRemark">None</div></div>
+          <div class="info-row full"><div class="label">附件</div><div class="value muted" id="attachments">None</div></div>
+        </div>
+      </section>
+
+      <!-- Files -->
+      <section class="section-card">
+        <div class="section-head">Files</div>
+        <div class="info-list" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>标签</th>
+                <th>文件名</th>
+                <th>描述</th>
+              </tr>
+            </thead>
+            <tbody id="fileTableBody">
+              <tr>
+                <td>Quotation report</td>
+                <td>T-25617004-11-Q1.pdf</td>
+                <td>Quotation report</td>
+              </tr>
+              <tr>
+                <td>Client report</td>
+                <td>T-25617004-11-R2 DOC.docx</td>
+                <td>Client report</td>
+              </tr>
+              <tr>
+                <td>Style Info</td>
+                <td>T-25617004-S01.jpg</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Invoice report</td>
+                <td>T-25617004-11-I1.pdf</td>
+                <td>Invoice report</td>
+              </tr>
+              <tr>
+                <td>Client report</td>
+                <td>T-25617004-11-R2.pdf</td>
+                <td>Client report</td>
+              </tr>
+              <tr>
+                <td>Client report</td>
+                <td>T-25617004-11-R1 DOC.docx</td>
+                <td>Client report</td>
+              </tr>
+              <tr>
+                <td>Style Info</td>
+                <td>T-25617004-S02.jpg</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Quotation report</td>
+                <td>T-25617004-11-Q2.pdf</td>
+                <td>Quotation report</td>
+              </tr>
+              <tr>
+                <td>Client report</td>
+                <td>T-25617004-11-R1.pdf</td>
+                <td>Client report</td>
+              </tr>
+              <tr>
+                <td>Client report</td>
+                <td>T-25617004-11-R1-RETEST1.docx</td>
+                <td>Client report</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 附加收件人 -->
+      <section class="section-card">
+        <div class="section-head">附加收件人</div>
+        <div class="sub-note" style="padding:8px 14px 0;">以下收件人将会收到与此订单相关的邮件</div>
+        <div class="info-list">
+          <div class="info-row"><div class="label">电子邮箱地址</div><div class="value" id="recipientEmail">850600530@qq.com</div></div>
+          <div class="info-row"><div class="label">收取邮件类型</div><div class="value" id="emailType">所有邮件</div></div>
+        </div>
+      </section>
+
+      <!-- Comments -->
+      <section class="section-card">
+        <div class="section-head">Comments</div>
+        <div class="info-list">
+          <div class="info-row full"><div class="value muted" id="recipientComments">在他们的QIMA账户中与可以访问此订单的同事/供应商分享有关此订单的评论。</div></div>
+        </div>
+        <div style="padding:0 14px 12px;">
+          <button style="
+            width:100%; height:36px; border-radius:8px;
+            border:1px solid var(--pool-500); background:transparent;
+            color:var(--pool-500); font-size:13px; font-weight:600;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+          ">Write a comment</button>
         </div>
       </section>
 
@@ -382,191 +470,196 @@
       '08008571': {
         title: 'Lab-Testing',
         subtitle: 'Order Ref: T-25617004',
-        applicationNo: '08008571',
         status: '待录入数据',
         statusClass: 'blue',
-        reportDate: '2026-06-05',
         serviceType: '实验室检测',
         category: 'Textile',
         productName: '黑色复合面料',
-        productEnglish: 'Black composite fabric',
-        sampleQty: '10cm×80cm',
-        modelNo: 'T-25617004',
-        orderDate: '2026-06-03',
-        referenceNo: 'T-25617004',
         testType: '首次测试',
-        projectName: 'TEMU Hardware - Seller Pay（商家付款）',
-        targetMarket: '欧盟，美国',
-        skuNo: 'T-25617004',
+        testingLocation: 'Hangzhou',
+        supplierName: 'Shenzhen Zhichuang Co., Ltd.',
+        productRefNo: 'N/A',
+        poNumber: 'PO-7845120',
+        skuValue: 'N/A',
         material: 'Polyester / Spandex',
-        brand: 'QIMA Sample',
         ageGrade: 'N/A',
+        projectName: 'TEMU Hardware - Seller Pay（商家付款）',
         originCountry: '中国',
         salesCountry: '欧盟，美国',
-        supplierName: 'Shenzhen Zhichuang Co., Ltd.',
+        turnaroundTime: '7 Day Regular',
+        needQuotation: '否',
         manufacturerName: 'QIMA Sample Manufacturer',
-        manufacturerAddress: 'No. 88 Industrial Road, Shenzhen, China',
-        poNumber: 'PO-7845120',
+        skuNo: 'T-25617004',
+        fibreContent: 'N/A',
+        colorValue: 'N/A',
+        productType: 'N/A',
+        sunLensCat: 'N/A',
         eanCode: '6 901234 567890',
+        brand: 'QIMA Sample',
+        batchNumber: 'N/A',
+        spuId: 'N/A',
+        skcId: 'N/A',
         collectionMethod: '启迈 QIMA 将在执行产品服务时收集样本',
-        sampleStatus: '待收样',
-        courierName: 'DHL',
-        trackingNo: 'DHL-20260603001',
-        sampleRemark: '请在样品包装外标注订单参考编号。',
-        orderRemark: '请优先安排常规纺织品项目测试，如需补充资料请联系客户。',
+        orderRemark: 'None',
+        recipientEmail: '850600530@qq.com',
+        emailType: '所有邮件',
+        recipientComments: 'None',
         thumbClass: ''
       },
       '080082671': {
         title: 'Lab-Testing',
         subtitle: 'Order Ref: T-26356800-11-R',
-        applicationNo: '080082671',
         status: '报告已完成',
         statusClass: 'green',
-        reportDate: '2026-06-03',
         serviceType: '实验室检测',
         category: 'Textile',
         productName: '黑色机织面料',
-        productEnglish: 'Black woven fabric',
-        sampleQty: '1.5m×2.0m',
-        modelNo: 'T-26356800-11-R',
-        orderDate: '2026-06-03',
-        referenceNo: 'T-26356800-11-R',
         testType: '重测',
-        projectName: 'TEMU Hardware - Seller Pay（商家付款）',
-        targetMarket: '欧盟',
-        skuNo: 'T-26356800-11-R',
+        testingLocation: 'Hangzhou',
+        supplierName: 'Shenzhen Textile Supplier Co., Ltd.',
+        productRefNo: 'N/A',
+        poNumber: 'PO-26356800',
+        skuValue: 'N/A',
         material: '100% Polyester',
-        brand: 'QIMA Sample',
         ageGrade: 'N/A',
+        projectName: 'TEMU Hardware - Seller Pay（商家付款）',
         originCountry: '中国',
         salesCountry: '欧盟',
-        supplierName: 'Shenzhen Textile Supplier Co., Ltd.',
+        turnaroundTime: '7 Day Regular',
+        needQuotation: '否',
         manufacturerName: 'QIMA Textile Factory',
-        manufacturerAddress: 'Baoan District, Shenzhen, Guangdong, China',
-        poNumber: 'PO-26356800',
+        skuNo: 'T-26356800-11-R',
+        fibreContent: 'N/A',
+        colorValue: 'N/A',
+        productType: 'N/A',
+        sunLensCat: 'N/A',
         eanCode: 'N/A',
-        collectionMethod: '您或者供应商会寄送样本',
-        sampleStatus: '已收样',
-        courierName: 'FedEx',
-        trackingNo: 'FDX-2635680011',
-        sampleRemark: '样品已到达实验室，报告已完成。',
-        orderRemark: '报告结果通过，等待客户下载报告。',
-        thumbClass: 'denim',
-        testStatus1: '已完成',
-        testStatus2: '已完成',
-        testStatus3: '已完成',
-        testStatus4: '已完成',
-        testStatus5: '已完成'
+        brand: 'QIMA Sample',
+        batchNumber: 'N/A',
+        spuId: 'N/A',
+        skcId: 'N/A',
+        collectionMethod: 'None',
+        orderRemark: 'None',
+        recipientEmail: 'N/A',
+        emailType: 'N/A',
+        recipientComments: 'None',
+        thumbClass: 'denim'
       },
       '08008536': {
         title: 'Lab-Testing',
         subtitle: 'Order Ref: T-25617036',
-        applicationNo: '08008536',
         status: '待录入数据',
         statusClass: 'blue',
-        reportDate: '2026-06-05',
         serviceType: '实验室检测',
         category: 'Textile',
         productName: '灰色针织面料',
-        productEnglish: 'Grey knitted fabric',
-        sampleQty: '15cm×60cm',
-        modelNo: 'T-25617036',
-        orderDate: '2026-06-02',
-        referenceNo: 'T-25617036',
         testType: '首次测试',
-        projectName: '通用检测项目',
-        targetMarket: '美国，加拿大',
-        skuNo: 'T-25617036',
+        testingLocation: 'Hangzhou',
+        supplierName: 'Vietnam Fabric Supplier Ltd.',
+        productRefNo: 'N/A',
+        poNumber: 'PI-2026-036',
+        skuValue: 'N/A',
         material: 'Cotton / Spandex',
-        brand: 'QIMA Sample',
         ageGrade: 'N/A',
+        projectName: '通用检测项目',
         originCountry: '越南',
         salesCountry: '美国，加拿大',
-        supplierName: 'Vietnam Fabric Supplier Ltd.',
+        turnaroundTime: '7 Day Regular',
+        needQuotation: '否',
         manufacturerName: 'QIMA Knitwear Factory',
-        manufacturerAddress: 'Binh Duong Industrial Zone, Vietnam',
-        poNumber: 'PI-2026-036',
+        skuNo: 'T-25617036',
+        fibreContent: 'N/A',
+        colorValue: 'N/A',
+        productType: 'N/A',
+        sunLensCat: 'N/A',
         eanCode: 'N/A',
-        collectionMethod: '启迈 QIMA 已经拿到了样本',
-        sampleStatus: '已收样',
-        courierName: 'UPS',
-        trackingNo: 'UPS-08008536',
-        sampleRemark: '样品数量满足测试要求。',
-        orderRemark: '等待实验室录入数据。',
+        brand: 'QIMA Sample',
+        batchNumber: 'N/A',
+        spuId: 'N/A',
+        skcId: 'N/A',
+        collectionMethod: 'None',
+        orderRemark: 'None',
+        recipientEmail: 'N/A',
+        emailType: 'N/A',
+        recipientComments: 'None',
         thumbClass: 'grey'
       },
       'T-25617004': {
         title: 'Lab-Testing',
         subtitle: 'Order Ref: T-25617004',
-        applicationNo: 'T-25617004',
         status: '进行中',
         statusClass: 'blue',
-        reportDate: '2026-06-05',
         serviceType: '实验室检测',
         category: 'Toys',
-        productName: 'Toys 产品检测',
-        productEnglish: 'Toy product testing',
-        sampleQty: '样品 3 件',
-        modelNo: 'T-25617004',
-        orderDate: '2026-06-03',
-        referenceNo: 'T-25617004',
+        productName: 'glasses',
         testType: '首次测试',
-        projectName: '玩具实验室检测项目',
-        targetMarket: '欧盟，美国',
-        skuNo: 'RBT-2025-X9',
-        material: 'ABS / PC 塑料',
-        brand: 'QIMA Toy',
-        ageGrade: '3岁以上',
+        testingLocation: 'QIMA Hangzhou Lab (Local)',
+        supplierName: 'None',
+        productRefNo: 'None',
+        poNumber: 'None',
+        skuValue: 'None',
+        material: 'None',
+        ageGrade: 'For adult use',
+        projectName: 'TEMU Hardware- Seller Pay（商家付款，杂货产品）',
         originCountry: '中国',
-        salesCountry: '欧盟，美国',
-        supplierName: 'Shenzhen Zhichuang Co., Ltd.',
-        manufacturerName: '深圳市智创玩具有限公司',
-        manufacturerAddress: '深圳市宝安区工业路 88 号',
-        poNumber: 'PO-7845120',
-        eanCode: '6 901234 567890',
-        collectionMethod: '启迈 QIMA 将在执行产品服务时收集样本',
-        sampleStatus: '待收样',
-        courierName: 'DHL',
-        trackingNo: 'DHL-8572-4490-CN',
-        sampleRemark: '请将玩具主机、配件、包装和说明书一并提供。',
-        orderRemark: '客户要求覆盖 EN71、ASTM F963 和 CPSIA 常规安全项目。',
+        salesCountry: 'European Union',
+        turnaroundTime: '7 Day Regular',
+        needQuotation: '否',
+        manufacturerName: 'Xujiating',
+        skuNo: 'RCR-001',
+        fibreContent: 'None',
+        colorValue: 'N/A',
+        productType: 'N/A',
+        sunLensCat: 'N/A',
+        eanCode: 'N/A',
+        brand: 'N/A',
+        batchNumber: 'N/A',
+        spuId: 'N/A',
+        skcId: 'N/A',
+        collectionMethod: 'None',
+        orderRemark: 'None',
+        recipientEmail: '850600530@qq.com',
+        emailType: 'All emails',
+        recipientComments: 'None',
         thumbClass: ''
       },
       'Q202349103': {
         title: 'Pre-Shipment Inspection',
         subtitle: 'Order Ref: Q202349103',
-        applicationNo: 'Q202349103',
         status: '待确认',
         statusClass: 'orange',
-        reportDate: '2026-06-06',
         serviceType: 'PSI 装运前检测',
         category: 'Toys',
         productName: 'Toys 装运前检测',
-        productEnglish: 'Toy pre-shipment inspection',
-        sampleQty: '订单批次 1',
-        modelNo: 'Q202349103',
-        orderDate: '2026-06-03',
-        referenceNo: 'Q202349103',
         testType: '再次下单',
-        projectName: 'PSI 装运前检测项目',
-        targetMarket: '欧盟，美国',
-        skuNo: 'Q202349103',
+        testingLocation: 'Hangzhou',
+        supplierName: 'QIMA Toy Supplier',
+        productRefNo: 'N/A',
+        poNumber: 'PI-Q202349103',
+        skuValue: 'N/A',
         material: 'ABS / Metal Parts',
-        brand: 'QIMA Toy',
         ageGrade: '6岁以上',
+        projectName: 'PSI 装运前检测项目',
         originCountry: '中国',
         salesCountry: '欧盟，美国',
-        supplierName: 'QIMA Toy Supplier',
+        turnaroundTime: '7 Day Regular',
+        needQuotation: '否',
         manufacturerName: 'QIMA Toy Factory',
-        manufacturerAddress: 'Dongguan, Guangdong, China',
-        poNumber: 'PI-Q202349103',
+        skuNo: 'Q202349103',
+        fibreContent: 'N/A',
+        colorValue: 'N/A',
+        productType: 'N/A',
+        sunLensCat: 'N/A',
         eanCode: 'N/A',
-        collectionMethod: '您或者供应商会寄送样本',
-        sampleStatus: '待确认',
-        courierName: '待确认',
-        trackingNo: '待确认',
-        sampleRemark: '供应商需确认最终验货时间和地点。',
-        orderRemark: '待客户确认装运前检测排期。',
+        brand: 'QIMA Toy',
+        batchNumber: 'N/A',
+        spuId: 'N/A',
+        skcId: 'N/A',
+        collectionMethod: 'None',
+        orderRemark: 'None',
+        recipientEmail: 'N/A',
+        emailType: 'N/A',
+        recipientComments: 'None',
         thumbClass: 'denim'
       }
     };
@@ -577,42 +670,40 @@
 
     document.getElementById('orderTitle').textContent = order.title;
     document.getElementById('orderSubtitle').textContent = order.subtitle;
-    document.getElementById('applicationNo').textContent = order.applicationNo;
-    document.getElementById('reportDate').textContent = order.reportDate;
     document.getElementById('serviceType').textContent = order.serviceType;
     document.getElementById('category').textContent = order.category;
     document.getElementById('productName').textContent = order.productName;
-    document.getElementById('sampleQty').textContent = order.sampleQty;
-    document.getElementById('modelNo').textContent = order.modelNo;
-    setText('productCategory', order.category);
-    setText('applicationNoDetail', order.applicationNo);
-    setText('referenceNo', order.referenceNo);
     setText('testType', order.testType);
-    setText('serviceTypeDetail', order.serviceType);
-    setText('orderStatusText', order.status);
-    setText('orderDate', order.orderDate);
-    setText('reportDateDetail', order.reportDate);
-    setText('projectName', order.projectName);
-    setText('targetMarket', order.targetMarket);
-    setText('productEnglish', order.productEnglish);
-    setText('skuNo', order.skuNo);
+    setText('testingLocation', order.testingLocation);
+    setText('supplierName', order.supplierName);
+    setText('productDisplayName', order.productName);
+    setText('productRefNo', order.productRefNo);
+    setText('poNumber', order.poNumber);
+    setText('skuValue', order.skuValue);
     setText('material', order.material);
-    setText('brand', order.brand);
     setText('ageGrade', order.ageGrade);
+    setText('projectName', order.projectName);
     setText('originCountry', order.originCountry);
     setText('salesCountry', order.salesCountry);
-    setText('supplierName', order.supplierName);
+    setText('testingLocation2', order.testingLocation);
+    setText('turnaroundTime', order.turnaroundTime);
+    setText('needQuotation', order.needQuotation);
+    setText('spuId', order.spuId);
+    setText('skcId', order.skcId);
+    setText('skuNo', order.skuNo);
     setText('manufacturerName', order.manufacturerName);
-    setText('manufacturerAddress', order.manufacturerAddress);
-    setText('poNumber', order.poNumber);
+    setText('fibreContent', order.fibreContent);
+    setText('colorValue', order.colorValue);
+    setText('productType', order.productType);
+    setText('sunLensCat', order.sunLensCat);
     setText('eanCode', order.eanCode);
+    setText('brand', order.brand);
+    setText('batchNumber', order.batchNumber);
     setText('collectionMethod', order.collectionMethod);
-    setText('sampleQtyDetail', order.sampleQty);
-    setText('sampleStatus', order.sampleStatus);
-    setText('courierName', order.courierName);
-    setText('trackingNo', order.trackingNo);
-    setText('sampleRemark', order.sampleRemark);
     setText('orderRemark', order.orderRemark);
+    setText('recipientEmail', order.recipientEmail);
+    setText('emailType', order.emailType);
+    setText('recipientComments', order.recipientComments, '在他们的QIMA账户中与可以访问此订单的同事/供应商分享有关此订单的评论。');
 
     const statusBadge = document.getElementById('statusBadge');
     statusBadge.textContent = order.status;
@@ -621,15 +712,15 @@
     const productThumb = document.getElementById('productThumb');
     productThumb.className = `thumb ${order.thumbClass || ''}`.trim();
 
-    document.getElementById('testStatus1').textContent = order.testStatus1 || '进行中';
-    document.getElementById('testStatus2').textContent = order.testStatus2 || '待测试';
-    document.getElementById('testStatus3').textContent = order.testStatus3 || '待测试';
-    document.getElementById('testStatus4').textContent = order.testStatus4 || '待测试';
-    document.getElementById('testStatus5').textContent = order.testStatus5 || '待测试';
-
-    function setText(id, value){
+    function setText(id, value, fallback){
       const node = document.getElementById(id);
-      if(node) node.textContent = value || 'N/A';
+      if(node){
+        if(fallback && (!value || value === 'None')){
+          node.textContent = fallback;
+        } else {
+          node.textContent = value || 'N/A';
+        }
+      }
     }
   </script>
 </body>
