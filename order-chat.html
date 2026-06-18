@@ -144,7 +144,14 @@
     padding: 8px 10px; border: 1px solid #edf0f6; border-radius: 10px;
     background: #fff; font-size: 12px; color: var(--carbon);
   }
-  .uploaded-file span:last-child { color: var(--seal); font-size: 11px; }
+  .uploaded-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .uploaded-file-status { color: var(--seal); font-size: 11px; flex-shrink: 0; }
+  .uploaded-file-delete {
+    width: 24px; height: 24px; border: none; border-radius: 50%;
+    background: #f4f6fa; color: var(--seal); cursor: pointer;
+    font-size: 16px; line-height: 24px; padding: 0; flex-shrink: 0;
+  }
+  .uploaded-file-delete:active { background: #e9edf7; color: var(--carbon); }
   .tip {
     margin-top: 12px; background: #fffaf0; border: 1px solid #ffe6b8; border-radius: 10px;
     padding: 10px 12px; font-size: 12px; color: #8a6d3b; line-height: 18px;
@@ -312,6 +319,49 @@
     font-size: 13px; font-weight: 600; cursor: pointer;
   }
   .edit-fields span { font-weight: 400; color: var(--seal); margin-right: 4px; }
+  .missing-card { padding: 14px; }
+  .missing-title { font-size: 15px; font-weight: 700; color: var(--carbon); }
+  .missing-desc { font-size: 12px; color: var(--seal); line-height: 18px; margin-top: 4px; }
+  .missing-form { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .missing-group { display: flex; flex-direction: column; gap: 8px; }
+  .missing-label { font-size: 12px; font-weight: 700; color: #333b4f; }
+  .missing-label .req { color: #ff5a43; }
+  .missing-radio {
+    display: flex; gap: 8px; align-items: flex-start;
+    border: 1px solid #edf0f6; border-radius: 10px;
+    padding: 9px 10px; font-size: 12px; line-height: 17px;
+    color: var(--carbon); background: #fff;
+  }
+  .missing-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .missing-subsection { display: none; flex-direction: column; gap: 10px; }
+  .missing-subsection.show { display: flex; }
+  .missing-hint { font-size: 11px; color: var(--seal); line-height: 16px; margin-top: -2px; }
+  .waybill-scan-btn {
+    height: 36px; border: 1px dashed #b8c6ee; border-radius: 10px;
+    background: #f7f9ff; color: var(--pool-500);
+    font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .waybill-scan-btn:active { background: #eef3ff; }
+  .missing-input, .missing-select, .missing-textarea {
+    width: 100%; border: 1px solid #e3e7ef; border-radius: 10px;
+    background: #fff; color: var(--carbon); font-size: 12px;
+    padding: 9px 10px; box-sizing: border-box; outline: none;
+  }
+  .missing-textarea { min-height: 58px; resize: none; line-height: 18px; }
+  .missing-input:focus, .missing-select:focus, .missing-textarea:focus {
+    border-color: var(--pool-500); box-shadow: 0 0 0 3px rgba(65,105,225,.10);
+  }
+  .missing-error { display: none; font-size: 12px; color: #ff5a43; line-height: 18px; }
+  .missing-error.show { display: block; }
+  .missing-submit {
+    height: 38px; border: none; border-radius: 10px;
+    background: var(--pool-500); color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .missing-submit.secondary {
+    background: #fff; color: var(--pool-500);
+    border: 1px solid #dbe5ff; font-weight: 600;
+  }
 
   /* ===== 字段编辑浮窗 ===== */
   .edit-mask {
@@ -424,6 +474,36 @@
   .order-confirm-action.primary {
     background: var(--pool-500); border-color: var(--pool-500);
     color: #fff; font-weight: 600;
+  }
+
+  /* ===== 返回主页确认弹窗 ===== */
+  .back-confirm-mask {
+    position: absolute; inset: 0; z-index: 70;
+    background: rgba(25,25,25,.42);
+    display: none; align-items: center; justify-content: center;
+    padding: 0 28px;
+  }
+  .back-confirm-mask.show { display: flex; }
+  .back-confirm-dialog {
+    width: 100%; background: #fff; border-radius: 14px;
+    overflow: hidden; box-shadow: 0 8px 28px rgba(25,25,25,.16);
+  }
+  .back-confirm-text {
+    padding: 22px 20px 18px; text-align: center;
+    font-size: 15px; line-height: 22px; color: var(--carbon);
+  }
+  .back-confirm-actions {
+    display: flex; border-top: .5px solid #eef0f4;
+  }
+  .back-confirm-action {
+    flex: 1; height: 48px; border: none; background: #fff;
+    color: var(--seal); font-size: 15px; cursor: pointer;
+  }
+  .back-confirm-action + .back-confirm-action {
+    border-left: .5px solid #eef0f4;
+  }
+  .back-confirm-action.primary {
+    color: var(--pool-500); font-weight: 600;
   }
 
   /* ===== 供应商选择弹窗 ===== */
@@ -567,6 +647,24 @@
     background: #fff; padding: 10px 11px;
     text-align: left; cursor: pointer;
   }
+  .shipping-method:hover { border-color: #c0cbeb; }
+  .lab-option {
+    width: 100%;
+    border: 1px solid #e6e9f2; border-radius: 12px;
+    background: #fff; padding: 12px;
+    text-align: left; cursor: pointer;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .lab-option:hover { border-color: #c0cbeb; }
+  .lab-option-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: var(--pool-050); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .lab-option-info { flex: 1; min-width: 0; }
+  .lab-option-name { font-size: 14px; font-weight: 600; color: var(--carbon); line-height: 20px; }
+  .lab-option-addr { font-size: 11px; color: var(--seal); line-height: 16px; margin-top: 3px; }
   .shipping-method-text { display: block; width: 100%; }
   .shipping-method-title { display: block; font-size: 13px; color: var(--carbon); line-height: 19px; }
   .shipping-method-desc { display: block; font-size: 11px; color: var(--seal); line-height: 16px; margin-top: 2px; }
@@ -596,9 +694,7 @@
 
   /* ===== 底部输入栏 ===== */
   .inputbar {
-    flex-shrink: 0; background: #fff; border-top: .5px solid #eef0f4;
-    padding: 10px 14px calc(12px + env(safe-area-inset-bottom));
-    display: flex; align-items: center; gap: 10px;
+    display: none;
   }
   .inputbar .mic { width: 24px; height: 24px; color: var(--seal); flex-shrink: 0; }
   .inputbar .box {
@@ -612,6 +708,82 @@
     border: none; border-radius: 17px;
     background: var(--pool-500); color: #fff;
     font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* ===== 详细填表弹窗 ===== */
+  .form-modal-mask {
+    position: absolute; inset: 0; z-index: 60;
+    background: rgba(25,25,25,.42);
+    display: none; align-items: flex-end;
+  }
+  .form-modal-mask.show { display: flex; }
+  .form-modal {
+    width: 100%; max-height: 92%; background: #fff;
+    border-radius: 18px 18px 0 0; overflow: hidden;
+    box-shadow: 0 -8px 28px rgba(25,25,25,.12);
+    display: flex; flex-direction: column;
+  }
+  .form-modal-head {
+    height: 52px; padding: 0 16px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: .5px solid #eef0f4;
+  }
+  .form-modal-title { font-size: 17px; font-weight: 700; color: var(--carbon); }
+  .form-modal-close {
+    border: none; background: #f4f6fa; color: var(--seal);
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    font-size: 18px; line-height: 28px;
+  }
+  .form-modal-body {
+    flex: 1; overflow-y: auto; padding: 16px 16px 24px;
+  }
+  .form-modal-body::-webkit-scrollbar { display: none; }
+  .fm-section-title {
+    font-size: 12px; font-weight: 700; color: #24407a;
+    margin: 18px 0 10px; padding-top: 10px;
+    border-top: .5px solid #eef0f4;
+  }
+  .fm-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .fm-row { margin-bottom: 14px; }
+  .fm-label {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--seal); margin-bottom: 6px;
+  }
+  .fm-label .req { color: #e4002b; }
+  .fm-input, .fm-select, .fm-textarea {
+    width: 100%; border: 1px solid #dcdfe6; border-radius: 9px;
+    font-size: 13px; color: var(--carbon); background: #fff; outline: none;
+  }
+  .fm-input, .fm-select { height: 38px; padding: 0 11px; }
+  .fm-textarea { min-height: 60px; padding: 10px 11px; resize: none; line-height: 18px; }
+  .fm-input:focus, .fm-select:focus, .fm-textarea:focus {
+    border-color: var(--pool-500); box-shadow: 0 0 0 3px rgba(65,105,225,.1);
+  }
+  .fm-radio-stack { display: flex; flex-direction: column; gap: 8px; }
+  .fm-radio-line {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 12px; color: var(--carbon); line-height: 18px;
+  }
+  .fm-radio-line input { margin-top: 3px; accent-color: var(--pool-500); }
+  .fm-check-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; row-gap: 8px; }
+  .fm-lab-addr {
+    display: none; margin-top: 8px; padding: 9px 11px;
+    background: #f7f9ff; border: 1px solid #e3e9fb; border-radius: 8px;
+    font-size: 11px; color: #24407a; line-height: 16px;
+  }
+  .fm-lab-addr.show { display: block; }
+  .form-modal-actions {
+    display: flex; gap: 10px; padding: 12px 16px 16px;
+    border-top: .5px solid #eef0f4; flex-shrink: 0;
+  }
+  .form-modal-action {
+    flex: 1; height: 42px; border-radius: 12px;
+    border: 1px solid #e1e5ee; background: #fff;
+    color: var(--seal); font-size: 14px; cursor: pointer;
+  }
+  .form-modal-action.primary {
+    background: var(--pool-500); border-color: var(--pool-500);
+    color: #fff; font-weight: 600;
   }
 </style>
 </head>
@@ -629,7 +801,7 @@
 
     <!-- 导航 -->
     <div class="navbar">
-      <a href="index.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <a href="index.html" onclick="return openBackConfirm(event)"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
       <div class="nav-center">
         <div class="nav-title">下单助手 <span class="ai-badge">AI</span></div>
         <div class="nav-sub">智能创建检测订单</div>
@@ -664,13 +836,13 @@
               </div>
               <div class="choice-btn" onclick="pickType('retest')">
                 <div>
-                  <div class="cb-name">重测 <span class="cb-rec">推荐选历史 Test</span></div>
+                  <div class="cb-name">重测 <span class="cb-rec">选历史 Test</span></div>
                   <div class="cb-desc">基于以往的测试重新检测，复用历史 Test 信息</div>
                 </div>
               </div>
               <div class="choice-btn" onclick="pickType('reorder')">
                 <div>
-                  <div class="cb-name">再次下单 <span class="cb-rec">推荐选历史 Order</span></div>
+                  <div class="cb-name">再次下单 <span class="cb-rec">选历史 Order</span></div>
                   <div class="cb-desc">复用以往订单，快速再次提交</div>
                 </div>
               </div>
@@ -733,7 +905,7 @@
           <button class="edit-close" onclick="closeFieldEditor()" aria-label="关闭">×</button>
         </div>
         <div class="edit-modal-body">
-          <div class="edit-note">已复用历史信息作为默认值。你可以在这里补充或修改表单字段，空字段保存后仍会保持「待确认」。</div>
+          <div class="edit-note">已复用历史信息作为默认值。你可以在这里补充或修改表单字段；必填字段为空会保持「待确认」，备注等非必填字段可留空。</div>
           <div class="edit-grid" id="fieldEditorGrid"></div>
         </div>
         <div class="edit-modal-actions">
@@ -748,12 +920,23 @@
       <div class="order-confirm-modal" onclick="event.stopPropagation()">
         <div class="order-confirm-head">
           <div class="order-confirm-title">订单确认信息</div>
-          <button class="order-confirm-close" type="button" onclick="closeOrderConfirm()" aria-label="关闭">×</button>
+          <button class="order-confirm-close" type="button" onclick="dismissOrderConfirm()" aria-label="关闭">×</button>
         </div>
         <div class="order-confirm-body" id="orderConfirmBody"></div>
         <div class="order-confirm-actions">
-          <button class="order-confirm-action" type="button" onclick="closeOrderConfirm()">返回修改</button>
+          <button class="order-confirm-action" type="button" onclick="editOrderFromConfirm()">返回修改</button>
           <button class="order-confirm-action primary" type="button" onclick="submitOrderSuccess()">提交下单</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 返回主页确认弹窗 -->
+    <div class="back-confirm-mask" id="backConfirmModal" onclick="closeBackConfirm(event)">
+      <div class="back-confirm-dialog" onclick="event.stopPropagation()">
+        <div class="back-confirm-text">你确定返回主页吗？现在的进度将不会保存</div>
+        <div class="back-confirm-actions">
+          <button class="back-confirm-action" type="button" onclick="closeBackConfirm()">取消</button>
+          <button class="back-confirm-action primary" type="button" onclick="goBackHome()">确定返回</button>
         </div>
       </div>
     </div>
@@ -789,6 +972,146 @@
             <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()">取消</button>
             <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled>选择</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 详细填表弹窗 -->
+    <div class="form-modal-mask" id="manualFormModal" onclick="closeManualFormModal(event)">
+      <div class="form-modal" onclick="event.stopPropagation()">
+        <div class="form-modal-head">
+          <div class="form-modal-title">详细填写订单</div>
+          <button class="form-modal-close" type="button" onclick="closeManualFormModal()" aria-label="关闭">×</button>
+        </div>
+        <div class="form-modal-body">
+          <div class="fm-section-title">基本信息</div>
+
+          <div class="fm-row">
+            <div class="fm-label">产品名称 <span class="req">*</span></div>
+            <input class="fm-input" id="mf_productName" type="text" placeholder="请输入产品名称">
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">关联项目 <span class="req">*</span></div>
+            <select class="fm-select" id="mf_program">
+              <option value="" disabled selected>请选择关联项目</option>
+              <option>TEMU 硬件 - 商家付款（商家付款，测试后退款）</option>
+              <option>TEMU 玩具 - 商家付款</option>
+              <option>Amazon Seller Program</option>
+            </select>
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">原产国家或地区 <span class="req">*</span></div>
+            <select class="fm-select" id="mf_origin">
+              <option value="" disabled selected>请选择原产国家或地区</option>
+              <option>奥兰群岛</option>
+              <option>中国</option>
+              <option>越南</option>
+              <option>印度</option>
+            </select>
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">销售国家或地区 <span class="req">*</span></div>
+            <div class="fm-check-grid">
+              <label class="fm-radio-line"><input type="checkbox" value="欧盟"> 欧盟</label>
+              <label class="fm-radio-line"><input type="checkbox" value="美国"> 美国</label>
+              <label class="fm-radio-line"><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
+              <label class="fm-radio-line"><input type="checkbox" value="加拿大"> 加拿大</label>
+              <label class="fm-radio-line"><input type="checkbox" value="南非"> 南非</label>
+            </div>
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">货号 / 型号 <span class="req">*</span></div>
+            <input class="fm-input" id="mf_sku" type="text" placeholder="请输入货号或型号">
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">产品是否带电 <span class="req">*</span></div>
+            <div class="fm-radio-stack">
+              <label class="fm-radio-line"><input type="radio" name="mf_electric" value="带电" onchange="mfToggleElectricDescription()"> 带电产品</label>
+              <label class="fm-radio-line"><input type="radio" name="mf_electric" value="非电" checked onchange="mfToggleElectricDescription()"> 非电产品</label>
+            </div>
+          </div>
+
+          <div class="fm-row" id="mf_electricDescriptionRow" style="display:none;">
+            <div class="fm-label">产品说明 <span class="req">*</span></div>
+            <textarea class="fm-textarea" id="mf_electricDescription" placeholder="请说明产品的带电部件、电池/电源类型、额定参数、充电方式等信息"></textarea>
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">制造商 <span class="req">*</span></div>
+            <input class="fm-input" id="mf_manufacturer" type="text" placeholder="请输入制造商完整工厂全称">
+            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;">⚠ 请务必提供完整的工厂全称，不可简写</div>
+          </div>
+
+          <div class="fm-row">
+            <div class="fm-label">制造商地址 <span class="req">*</span></div>
+            <input class="fm-input" id="mf_manufacturerAddr" type="text" placeholder="请输入制造商完整地址（省/市/区/街道/门牌号）">
+            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;">⚠ 请务必提供完整地址，包括省、市、区、街道和门牌号</div>
+          </div>
+
+          <div class="fm-section-title">样品收集</div>
+
+          <div class="fm-row">
+            <div class="fm-label">样品收集方式 <span class="req">*</span></div>
+            <div class="fm-radio-stack">
+              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="collect" checked onchange="mfToggleSampleFields()"> 启迈 QIMA 将在执行产品服务时收集样本</label>
+              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="ship" onchange="mfToggleSampleFields()"> 您或者供应商会寄送样本</label>
+              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="received" onchange="mfToggleSampleFields()"> 启迈 QIMA 已经拿到了样本</label>
+            </div>
+          </div>
+
+          <div class="fm-row" id="mf_refNumberRow">
+            <div class="fm-label">产品检验订单参考编号</div>
+            <select class="fm-select" id="mf_refNumber">
+              <option value="" disabled selected>请选择参考编号</option>
+              <option>T-25617004 · 实验室检测 · Toys</option>
+              <option>T-25590011 · EN71 · Toys</option>
+              <option>Q202349103 · PSI 装运前检测 · Toys</option>
+            </select>
+          </div>
+
+          <div id="mf_labSection" style="display:none;">
+            <div class="fm-row">
+              <div class="fm-label">寄送实验室 <span class="req">*</span></div>
+              <div class="fm-radio-stack">
+                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="hangzhou" onchange="mfShowLabAddr('hangzhou')"> 杭州实验室</label>
+                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="shanghai" onchange="mfShowLabAddr('shanghai')"> 上海实验室</label>
+                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="dongguan" onchange="mfShowLabAddr('dongguan')"> 东莞实验室</label>
+              </div>
+              <div class="fm-lab-addr" id="mf_labAddr"></div>
+            </div>
+          </div>
+
+          <div id="mf_shippingSection" style="display:none;">
+            <div class="fm-row">
+              <div class="fm-label">快递公司</div>
+              <select class="fm-select" id="mf_carrier">
+                <option value="" disabled selected>请选择快递公司</option>
+                <option>TNT</option>
+                <option>DHL</option>
+                <option>FedEx</option>
+                <option>UPS</option>
+              </select>
+            </div>
+
+            <div class="fm-row">
+              <div class="fm-label">运单号</div>
+              <input class="fm-input" id="mf_trackingNo" type="text" placeholder="请输入运单号">
+            </div>
+
+            <div class="fm-row">
+              <div class="fm-label">备注</div>
+              <textarea class="fm-textarea" id="mf_shippingRemark" placeholder="请输入备注信息"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-modal-actions">
+          <button class="form-modal-action" type="button" onclick="closeManualFormModal()">取消</button>
+          <button class="form-modal-action primary" type="button" onclick="submitManualForm()">提交下单</button>
         </div>
       </div>
     </div>
@@ -1022,7 +1345,7 @@
           (fields['Sample Collection Method'] === '启迈 QIMA 将在执行产品服务时收集样本' ? '' :
             field('Carrier', fields['Carrier'], !!fields['Carrier'])+
             field('Tracking Number', fields['Tracking Number'], !!fields['Tracking Number'])+
-            field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'])
+            field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'], true)
           )+
         '</div><button class="edit-fields" onclick="openFieldEditor()"><span>需要调整？</span>去编辑</button>'+
       '</div>';
@@ -1035,9 +1358,8 @@
         botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
         return;
       }
-      botMsg('历史记录里没有完整物流信息。请补充本批样品的<b>物流承运商（Carrier）</b>与<b>运单号（Tracking No.）</b>，也可以拍照识别快递面单。', false);
-      botMsg('请直接输入，例如：<b>DHL DHL-8572-4490-CN</b>。如果想拍照识别，可以输入“拍照识别”。', false);
-      waitForInput({ type:'reuseShipping' });
+      botMsg('历史记录里没有完整物流信息。请在下方补充本批样品的快递信息；如果暂时没有，也可以先生成订单草稿。', false);
+      botMsg(shippingManualForm('reuseShipping'), true);
     }
 
     function answerReuseShipping(btn, value){
@@ -1129,27 +1451,53 @@
     }
 
     let hasUploadedFiles = false;
+    let uploadedFileList = [];
 
     function doUpload(){
-      hasUploadedFiles = true;
+      uploadedFileList = [
+        { icon:'🧸', name:'产品照片.jpg' },
+        { icon:'📄', name:'产品规格书.pdf' },
+        { icon:'🧾', name:'采购单.pdf' }
+      ];
+      renderUploadedFiles();
+    }
+
+    function renderUploadedFiles(){
       const uploadedFiles = document.getElementById('uploadedFiles');
-      uploadedFiles.innerHTML =
-        '<div class="uploaded-file"><span>🧸 产品照片.jpg</span><span>已上传</span></div>'+
-        '<div class="uploaded-file"><span>📄 产品规格书.pdf</span><span>已上传</span></div>'+
-        '<div class="uploaded-file"><span>🧾 采购单.pdf</span><span>已上传</span></div>';
-      uploadedFiles.classList.add('show');
+      if(!uploadedFiles) return;
+      hasUploadedFiles = uploadedFileList.length > 0;
+      uploadedFiles.innerHTML = uploadedFileList.map((file, index) =>
+        '<div class="uploaded-file">'+
+          '<span class="uploaded-file-name">'+file.icon+' '+escapeHtml(file.name)+'</span>'+
+          '<span class="uploaded-file-status">已上传</span>'+
+          '<button class="uploaded-file-delete" type="button" aria-label="删除 '+escapeHtml(file.name)+'" onclick="removeUploadedFile('+index+', event)">×</button>'+
+        '</div>'
+      ).join('');
+      uploadedFiles.classList.toggle('show', hasUploadedFiles);
       updateParseButtonState();
     }
+
+    function removeUploadedFile(index, event){
+      if(event) event.stopPropagation();
+      uploadedFileList.splice(index, 1);
+      renderUploadedFiles();
+    }
+
+    function uploadedFilesSummary(){
+      const icons = uploadedFileList.map(file => '<span class="t">'+file.icon+'</span>').join('');
+      return '<div class="thumbs">'+icons+'<span style="margin-left:4px">已上传 '+uploadedFileList.length+' 个文件</span></div>';
+    }
+
     function doParse(){
       const v = (document.getElementById('linkIn')||{}).value || '';
       if(!hasUploadedFiles && !v.trim()) return;
       if(hasUploadedFiles && v.trim()){
-        userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div><div style="margin-top:6px">🔗 商品链接：'+escapeHtml(v.slice(0,28))+'…</div>');
+        userMsg(uploadedFilesSummary()+'<div style="margin-top:6px">🔗 商品链接：'+escapeHtml(v.slice(0,28))+'…</div>');
         runRecognize('图片/文档和商品链接');
         return;
       }
       if(hasUploadedFiles){
-        userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div>');
+        userMsg(uploadedFilesSummary());
         runRecognize('图片/文档');
         return;
       }
@@ -1178,10 +1526,126 @@
 
     function startManualFill(){
       userMsg('暂无资料，直接填写');
-      manualIndex = 0;
+      manualIndex = manualQuestions.length;
       Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
       const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('没问题～我会用对话方式帮你逐项填写订单信息。请直接在底部输入框中填写答案，之后也能再编辑。', false); askManualField(); }, 650);
+      setTimeout(()=>{
+        t.remove();
+        botMsg('好的，请在弹出的表单中填写完整的订单信息。', false);
+        openManualFormModal();
+      }, 400);
+    }
+
+    const mfLabAddresses = {
+      'hangzhou': '浙江省杭州市萧山区经济技术开发区建设三路 733 号 QIMA 启迈实验室',
+      'shanghai': '上海市浦东新区张江高科技园区科苑路 88 号 QIMA 启迈实验室',
+      'dongguan': '广东省东莞市松山湖高新技术产业开发区工业南路 8 号 QIMA 启迈实验室'
+    };
+
+    function openManualFormModal(){
+      document.getElementById('manualFormModal').classList.add('show');
+    }
+
+    function closeManualFormModal(e){
+      if(e && e.target !== e.currentTarget) return;
+      document.getElementById('manualFormModal').classList.remove('show');
+    }
+
+    function mfToggleSampleFields(){
+      const val = document.querySelector('input[name="mf_sample"]:checked').value;
+      document.getElementById('mf_refNumberRow').style.display = val === 'collect' ? 'block' : 'none';
+      document.getElementById('mf_labSection').style.display = val === 'ship' ? 'block' : 'none';
+      document.getElementById('mf_shippingSection').style.display = (val === 'ship' || val === 'received') ? 'block' : 'none';
+    }
+
+    function mfShowLabAddr(key){
+      const box = document.getElementById('mf_labAddr');
+      box.textContent = mfLabAddresses[key] || '';
+      box.classList.add('show');
+    }
+
+    function mfToggleElectricDescription(){
+      const selected = document.querySelector('input[name="mf_electric"]:checked');
+      const row = document.getElementById('mf_electricDescriptionRow');
+      if(!selected || !row) return;
+      row.style.display = selected.value === '带电' ? 'block' : 'none';
+    }
+
+    function submitManualForm(){
+      const productName = document.getElementById('mf_productName').value.trim();
+      const program = document.getElementById('mf_program').value;
+      const origin = document.getElementById('mf_origin').value;
+      const sku = document.getElementById('mf_sku').value.trim();
+      const electric = document.querySelector('input[name="mf_electric"]:checked');
+      const electricLabel = electric ? electric.parentElement.textContent.trim() : '';
+      const electricVal = electric ? electric.value : '';
+      const electricDescription = document.getElementById('mf_electricDescription').value.trim();
+      const manufacturer = document.getElementById('mf_manufacturer').value.trim();
+      const manufacturerAddr = document.getElementById('mf_manufacturerAddr').value.trim();
+      const sampleMethod = document.querySelector('input[name="mf_sample"]:checked');
+      const sampleLabel = sampleMethod ? sampleMethod.parentElement.textContent.trim() : '';
+      const sampleVal = sampleMethod ? sampleMethod.value : '';
+
+      const salesChecked = document.querySelectorAll('#mf_shippingSection .fm-check-grid input:checked, #manualFormModal .fm-check-grid input:checked');
+      let salesCountries = [];
+      document.querySelectorAll('#manualFormModal .fm-check-grid input:checked').forEach(function(cb){ salesCountries.push(cb.value); });
+
+      const labRadio = document.querySelector('input[name="mf_lab"]:checked');
+      const labName = labRadio ? labRadio.parentElement.textContent.trim() : '';
+      const carrier = document.getElementById('mf_carrier').value;
+      const trackingNo = document.getElementById('mf_trackingNo').value.trim();
+      const shippingRemark = document.getElementById('mf_shippingRemark').value.trim();
+
+      manualAnswers['Product Name'] = productName || '';
+      manualAnswers['Program'] = program || '';
+      manualAnswers['Country of Origin'] = origin || '';
+      manualAnswers['Countries/Regions of Distribution'] = salesCountries.join(', ');
+      manualAnswers['Item#/model#'] = sku || '';
+      manualAnswers['产品是否带电'] = electricLabel || '';
+      manualAnswers['产品说明'] = electricVal === '带电' ? electricDescription : '';
+      manualAnswers['Manufacturer'] = manufacturer || '';
+      manualAnswers['Manufacturer Address'] = manufacturerAddr || '';
+      manualAnswers['Sample Collection Method'] = sampleLabel;
+      manualAnswers['Carrier'] = carrier || '';
+      manualAnswers['Tracking Number'] = trackingNo || '';
+      manualAnswers['Shipping Remark'] = shippingRemark || '';
+      if(labName) manualAnswers['寄送实验室'] = labName;
+
+      closeManualFormModal();
+
+      const t = botTyping();
+      setTimeout(()=>{
+        t.remove();
+        botMsg('已收到表单信息 ✅ 请确认以下订单信息，确认无误后即可下单。', false);
+        botMsg(mfConfirmCard(productName, program, origin, salesCountries, sku, electricLabel, electricVal, electricDescription, manufacturer, manufacturerAddr, sampleLabel, sampleVal, labName, carrier, trackingNo, shippingRemark), true);
+        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
+      }, 500);
+    }
+
+    function mfConfirmCard(pn, prog, origin, countries, sku, electricLabel, electricVal, electricDescription, mfr, mfrAddr, sampleLabel, sampleVal, lab, carrier, tracking, remark){
+      return '<div class="panel">'+
+        '<div class="extract-head"><div class="eh-title">订单信息确认</div><div class="progress-pill">待提交</div></div>'+
+        '<div class="fields">'+
+          field('产品名称', pn, !!pn)+
+          field('关联项目', prog, !!prog)+
+          field('原产国家或地区', origin, !!origin)+
+          field('销售国家或地区', countries.join('、'), countries.length > 0)+
+          field('货号 / 型号', sku, !!sku)+
+          field('产品是否带电', electricLabel, !!electricLabel)+
+          (electricVal === '带电' ? field('产品说明', electricDescription, !!electricDescription) : '')+
+          field('制造商', mfr, !!mfr)+
+          field('制造商地址', mfrAddr, !!mfrAddr)+
+          field('样品收集方式', sampleLabel, !!sampleLabel)+
+          (sampleVal === 'collect' ? field('产品检验订单参考编号', document.getElementById('mf_refNumber').value || '', !!document.getElementById('mf_refNumber').value) : '')+
+          (sampleVal === 'ship' && lab ? field('寄送实验室', lab, true) : '')+
+          (sampleVal !== 'collect' ? 
+            field('快递公司', carrier, !!carrier)+
+            field('运单号', tracking, !!tracking)+
+            field('备注', remark, !!remark)
+          : '')+
+        '</div>'+
+        '<button class="edit-fields" onclick="openFieldEditor()"><span>需要修改？</span>编辑</button>'+
+      '</div>';
     }
 
     function askManualField(){
@@ -1316,8 +1780,8 @@
         '<div class="select-card-title">样品收集方式</div>'+
         '<div class="select-card-desc">请选择本次样品将如何提供。</div>'+
         '<div class="shipping-methods">'+
-          shippingMethodButton('collect', '启迈 QIMA 将在执行产品服务时收集样本', '无需填写承运商和运单号。', cardSource)+
           shippingMethodButton('ship', '您或者供应商会寄送样本', '选择后可拍照识别快递面单，或手动填写物流信息。', cardSource)+
+          shippingMethodButton('collect', '启迈 QIMA 将在执行产品服务时收集样本', '无需填写承运商和运单号。', cardSource)+
           shippingMethodButton('received', '启迈 QIMA 已经拿到了样本', '可补充已有物流信息或备注，便于追踪。', cardSource)+
         '</div>'+
       '</div>';
@@ -1344,8 +1808,58 @@
         }, 500);
         return;
       }
+      const t2 = botTyping();
+      setTimeout(()=>{
+        t2.remove();
+        botMsg('请选择寄送实验室，将样品寄至对应地址。', false);
+        botMsg(labSelectionCard(flowSource), true);
+      }, 500);
+    }
+
+    const labs = [
+      { name: '杭州实验室', address: '浙江省杭州市萧山区经济技术开发区建设三路 733 号 QIMA 启迈实验室', icon: '🔬' },
+      { name: '上海实验室', address: '上海市浦东新区张江高科技园区科苑路 88 号 QIMA 启迈实验室', icon: '🧪' },
+      { name: '东莞实验室', address: '广东省东莞市松山湖高新技术产业开发区工业南路 8 号 QIMA 启迈实验室', icon: '🧫' }
+    ];
+
+    function labSelectionCard(source){
+      const cardSource = source || 'manual';
+      return '<div class="select-card">'+
+        '<div class="select-card-title">选择寄送实验室</div>'+
+        '<div class="select-card-desc">请选择一个实验室，将样品寄至对应地址。</div>'+
+        '<div class="shipping-methods">'+
+          labs.map(function(lab){ return labOptionButton(lab, cardSource); }).join('')+
+        '</div>'+
+      '</div>';
+    }
+
+    function labOptionButton(lab, source){
+      return '<button class="lab-option" type="button" onclick="selectLab(\''+escapeJs(lab.name)+'\', \''+escapeJs(lab.address)+'\', \''+escapeJs(source || 'manual')+'\', this)">'+
+        '<div class="lab-option-icon">'+lab.icon+'</div>'+
+        '<div class="lab-option-info"><div class="lab-option-name">'+escapeHtml(lab.name)+'</div><div class="lab-option-addr">'+escapeHtml(lab.address)+'</div></div>'+
+      '</button>';
+    }
+
+    function selectLab(name, address, source, btn){
+      const flowSource = source || 'manual';
+      userMsg(escapeHtml(name));
+      manualAnswers['寄送实验室'] = name;
+      manualAnswers['实验室地址'] = address;
+      renderReadonlyLabSelection(btn, name, address);
       botMsg('请补充物流信息。你可以拍照识别快递面单，也可以手动填写。', false);
       botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn" onclick="chooseShippingInput(\'photo\', this, \''+flowSource+'\')">拍照识别面单</button><button class="chip-btn" onclick="chooseShippingInput(\'manual\', this, \''+flowSource+'\')">手动填写物流</button><button class="chip-btn" onclick="chooseShippingInput(\'skip\', this, \''+flowSource+'\')">稍后补充</button></div></div>', true);
+    }
+
+    function renderReadonlyLabSelection(btn, name, address){
+      const card = btn ? btn.closest('.select-card') : null;
+      if(!card) return;
+      card.innerHTML =
+        '<div class="select-card-title">选择寄送实验室</div>'+
+        '<div class="readonly-choice">'+
+          '<div class="readonly-choice-label">已选择</div>'+
+          '<div class="readonly-choice-value">'+escapeHtml(name)+'</div>'+
+          '<div class="shipping-method-desc" style="margin-top:4px">'+escapeHtml(address)+'</div>'+
+        '</div>';
     }
 
     function renderReadonlySampleCollection(btn, label){
@@ -1461,6 +1975,14 @@
         shippingFormSource = 'manual';
         return;
       }
+      if(shippingFormSource === 'reuseShipping'){
+        setFieldValue('Carrier', carrier);
+        setFieldValue('Tracking Number', tracking);
+        const t = botTyping();
+        setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅ 请再次确认订单信息。', false); }, 500);
+        shippingFormSource = 'manual';
+        return;
+      }
       manualIndex++;
       const t = botTyping();
       setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅', false); askManualField(); }, 500);
@@ -1553,7 +2075,7 @@
           field('Sample Collection Method', manualAnswers['Sample Collection Method'] || '', !!manualAnswers['Sample Collection Method'])+
           field('Carrier', manualAnswers['Carrier'] || '', !!manualAnswers['Carrier'])+
           field('Tracking Number', manualAnswers['Tracking Number'] || '', !!manualAnswers['Tracking Number'])+
-          field('Shipping Remark', manualAnswers['Shipping Remark'] || '', !!manualAnswers['Shipping Remark'])+
+          field('Shipping Remark', manualAnswers['Shipping Remark'] || '', !!manualAnswers['Shipping Remark'], true)+
         '</div><button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
       '</div>';
     }
@@ -1587,8 +2109,8 @@
           // 字段提取卡
           botMsg(extractCard(), true);
           // 总结 + 缺失确认
-          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，我们逐项补齐 👇', false);
-          askMissing();
+          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，请在下方一次性补充 👇', false);
+          botMsg(missingFieldsCard(), true);
         }, 1100);
       }, 700);
     }
@@ -1612,10 +2134,12 @@
       return labels[key] || key;
     }
 
-    function field(k, v, ok){
+    function field(k, v, ok, optional){
       const label = fieldLabel(k);
-      if(ok) return '<div class="field" data-field="'+k+'"><div class="fk">'+label+'</div><div class="fv">'+v+'</div><div class="badge-ok">✓</div></div>';
-      return '<div class="field" data-field="'+k+'"><div class="fk">'+label+'</div><div class="fv miss">待确认</div><div class="badge-miss">缺失</div></div>';
+      const opt = optional ? ' data-optional="true"' : '';
+      if(ok) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">'+v+'</div><div class="badge-ok">✓</div></div>';
+      if(optional) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">—</div></div>';
+      return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv miss">待确认</div><div class="badge-miss">缺失</div></div>';
     }
     function extractCard(){
       return '<div class="panel">'+
@@ -1631,7 +2155,7 @@
           field('Sample Collection Method','', false)+
           field('Carrier','', false)+
           field('Tracking Number','', false)+
-          field('Shipping Remark','', false)+
+          field('Shipping Remark','', false, true)+
         '</div>'+
         '<button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
       '</div>';
@@ -1663,6 +2187,8 @@
 
     function removeActionRow(btn){
       const row = btn ? btn.closest('.row') : null;
+      const keepChips = btn ? btn.closest('.chips[data-keep="true"]') : null;
+      if(keepChips) return;
       if(row) row.remove();
     }
 
@@ -1706,7 +2232,7 @@
     function getFieldValue(name){
       const field = document.querySelector('.field[data-field="'+cssEscape(name)+'"] .fv');
       if(!field) return '';
-      return field.classList.contains('miss') ? '' : field.textContent.trim();
+      return field.classList.contains('miss') || field.textContent.trim() === '—' ? '' : field.textContent.trim();
     }
 
     function saveFieldEditor(){
@@ -1719,16 +2245,27 @@
         if(!field) return;
         const valueNode = field.querySelector('.fv');
         const statusNode = field.querySelector('.badge-ok, .badge-miss');
+        const isOptional = field.dataset.optional === 'true';
         if(value){
           valueNode.textContent = value;
           valueNode.classList.remove('miss');
-          statusNode.className = 'badge-ok';
-          statusNode.textContent = '✓';
+          if(statusNode){
+            statusNode.className = 'badge-ok';
+            statusNode.textContent = '✓';
+            statusNode.style.display = '';
+          }
+        } else if(isOptional){
+          valueNode.textContent = '—';
+          valueNode.classList.remove('miss');
+          if(statusNode) statusNode.style.display = 'none';
         } else {
           valueNode.textContent = '待确认';
           valueNode.classList.add('miss');
-          statusNode.className = 'badge-miss';
-          statusNode.textContent = '缺失';
+          if(statusNode){
+            statusNode.className = 'badge-miss';
+            statusNode.textContent = '缺失';
+            statusNode.style.display = '';
+          }
         }
       });
       closeFieldEditor();
@@ -1802,8 +2339,155 @@
       const statusNode = field.querySelector('.badge-ok, .badge-miss');
       valueNode.textContent = value;
       valueNode.classList.remove('miss');
-      statusNode.className = 'badge-ok';
-      statusNode.textContent = '✓';
+      if(statusNode){
+        statusNode.className = 'badge-ok';
+        statusNode.textContent = '✓';
+        statusNode.style.display = '';
+      }
+    }
+
+    function missingFieldsCard(){
+      return '<div class="panel missing-card">'+
+        '<div class="missing-title">补充缺失信息</div>'+
+        '<div class="missing-desc">请一次性确认样品收集方式和物流信息，提交后我会直接更新订单字段。</div>'+
+        '<div class="missing-form">'+
+          '<div class="missing-group">'+
+            '<div class="missing-label">样品收集方式 <span class="req">*</span></div>'+
+            missingRadio('ship', '您或者供应商会寄送样本', true)+
+            missingRadio('collect', '启迈 QIMA 将在执行产品服务时收集样本', false)+
+            missingRadio('received', '启迈 QIMA 已经拿到了样本', false)+
+          '</div>'+
+          '<div class="missing-subsection" data-section="ref">'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">产品检验订单参考编号 <span class="req">*</span></div>'+
+              '<select class="missing-select" id="missingRefNumber"><option value="">请选择参考编号</option><option>T-25617004 · 实验室检测 · Toys</option><option>T-25590011 · EN71 · Toys</option><option>Q202349103 · PSI 装运前检测 · Toys</option></select>'+
+              '<div class="missing-hint">QIMA 收集样本时，需要参考历史 Test / Order 便于安排取样。</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-subsection show" data-section="lab">'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">寄送实验室 <span class="req">*</span></div>'+
+              '<select class="missing-select" id="missingLab"><option value="">请选择实验室</option><option selected>杭州实验室 · 浙江省杭州市萧山区经济技术开发区建设三路 733 号</option><option>上海实验室 · 上海市浦东新区张江高科技园区科苑路 88 号</option><option>东莞实验室 · 广东省东莞市松山湖高新技术产业开发区工业南路 8 号</option></select>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-subsection show" data-section="shipping">'+
+            '<button class="waybill-scan-btn" type="button" onclick="scanWaybillIntoMissingCard(this)">拍照识别面单</button>'+
+            '<div class="missing-row">'+
+              '<div class="missing-group">'+
+                '<div class="missing-label">快递公司</div>'+
+                '<select class="missing-select" id="missingCarrier"><option value="">请选择</option><option selected>DHL</option><option>FedEx</option><option>UPS</option><option>TNT</option><option>其他</option></select>'+
+              '</div>'+
+              '<div class="missing-group">'+
+                '<div class="missing-label">运单号</div>'+
+                '<input class="missing-input" id="missingTracking" value="DHL-8572-4490-CN" placeholder="如 DHL-8572-4490-CN">'+
+              '</div>'+
+            '</div>'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">备注</div>'+
+              '<textarea class="missing-textarea" id="missingRemark" placeholder="可填写样品寄送说明或其他备注"></textarea>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-group">'+
+            '<div class="missing-label">是否需要增加更多字段展示在报告上？ <span class="req">*</span></div>'+
+            missingReportRadio('是', false)+
+            missingReportRadio('否', true)+
+          '</div>'+
+          '<div class="missing-error" id="missingFormError">请先补充当前样品收集方式下需要的信息。</div>'+
+          '<button class="missing-submit" type="button" onclick="submitMissingFields(this)">确认并更新字段</button>'+
+        '</div>'+
+      '</div>';
+    }
+
+    function missingRadio(value, label, checked){
+      return '<label class="missing-radio">'+
+        '<input type="radio" name="missingSample" value="'+value+'" '+(checked ? 'checked' : '')+' onchange="toggleMissingSampleFields(this)">'+
+        '<span>'+label+'</span>'+
+      '</label>';
+    }
+
+    function missingReportRadio(value, checked){
+      return '<label class="missing-radio">'+
+        '<input type="radio" name="missingReportFields" value="'+value+'" '+(checked ? 'checked' : '')+'>'+
+        '<span>'+value+'</span>'+
+      '</label>';
+    }
+
+    function scanWaybillIntoMissingCard(btn){
+      const card = btn.closest('.missing-card');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '识别中...';
+      setTimeout(()=>{
+        card.querySelector('#missingCarrier').value = 'DHL';
+        card.querySelector('#missingTracking').value = 'DHL-8572-4490-CN';
+        card.querySelector('#missingFormError').classList.remove('show');
+        btn.textContent = '已识别面单';
+        setTimeout(()=>{ btn.disabled = false; btn.textContent = originalText; }, 900);
+      }, 600);
+    }
+
+    function toggleMissingSampleFields(input){
+      const card = input.closest('.missing-card');
+      const value = input.value;
+      const ref = card.querySelector('[data-section="ref"]');
+      const lab = card.querySelector('[data-section="lab"]');
+      const shipping = card.querySelector('[data-section="shipping"]');
+      ref.classList.toggle('show', value === 'collect');
+      lab.classList.toggle('show', value === 'ship');
+      shipping.classList.toggle('show', value === 'ship' || value === 'received');
+      card.querySelector('#missingFormError').classList.remove('show');
+    }
+
+    function submitMissingFields(btn){
+      const card = btn.closest('.missing-card');
+      const selected = card.querySelector('input[name="missingSample"]:checked');
+      const sampleLabel = selected ? selected.parentElement.textContent.trim() : '';
+      const refNumber = ((card.querySelector('#missingRefNumber') || {}).value || '').trim();
+      const lab = ((card.querySelector('#missingLab') || {}).value || '').trim();
+      const carrier = (card.querySelector('#missingCarrier') || {}).value || '';
+      const tracking = ((card.querySelector('#missingTracking') || {}).value || '').trim();
+      const remark = ((card.querySelector('#missingRemark') || {}).value || '').trim();
+      const reportFields = ((card.querySelector('input[name="missingReportFields"]:checked') || {}).value || '否').trim();
+      const isCollect = selected && selected.value === 'collect';
+      const isShip = selected && selected.value === 'ship';
+      const needsShipping = selected && (selected.value === 'ship' || selected.value === 'received');
+      const error = card.querySelector('#missingFormError');
+
+      if(isCollect && !refNumber){
+        error.textContent = '请选择产品检验订单参考编号。';
+        error.classList.add('show');
+        card.querySelector('#missingRefNumber').focus();
+        return;
+      }
+      if(isShip && !lab){
+        error.textContent = '请选择寄送实验室。';
+        error.classList.add('show');
+        card.querySelector('#missingLab').focus();
+        return;
+      }
+      if(needsShipping && (!carrier || !tracking)){
+        error.textContent = '请补充快递公司和运单号。';
+        error.classList.add('show');
+        (carrier ? card.querySelector('#missingTracking') : card.querySelector('#missingCarrier')).focus();
+        return;
+      }
+
+      error.classList.remove('show');
+      manualAnswers['Sample Collection Method'] = sampleLabel;
+      manualAnswers['Product Inspection Order Reference Number'] = refNumber;
+      manualAnswers['寄送实验室'] = lab;
+      manualAnswers['Carrier'] = carrier;
+      manualAnswers['Tracking Number'] = tracking;
+      manualAnswers['Shipping Remark'] = remark;
+      manualAnswers['是否需要增加更多字段展示在报告上'] = reportFields;
+      setFieldValue('Sample Collection Method', sampleLabel);
+      if(carrier) setFieldValue('Carrier', carrier);
+      if(tracking) setFieldValue('Tracking Number', tracking);
+      if(remark) setFieldValue('Shipping Remark', remark);
+      userMsg('已补充缺失信息');
+      const row = btn.closest('.row');
+      if(row) row.remove();
+      finishConfirm();
     }
 
     function escapeHtml(str){
@@ -1906,12 +2590,10 @@
       const pct = shippingComplete ? 100 : 85;
       const t = botTyping();
       setTimeout(()=>{ t.remove();
-        botMsg('太好了！信息已全部补齐，<b>表单完成度 '+pct+'%</b> 🎉<br>'+(shippingComplete ? '' : '物流信息尚未填写，确认订单后仍可补充。<br>')+'下一步请确认订单信息，确认无误后即可去下单。', false);
-        const chips = '<div class="chips">'+
-          '<button class="chip-btn primary" onclick="confirmOrderInfo(this)">'+ciIcon('check')+' 确认订单信息</button>'+
-          '<button class="chip-btn" onclick="placeOrder(this)">'+ciIcon('cart')+' 去下单</button>'+
-          '<button class="chip-btn" onclick="reedit(this)">'+ciIcon('edit')+' 补充商品信息</button>'+
-          '<button class="chip-btn" onclick="reupload(this)">'+ciIcon('refresh')+' 更换资料</button>'+
+        botMsg('太好了！信息已'+(shippingComplete ? '全部补齐' : '基本补齐')+'，<b>表单完成度 '+pct+'%</b> 🎉<br>'+(shippingComplete ? '' : '物流信息尚未填写，将先生成订单草稿，之后仍可补充。<br>')+'请确认订单信息，确认无误后即可去下单。', false);
+        const chips = '<div class="chips" data-keep="true">'+
+          '<button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button>'+
+          '<button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button>'+
           '</div>';
         botMsg('<div style="width:268px">'+chips+'</div>', true);
       }, 700);
@@ -1940,11 +2622,12 @@
           field('Sample Collection Method', getFieldValue('Sample Collection Method') || '您或者供应商会寄送样本', true)+
           field('Carrier', getFieldValue('Carrier') || '待确认', !!getFieldValue('Carrier'))+
           field('Tracking Number', getFieldValue('Tracking Number') || '待确认', !!getFieldValue('Tracking Number'))+
-          field('Shipping Remark', getFieldValue('Shipping Remark') || '', !!getFieldValue('Shipping Remark'))+
+          field('Shipping Remark', getFieldValue('Shipping Remark') || '', !!getFieldValue('Shipping Remark'), true)+
         '</div>'+
       '</div>';
     }
-    function placeOrder(btn){
+    function placeOrder(btn, skipReportFieldsQuestion){
+      if (!manualAnswers['是否需要增加更多字段展示在报告上']) manualAnswers['是否需要增加更多字段展示在报告上'] = '否';
       removeActionRow(btn);
       document.getElementById('orderConfirmBody').innerHTML = readonlyOrderConfirmCard();
       document.getElementById('orderConfirmModal').classList.add('show');
@@ -1952,6 +2635,31 @@
 
     function closeOrderConfirm(){
       document.getElementById('orderConfirmModal').classList.remove('show');
+    }
+
+    function openBackConfirm(event){
+      if(event) event.preventDefault();
+      document.getElementById('backConfirmModal').classList.add('show');
+      return false;
+    }
+
+    function closeBackConfirm(event){
+      if(event && event.target !== event.currentTarget) return;
+      document.getElementById('backConfirmModal').classList.remove('show');
+    }
+
+    function goBackHome(){
+      window.location.href = 'index.html';
+    }
+
+    function dismissOrderConfirm(){
+      closeOrderConfirm();
+      botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 提交下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 继续修改</button></div></div>', true);
+    }
+
+    function editOrderFromConfirm(){
+      closeOrderConfirm();
+      openFieldEditor();
     }
 
     function submitOrderSuccess(){
@@ -1965,32 +2673,36 @@
       const origin = manualAnswers['Country of Origin'] || getFieldValue('Country of Origin') || 'Aland';
       const distribution = manualAnswers['Countries/Regions of Distribution'] || getFieldValue('Countries/Regions of Distribution') || 'European Union, United States';
       const itemModel = manualAnswers['Item#/model#'] || getFieldValue('Item#/model#') || 'RBT-2025-X9';
+      const electricType = manualAnswers['产品是否带电'] || '';
+      const electricDescription = manualAnswers['产品说明'] || '';
       const manufacturerAddress = manualAnswers['Manufacturer Address'] || getFieldValue('Manufacturer Address') || '深圳市宝安区工业路 88 号';
       const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || '待确认';
       const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '待确认';
       const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '启迈 QIMA 将在执行产品服务时收集样本';
       const shippingRemark = manualAnswers['Shipping Remark'] || getFieldValue('Shipping Remark') || '';
+      const reportFieldsNeed = manualAnswers['是否需要增加更多字段展示在报告上'] || '否';
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">订单确认信息</div><div class="progress-pill">只读</div></div>'+
         '<div class="fields">'+
           field('产品名称', productName, true)+
           field('Program', program, true)+
           field('原产国', origin, true)+
           field('销售国家或地区', distribution, true)+
           field('Item # / model #', itemModel, true)+
+          (electricType ? field('产品是否带电', electricType, true) : '')+
+          (electricDescription ? field('产品说明', electricDescription, true) : '')+
           field('制造商', manufacturer, true)+
           field('制造商地址', manufacturerAddress, true)+
           field('样品收集方式', collectionMethod, true)+
+          field('是否需要增加更多字段展示在报告上？', reportFieldsNeed, true)+
           (collectionMethod === '启迈 QIMA 将在执行产品服务时收集样本' ? '' :
             field('快递公司', carrier, carrier !== '待确认')+
             field('运单号', tracking, tracking !== '待确认')+
-            field('物流备注', shippingRemark, !!shippingRemark)
+            field('物流备注', shippingRemark, !!shippingRemark, true)
           )+
         '</div>'+
       '</div>';
     }
-    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); botMsg('好的，请直接在下方输入需要补充或修改的内容～', false); }
-    function reupload(btn){ removeActionRow(btn); userMsg('更换资料'); askUpload(); }
+    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); openFieldEditor(); }
   </script>
 </body>
 </html>

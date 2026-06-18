@@ -586,9 +586,7 @@
 
   /* ===== 底部输入栏 ===== */
   .inputbar {
-    flex-shrink: 0; background: #fff; border-top: .5px solid #eef0f4;
-    padding: 10px 14px calc(12px + env(safe-area-inset-bottom));
-    display: flex; align-items: center; gap: 10px;
+    display: none;
   }
   .inputbar .mic { width: 24px; height: 24px; color: var(--seal); flex-shrink: 0; }
   .inputbar .box {
@@ -654,13 +652,13 @@
               </div>
               <div class="choice-btn" onclick="pickType('retest')">
                 <div>
-                  <div class="cb-name">重测 <span class="cb-rec">推荐选历史 Test</span></div>
+                  <div class="cb-name">重测 <span class="cb-rec">选历史 Test</span></div>
                   <div class="cb-desc">基于以往的测试重新检测，复用历史 Test 信息</div>
                 </div>
               </div>
               <div class="choice-btn" onclick="pickType('reorder')">
                 <div>
-                  <div class="cb-name">再次下单 <span class="cb-rec">推荐选历史 Order</span></div>
+                  <div class="cb-name">再次下单 <span class="cb-rec">选历史 Order</span></div>
                   <div class="cb-desc">复用以往订单，快速再次提交</div>
                 </div>
               </div>
@@ -738,11 +736,11 @@
       <div class="order-confirm-modal" onclick="event.stopPropagation()">
         <div class="order-confirm-head">
           <div class="order-confirm-title">订单确认信息</div>
-          <button class="order-confirm-close" type="button" onclick="closeOrderConfirm()" aria-label="关闭">×</button>
+          <button class="order-confirm-close" type="button" onclick="dismissOrderConfirm()" aria-label="关闭">×</button>
         </div>
         <div class="order-confirm-body" id="orderConfirmBody"></div>
         <div class="order-confirm-actions">
-          <button class="order-confirm-action" type="button" onclick="closeOrderConfirm()">返回修改</button>
+          <button class="order-confirm-action" type="button" onclick="editOrderFromConfirm()">返回修改</button>
           <button class="order-confirm-action primary" type="button" onclick="submitOrderSuccess()">提交下单</button>
         </div>
       </div>
@@ -1023,9 +1021,8 @@
         botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
         return;
       }
-      botMsg('历史记录里没有完整物流信息。请补充本批样品的<b>物流承运商（Carrier）</b>与<b>运单号（Tracking No.）</b>，也可以拍照识别快递面单。', false);
-      botMsg('请直接输入，例如：<b>DHL DHL-8572-4490-CN</b>。如果想拍照识别，可以输入“拍照识别”。', false);
-      waitForInput({ type:'reuseShipping' });
+      botMsg('历史记录里没有完整物流信息。请在下方补充本批样品的快递信息；如果暂时没有，也可以先生成订单草稿。', false);
+      botMsg(shippingManualForm('reuseShipping'), true);
     }
 
     function answerReuseShipping(btn, value){
@@ -1441,6 +1438,14 @@
         mi++;
         const t = botTyping();
         setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅', false); askMissing(); }, 500);
+        shippingFormSource = 'manual';
+        return;
+      }
+      if(shippingFormSource === 'reuseShipping'){
+        setFieldValue('Carrier', carrier);
+        setFieldValue('Tracking Number', tracking);
+        const t = botTyping();
+        setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅ 请再次确认订单信息。', false); }, 500);
         shippingFormSource = 'manual';
         return;
       }
@@ -1921,7 +1926,26 @@
         '</div>'+
       '</div>';
     }
-    function placeOrder(btn){
+    const REPORT_FIELDS_QUESTION = '是否需要增加更多字段展示在报告上？';
+
+    function askReportFieldsStep(btn){
+      removeActionRow(btn);
+      botMsg(REPORT_FIELDS_QUESTION, false);
+      botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="selectReportFieldsNeed(\'是\', this)">是</button><button class="chip-btn" onclick="selectReportFieldsNeed(\'否\', this)">否</button></div></div>', true);
+    }
+
+    function selectReportFieldsNeed(answer, btn){
+      removeActionRow(btn);
+      userMsg(answer);
+      manualAnswers['是否需要增加更多字段展示在报告上'] = answer;
+      placeOrder(null, true);
+    }
+
+    function placeOrder(btn, skipReportFieldsQuestion){
+      if (!skipReportFieldsQuestion && !manualAnswers['是否需要增加更多字段展示在报告上']) {
+        askReportFieldsStep(btn);
+        return;
+      }
       removeActionRow(btn);
       document.getElementById('orderConfirmBody').innerHTML = readonlyOrderConfirmCard();
       document.getElementById('orderConfirmModal').classList.add('show');
@@ -1929,6 +1953,16 @@
 
     function closeOrderConfirm(){
       document.getElementById('orderConfirmModal').classList.remove('show');
+    }
+
+    function dismissOrderConfirm(){
+      closeOrderConfirm();
+      botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 提交下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 继续修改</button></div></div>', true);
+    }
+
+    function editOrderFromConfirm(){
+      closeOrderConfirm();
+      openFieldEditor();
     }
 
     function submitOrderSuccess(){
@@ -1947,6 +1981,7 @@
       const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '待确认';
       const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '启迈 QIMA 将在执行产品服务时收集样本';
       const shippingRemark = manualAnswers['Shipping Remark'] || getFieldValue('Shipping Remark') || '';
+      const reportFieldsNeed = manualAnswers['是否需要增加更多字段展示在报告上'] || '否';
       return '<div class="panel">'+
         '<div class="extract-head"><div class="eh-title">订单确认信息</div><div class="progress-pill">只读</div></div>'+
         '<div class="fields">'+
@@ -1960,11 +1995,11 @@
           field('样品收集方式', collectionMethod, true)+
           field('快递公司', carrier, carrier !== '待确认')+
           field('运单号', tracking, tracking !== '待确认')+
-          field('物流备注', shippingRemark, !!shippingRemark)+
+          field('物流备注', shippingRemark, !!shippingRemark, true)+
         '</div>'+
       '</div>';
     }
-    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); botMsg('好的，请直接在下方输入需要补充或修改的内容～', false); }
+    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); openFieldEditor(); }
     function reupload(btn){ removeActionRow(btn); userMsg('更换资料'); askUpload(); }
   </script><script>var _origST=window.setTimeout;window.setTimeout=function(fn,ms){fn();return 0};pickType('retest');reuse('T-25617004');</script>
 </body>

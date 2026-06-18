@@ -134,7 +134,14 @@
     padding: 8px 10px; border: 1px solid #edf0f6; border-radius: 10px;
     background: #fff; font-size: 12px; color: var(--carbon);
   }
-  .uploaded-file span:last-child { color: var(--seal); font-size: 11px; }
+  .uploaded-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .uploaded-file-status { color: var(--seal); font-size: 11px; flex-shrink: 0; }
+  .uploaded-file-delete {
+    width: 24px; height: 24px; border: none; border-radius: 50%;
+    background: #f4f6fa; color: var(--seal); cursor: pointer;
+    font-size: 16px; line-height: 24px; padding: 0; flex-shrink: 0;
+  }
+  .uploaded-file-delete:active { background: #e9edf7; color: var(--carbon); }
   .tip {
     margin-top: 12px; background: #fffaf0; border: 1px solid #ffe6b8; border-radius: 10px;
     padding: 10px 12px; font-size: 12px; color: #8a6d3b; line-height: 18px;
@@ -302,6 +309,49 @@
     font-size: 13px; font-weight: 600; cursor: pointer;
   }
   .edit-fields span { font-weight: 400; color: var(--seal); margin-right: 4px; }
+  .missing-card { padding: 14px; }
+  .missing-title { font-size: 15px; font-weight: 700; color: var(--carbon); }
+  .missing-desc { font-size: 12px; color: var(--seal); line-height: 18px; margin-top: 4px; }
+  .missing-form { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+  .missing-group { display: flex; flex-direction: column; gap: 8px; }
+  .missing-label { font-size: 12px; font-weight: 700; color: #333b4f; }
+  .missing-label .req { color: #ff5a43; }
+  .missing-radio {
+    display: flex; gap: 8px; align-items: flex-start;
+    border: 1px solid #edf0f6; border-radius: 10px;
+    padding: 9px 10px; font-size: 12px; line-height: 17px;
+    color: var(--carbon); background: #fff;
+  }
+  .missing-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .missing-subsection { display: none; flex-direction: column; gap: 10px; }
+  .missing-subsection.show { display: flex; }
+  .missing-hint { font-size: 11px; color: var(--seal); line-height: 16px; margin-top: -2px; }
+  .waybill-scan-btn {
+    height: 36px; border: 1px dashed #b8c6ee; border-radius: 10px;
+    background: #f7f9ff; color: var(--pool-500);
+    font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .waybill-scan-btn:active { background: #eef3ff; }
+  .missing-input, .missing-select, .missing-textarea {
+    width: 100%; border: 1px solid #e3e7ef; border-radius: 10px;
+    background: #fff; color: var(--carbon); font-size: 12px;
+    padding: 9px 10px; box-sizing: border-box; outline: none;
+  }
+  .missing-textarea { min-height: 58px; resize: none; line-height: 18px; }
+  .missing-input:focus, .missing-select:focus, .missing-textarea:focus {
+    border-color: var(--pool-500); box-shadow: 0 0 0 3px rgba(65,105,225,.10);
+  }
+  .missing-error { display: none; font-size: 12px; color: #ff5a43; line-height: 18px; }
+  .missing-error.show { display: block; }
+  .missing-submit {
+    height: 38px; border: none; border-radius: 10px;
+    background: var(--pool-500); color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .missing-submit.secondary {
+    background: #fff; color: var(--pool-500);
+    border: 1px solid #dbe5ff; font-weight: 600;
+  }
 
   /* ===== 字段编辑浮窗 ===== */
   .edit-mask {
@@ -414,6 +464,36 @@
   .order-confirm-action.primary {
     background: var(--pool-500); border-color: var(--pool-500);
     color: #fff; font-weight: 600;
+  }
+
+  /* ===== 返回主页确认弹窗 ===== */
+  .back-confirm-mask {
+    position: absolute; inset: 0; z-index: 70;
+    background: rgba(25,25,25,.42);
+    display: none; align-items: center; justify-content: center;
+    padding: 0 28px;
+  }
+  .back-confirm-mask.show { display: flex; }
+  .back-confirm-dialog {
+    width: 100%; background: #fff; border-radius: 14px;
+    overflow: hidden; box-shadow: 0 8px 28px rgba(25,25,25,.16);
+  }
+  .back-confirm-text {
+    padding: 22px 20px 18px; text-align: center;
+    font-size: 15px; line-height: 22px; color: var(--carbon);
+  }
+  .back-confirm-actions {
+    display: flex; border-top: .5px solid #eef0f4;
+  }
+  .back-confirm-action {
+    flex: 1; height: 48px; border: none; background: #fff;
+    color: var(--seal); font-size: 15px; cursor: pointer;
+  }
+  .back-confirm-action + .back-confirm-action {
+    border-left: .5px solid #eef0f4;
+  }
+  .back-confirm-action.primary {
+    color: var(--pool-500); font-weight: 600;
   }
 
   /* ===== 供应商选择弹窗 ===== */
@@ -586,9 +666,7 @@
 
   /* ===== 底部输入栏 ===== */
   .inputbar {
-    flex-shrink: 0; background: #fff; border-top: .5px solid #eef0f4;
-    padding: 10px 14px calc(12px + env(safe-area-inset-bottom));
-    display: flex; align-items: center; gap: 10px;
+    display: none;
   }
   .inputbar .mic { width: 24px; height: 24px; color: var(--seal); flex-shrink: 0; }
   .inputbar .box {
@@ -619,7 +697,7 @@
 
     <!-- 导航 -->
     <div class="navbar">
-      <a href="index.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <a href="index.html" onclick="return openBackConfirm(event)"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
       <div class="nav-center">
         <div class="nav-title">下单助手 <span class="ai-badge">AI</span></div>
         <div class="nav-sub">智能创建检测订单</div>
@@ -654,13 +732,13 @@
               </div>
               <div class="choice-btn" onclick="pickType('retest')">
                 <div>
-                  <div class="cb-name">重测 <span class="cb-rec">推荐选历史 Test</span></div>
+                  <div class="cb-name">重测 <span class="cb-rec">选历史 Test</span></div>
                   <div class="cb-desc">基于以往的测试重新检测，复用历史 Test 信息</div>
                 </div>
               </div>
               <div class="choice-btn" onclick="pickType('reorder')">
                 <div>
-                  <div class="cb-name">再次下单 <span class="cb-rec">推荐选历史 Order</span></div>
+                  <div class="cb-name">再次下单 <span class="cb-rec">选历史 Order</span></div>
                   <div class="cb-desc">复用以往订单，快速再次提交</div>
                 </div>
               </div>
@@ -738,12 +816,23 @@
       <div class="order-confirm-modal" onclick="event.stopPropagation()">
         <div class="order-confirm-head">
           <div class="order-confirm-title">订单确认信息</div>
-          <button class="order-confirm-close" type="button" onclick="closeOrderConfirm()" aria-label="关闭">×</button>
+          <button class="order-confirm-close" type="button" onclick="dismissOrderConfirm()" aria-label="关闭">×</button>
         </div>
         <div class="order-confirm-body" id="orderConfirmBody"></div>
         <div class="order-confirm-actions">
-          <button class="order-confirm-action" type="button" onclick="closeOrderConfirm()">返回修改</button>
+          <button class="order-confirm-action" type="button" onclick="editOrderFromConfirm()">返回修改</button>
           <button class="order-confirm-action primary" type="button" onclick="submitOrderSuccess()">提交下单</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 返回主页确认弹窗 -->
+    <div class="back-confirm-mask" id="backConfirmModal" onclick="closeBackConfirm(event)">
+      <div class="back-confirm-dialog" onclick="event.stopPropagation()">
+        <div class="back-confirm-text">你确定返回主页吗？现在的进度将不会保存</div>
+        <div class="back-confirm-actions">
+          <button class="back-confirm-action" type="button" onclick="closeBackConfirm()">取消</button>
+          <button class="back-confirm-action primary" type="button" onclick="goBackHome()">确定返回</button>
         </div>
       </div>
     </div>
@@ -1011,7 +1100,7 @@
           field('Sample Collection Method', fields['Sample Collection Method'], !!fields['Sample Collection Method'])+
           field('Carrier', fields['Carrier'], !!fields['Carrier'])+
           field('Tracking Number', fields['Tracking Number'], !!fields['Tracking Number'])+
-          field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'])+
+          field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'], true)+
         '</div><button class="edit-fields" onclick="openFieldEditor()"><span>需要调整？</span>去编辑</button>'+
       '</div>';
     }
@@ -1023,9 +1112,8 @@
         botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
         return;
       }
-      botMsg('历史记录里没有完整物流信息。请补充本批样品的<b>物流承运商（Carrier）</b>与<b>运单号（Tracking No.）</b>，也可以拍照识别快递面单。', false);
-      botMsg('请直接输入，例如：<b>DHL DHL-8572-4490-CN</b>。如果想拍照识别，可以输入“拍照识别”。', false);
-      waitForInput({ type:'reuseShipping' });
+      botMsg('历史记录里没有完整物流信息。请在下方补充本批样品的快递信息；如果暂时没有，也可以先生成订单草稿。', false);
+      botMsg(shippingManualForm('reuseShipping'), true);
     }
 
     function answerReuseShipping(btn, value){
@@ -1112,27 +1200,53 @@
     }
 
     let hasUploadedFiles = false;
+    let uploadedFileList = [];
 
     function doUpload(){
-      hasUploadedFiles = true;
+      uploadedFileList = [
+        { icon:'🧸', name:'产品照片.jpg' },
+        { icon:'📄', name:'产品规格书.pdf' },
+        { icon:'🧾', name:'采购单.pdf' }
+      ];
+      renderUploadedFiles();
+    }
+
+    function renderUploadedFiles(){
       const uploadedFiles = document.getElementById('uploadedFiles');
-      uploadedFiles.innerHTML =
-        '<div class="uploaded-file"><span>🧸 产品照片.jpg</span><span>已上传</span></div>'+
-        '<div class="uploaded-file"><span>📄 产品规格书.pdf</span><span>已上传</span></div>'+
-        '<div class="uploaded-file"><span>🧾 采购单.pdf</span><span>已上传</span></div>';
-      uploadedFiles.classList.add('show');
+      if(!uploadedFiles) return;
+      hasUploadedFiles = uploadedFileList.length > 0;
+      uploadedFiles.innerHTML = uploadedFileList.map((file, index) =>
+        '<div class="uploaded-file">'+
+          '<span class="uploaded-file-name">'+file.icon+' '+escapeHtml(file.name)+'</span>'+
+          '<span class="uploaded-file-status">已上传</span>'+
+          '<button class="uploaded-file-delete" type="button" aria-label="删除 '+escapeHtml(file.name)+'" onclick="removeUploadedFile('+index+', event)">×</button>'+
+        '</div>'
+      ).join('');
+      uploadedFiles.classList.toggle('show', hasUploadedFiles);
       updateParseButtonState();
     }
+
+    function removeUploadedFile(index, event){
+      if(event) event.stopPropagation();
+      uploadedFileList.splice(index, 1);
+      renderUploadedFiles();
+    }
+
+    function uploadedFilesSummary(){
+      const icons = uploadedFileList.map(file => '<span class="t">'+file.icon+'</span>').join('');
+      return '<div class="thumbs">'+icons+'<span style="margin-left:4px">已上传 '+uploadedFileList.length+' 个文件</span></div>';
+    }
+
     function doParse(){
       const v = (document.getElementById('linkIn')||{}).value || '';
       if(!hasUploadedFiles && !v.trim()) return;
       if(hasUploadedFiles && v.trim()){
-        userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div><div style="margin-top:6px">🔗 商品链接：'+escapeHtml(v.slice(0,28))+'…</div>');
+        userMsg(uploadedFilesSummary()+'<div style="margin-top:6px">🔗 商品链接：'+escapeHtml(v.slice(0,28))+'…</div>');
         runRecognize('图片/文档和商品链接');
         return;
       }
       if(hasUploadedFiles){
-        userMsg('<div class="thumbs"><span class="t">🧸</span><span class="t">📄</span><span class="t">🧾</span><span style="margin-left:4px">已上传 3 个文件</span></div>');
+        userMsg(uploadedFilesSummary());
         runRecognize('图片/文档');
         return;
       }
@@ -1444,6 +1558,14 @@
         shippingFormSource = 'manual';
         return;
       }
+      if(shippingFormSource === 'reuseShipping'){
+        setFieldValue('Carrier', carrier);
+        setFieldValue('Tracking Number', tracking);
+        const t = botTyping();
+        setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅ 请再次确认订单信息。', false); }, 500);
+        shippingFormSource = 'manual';
+        return;
+      }
       manualIndex++;
       const t = botTyping();
       setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅', false); askManualField(); }, 500);
@@ -1536,7 +1658,7 @@
           field('Sample Collection Method', manualAnswers['Sample Collection Method'] || '', !!manualAnswers['Sample Collection Method'])+
           field('Carrier', manualAnswers['Carrier'] || '', !!manualAnswers['Carrier'])+
           field('Tracking Number', manualAnswers['Tracking Number'] || '', !!manualAnswers['Tracking Number'])+
-          field('Shipping Remark', manualAnswers['Shipping Remark'] || '', !!manualAnswers['Shipping Remark'])+
+          field('Shipping Remark', manualAnswers['Shipping Remark'] || '', !!manualAnswers['Shipping Remark'], true)+
         '</div><button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
       '</div>';
     }
@@ -1570,8 +1692,8 @@
           // 字段提取卡
           botMsg(extractCard(), true);
           // 总结 + 缺失确认
-          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，我们逐项补齐 👇', false);
-          askMissing();
+          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，请在下方一次性补充 👇', false);
+          botMsg(missingFieldsCard(), true);
         }, 1100);
       }, 700);
     }
@@ -1595,10 +1717,12 @@
       return labels[key] || key;
     }
 
-    function field(k, v, ok){
+    function field(k, v, ok, optional){
       const label = fieldLabel(k);
-      if(ok) return '<div class="field" data-field="'+k+'"><div class="fk">'+label+'</div><div class="fv">'+v+'</div><div class="badge-ok">✓</div></div>';
-      return '<div class="field" data-field="'+k+'"><div class="fk">'+label+'</div><div class="fv miss">待确认</div><div class="badge-miss">缺失</div></div>';
+      const opt = optional ? ' data-optional="true"' : '';
+      if(ok) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">'+v+'</div><div class="badge-ok">✓</div></div>';
+      if(optional) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">—</div></div>';
+      return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv miss">待确认</div><div class="badge-miss">缺失</div></div>';
     }
     function extractCard(){
       return '<div class="panel">'+
@@ -1614,7 +1738,7 @@
           field('Sample Collection Method','', false)+
           field('Carrier','', false)+
           field('Tracking Number','', false)+
-          field('Shipping Remark','', false)+
+          field('Shipping Remark','', false, true)+
         '</div>'+
         '<button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
       '</div>';
@@ -1646,6 +1770,8 @@
 
     function removeActionRow(btn){
       const row = btn ? btn.closest('.row') : null;
+      const keepChips = btn ? btn.closest('.chips[data-keep="true"]') : null;
+      if(keepChips) return;
       if(row) row.remove();
     }
 
@@ -1689,7 +1815,7 @@
     function getFieldValue(name){
       const field = document.querySelector('.field[data-field="'+cssEscape(name)+'"] .fv');
       if(!field) return '';
-      return field.classList.contains('miss') ? '' : field.textContent.trim();
+      return field.classList.contains('miss') || field.textContent.trim() === '—' ? '' : field.textContent.trim();
     }
 
     function saveFieldEditor(){
@@ -1702,16 +1828,27 @@
         if(!field) return;
         const valueNode = field.querySelector('.fv');
         const statusNode = field.querySelector('.badge-ok, .badge-miss');
+        const isOptional = field.dataset.optional === 'true';
         if(value){
           valueNode.textContent = value;
           valueNode.classList.remove('miss');
-          statusNode.className = 'badge-ok';
-          statusNode.textContent = '✓';
+          if(statusNode){
+            statusNode.className = 'badge-ok';
+            statusNode.textContent = '✓';
+            statusNode.style.display = '';
+          }
+        } else if(isOptional){
+          valueNode.textContent = '—';
+          valueNode.classList.remove('miss');
+          if(statusNode) statusNode.style.display = 'none';
         } else {
           valueNode.textContent = '待确认';
           valueNode.classList.add('miss');
-          statusNode.className = 'badge-miss';
-          statusNode.textContent = '缺失';
+          if(statusNode){
+            statusNode.className = 'badge-miss';
+            statusNode.textContent = '缺失';
+            statusNode.style.display = '';
+          }
         }
       });
       closeFieldEditor();
@@ -1785,8 +1922,155 @@
       const statusNode = field.querySelector('.badge-ok, .badge-miss');
       valueNode.textContent = value;
       valueNode.classList.remove('miss');
-      statusNode.className = 'badge-ok';
-      statusNode.textContent = '✓';
+      if(statusNode){
+        statusNode.className = 'badge-ok';
+        statusNode.textContent = '✓';
+        statusNode.style.display = '';
+      }
+    }
+
+    function missingFieldsCard(){
+      return '<div class="panel missing-card">'+
+        '<div class="missing-title">补充缺失信息</div>'+
+        '<div class="missing-desc">请一次性确认样品收集方式和物流信息，提交后我会直接更新订单字段。</div>'+
+        '<div class="missing-form">'+
+          '<div class="missing-group">'+
+            '<div class="missing-label">样品收集方式 <span class="req">*</span></div>'+
+            missingRadio('ship', '您或者供应商会寄送样本', true)+
+            missingRadio('collect', '启迈 QIMA 将在执行产品服务时收集样本', false)+
+            missingRadio('received', '启迈 QIMA 已经拿到了样本', false)+
+          '</div>'+
+          '<div class="missing-subsection" data-section="ref">'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">产品检验订单参考编号 <span class="req">*</span></div>'+
+              '<select class="missing-select" id="missingRefNumber"><option value="">请选择参考编号</option><option>T-25617004 · 实验室检测 · Toys</option><option>T-25590011 · EN71 · Toys</option><option>Q202349103 · PSI 装运前检测 · Toys</option></select>'+
+              '<div class="missing-hint">QIMA 收集样本时，需要参考历史 Test / Order 便于安排取样。</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-subsection show" data-section="lab">'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">寄送实验室 <span class="req">*</span></div>'+
+              '<select class="missing-select" id="missingLab"><option value="">请选择实验室</option><option selected>杭州实验室 · 浙江省杭州市萧山区经济技术开发区建设三路 733 号</option><option>上海实验室 · 上海市浦东新区张江高科技园区科苑路 88 号</option><option>东莞实验室 · 广东省东莞市松山湖高新技术产业开发区工业南路 8 号</option></select>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-subsection show" data-section="shipping">'+
+            '<button class="waybill-scan-btn" type="button" onclick="scanWaybillIntoMissingCard(this)">拍照识别面单</button>'+
+            '<div class="missing-row">'+
+              '<div class="missing-group">'+
+                '<div class="missing-label">快递公司</div>'+
+                '<select class="missing-select" id="missingCarrier"><option value="">请选择</option><option selected>DHL</option><option>FedEx</option><option>UPS</option><option>TNT</option><option>其他</option></select>'+
+              '</div>'+
+              '<div class="missing-group">'+
+                '<div class="missing-label">运单号</div>'+
+                '<input class="missing-input" id="missingTracking" value="DHL-8572-4490-CN" placeholder="如 DHL-8572-4490-CN">'+
+              '</div>'+
+            '</div>'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">备注</div>'+
+              '<textarea class="missing-textarea" id="missingRemark" placeholder="可填写样品寄送说明或其他备注"></textarea>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-group">'+
+            '<div class="missing-label">是否需要增加更多字段展示在报告上？ <span class="req">*</span></div>'+
+            missingReportRadio('是', false)+
+            missingReportRadio('否', true)+
+          '</div>'+
+          '<div class="missing-error" id="missingFormError">请先补充当前样品收集方式下需要的信息。</div>'+
+          '<button class="missing-submit" type="button" onclick="submitMissingFields(this)">确认并更新字段</button>'+
+        '</div>'+
+      '</div>';
+    }
+
+    function missingRadio(value, label, checked){
+      return '<label class="missing-radio">'+
+        '<input type="radio" name="missingSample" value="'+value+'" '+(checked ? 'checked' : '')+' onchange="toggleMissingSampleFields(this)">'+
+        '<span>'+label+'</span>'+
+      '</label>';
+    }
+
+    function missingReportRadio(value, checked){
+      return '<label class="missing-radio">'+
+        '<input type="radio" name="missingReportFields" value="'+value+'" '+(checked ? 'checked' : '')+'>'+
+        '<span>'+value+'</span>'+
+      '</label>';
+    }
+
+    function scanWaybillIntoMissingCard(btn){
+      const card = btn.closest('.missing-card');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '识别中...';
+      setTimeout(()=>{
+        card.querySelector('#missingCarrier').value = 'DHL';
+        card.querySelector('#missingTracking').value = 'DHL-8572-4490-CN';
+        card.querySelector('#missingFormError').classList.remove('show');
+        btn.textContent = '已识别面单';
+        setTimeout(()=>{ btn.disabled = false; btn.textContent = originalText; }, 900);
+      }, 600);
+    }
+
+    function toggleMissingSampleFields(input){
+      const card = input.closest('.missing-card');
+      const value = input.value;
+      const ref = card.querySelector('[data-section="ref"]');
+      const lab = card.querySelector('[data-section="lab"]');
+      const shipping = card.querySelector('[data-section="shipping"]');
+      ref.classList.toggle('show', value === 'collect');
+      lab.classList.toggle('show', value === 'ship');
+      shipping.classList.toggle('show', value === 'ship' || value === 'received');
+      card.querySelector('#missingFormError').classList.remove('show');
+    }
+
+    function submitMissingFields(btn){
+      const card = btn.closest('.missing-card');
+      const selected = card.querySelector('input[name="missingSample"]:checked');
+      const sampleLabel = selected ? selected.parentElement.textContent.trim() : '';
+      const refNumber = ((card.querySelector('#missingRefNumber') || {}).value || '').trim();
+      const lab = ((card.querySelector('#missingLab') || {}).value || '').trim();
+      const carrier = (card.querySelector('#missingCarrier') || {}).value || '';
+      const tracking = ((card.querySelector('#missingTracking') || {}).value || '').trim();
+      const remark = ((card.querySelector('#missingRemark') || {}).value || '').trim();
+      const reportFields = ((card.querySelector('input[name="missingReportFields"]:checked') || {}).value || '否').trim();
+      const isCollect = selected && selected.value === 'collect';
+      const isShip = selected && selected.value === 'ship';
+      const needsShipping = selected && (selected.value === 'ship' || selected.value === 'received');
+      const error = card.querySelector('#missingFormError');
+
+      if(isCollect && !refNumber){
+        error.textContent = '请选择产品检验订单参考编号。';
+        error.classList.add('show');
+        card.querySelector('#missingRefNumber').focus();
+        return;
+      }
+      if(isShip && !lab){
+        error.textContent = '请选择寄送实验室。';
+        error.classList.add('show');
+        card.querySelector('#missingLab').focus();
+        return;
+      }
+      if(needsShipping && (!carrier || !tracking)){
+        error.textContent = '请补充快递公司和运单号。';
+        error.classList.add('show');
+        (carrier ? card.querySelector('#missingTracking') : card.querySelector('#missingCarrier')).focus();
+        return;
+      }
+
+      error.classList.remove('show');
+      manualAnswers['Sample Collection Method'] = sampleLabel;
+      manualAnswers['Product Inspection Order Reference Number'] = refNumber;
+      manualAnswers['寄送实验室'] = lab;
+      manualAnswers['Carrier'] = carrier;
+      manualAnswers['Tracking Number'] = tracking;
+      manualAnswers['Shipping Remark'] = remark;
+      manualAnswers['是否需要增加更多字段展示在报告上'] = reportFields;
+      setFieldValue('Sample Collection Method', sampleLabel);
+      if(carrier) setFieldValue('Carrier', carrier);
+      if(tracking) setFieldValue('Tracking Number', tracking);
+      if(remark) setFieldValue('Shipping Remark', remark);
+      userMsg('已补充缺失信息');
+      const row = btn.closest('.row');
+      if(row) row.remove();
+      finishConfirm();
     }
 
     function escapeHtml(str){
@@ -1881,14 +2165,18 @@
     }
 
     function finishConfirm(){
+      const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '';
+      const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || '';
+      const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '';
+      const needShipping = collectionMethod !== '启迈 QIMA 将在执行产品服务时收集样本';
+      const shippingComplete = !needShipping || (carrier && tracking);
+      const pct = shippingComplete ? 100 : 85;
       const t = botTyping();
       setTimeout(()=>{ t.remove();
-        botMsg('太好了！信息已全部补齐，<b>表单完成度 100%</b> 🎉<br>下一步请确认订单信息，确认无误后即可去下单。', false);
-        const chips = '<div class="chips">'+
-          '<button class="chip-btn primary" onclick="confirmOrderInfo(this)">'+ciIcon('check')+' 确认订单信息</button>'+
-          '<button class="chip-btn" onclick="placeOrder(this)">'+ciIcon('cart')+' 去下单</button>'+
-          '<button class="chip-btn" onclick="reedit(this)">'+ciIcon('edit')+' 补充商品信息</button>'+
-          '<button class="chip-btn" onclick="reupload(this)">'+ciIcon('refresh')+' 更换资料</button>'+
+        botMsg('太好了！信息已'+(shippingComplete ? '全部补齐' : '基本补齐')+'，<b>表单完成度 '+pct+'%</b> 🎉<br>'+(shippingComplete ? '' : '物流信息尚未填写，将先生成订单草稿，之后仍可补充。<br>')+'请确认订单信息，确认无误后即可去下单。', false);
+        const chips = '<div class="chips" data-keep="true">'+
+          '<button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button>'+
+          '<button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button>'+
           '</div>';
         botMsg('<div style="width:268px">'+chips+'</div>', true);
       }, 700);
@@ -1917,11 +2205,12 @@
           field('Sample Collection Method', getFieldValue('Sample Collection Method') || '您或者供应商会寄送样本', true)+
           field('Carrier', getFieldValue('Carrier') || '待确认', !!getFieldValue('Carrier'))+
           field('Tracking Number', getFieldValue('Tracking Number') || '待确认', !!getFieldValue('Tracking Number'))+
-          field('Shipping Remark', getFieldValue('Shipping Remark') || '', !!getFieldValue('Shipping Remark'))+
+          field('Shipping Remark', getFieldValue('Shipping Remark') || '', !!getFieldValue('Shipping Remark'), true)+
         '</div>'+
       '</div>';
     }
-    function placeOrder(btn){
+    function placeOrder(btn, skipReportFieldsQuestion){
+      if (!manualAnswers['是否需要增加更多字段展示在报告上']) manualAnswers['是否需要增加更多字段展示在报告上'] = '否';
       removeActionRow(btn);
       document.getElementById('orderConfirmBody').innerHTML = readonlyOrderConfirmCard();
       document.getElementById('orderConfirmModal').classList.add('show');
@@ -1929,6 +2218,31 @@
 
     function closeOrderConfirm(){
       document.getElementById('orderConfirmModal').classList.remove('show');
+    }
+
+    function openBackConfirm(event){
+      if(event) event.preventDefault();
+      document.getElementById('backConfirmModal').classList.add('show');
+      return false;
+    }
+
+    function closeBackConfirm(event){
+      if(event && event.target !== event.currentTarget) return;
+      document.getElementById('backConfirmModal').classList.remove('show');
+    }
+
+    function goBackHome(){
+      window.location.href = 'index.html';
+    }
+
+    function dismissOrderConfirm(){
+      closeOrderConfirm();
+      botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 提交下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 继续修改</button></div></div>', true);
+    }
+
+    function editOrderFromConfirm(){
+      closeOrderConfirm();
+      openFieldEditor();
     }
 
     function submitOrderSuccess(){
@@ -1947,6 +2261,7 @@
       const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '待确认';
       const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '启迈 QIMA 将在执行产品服务时收集样本';
       const shippingRemark = manualAnswers['Shipping Remark'] || getFieldValue('Shipping Remark') || '';
+      const reportFieldsNeed = manualAnswers['是否需要增加更多字段展示在报告上'] || '否';
       return '<div class="panel">'+
         '<div class="extract-head"><div class="eh-title">订单确认信息</div><div class="progress-pill">只读</div></div>'+
         '<div class="fields">'+
@@ -1960,12 +2275,11 @@
           field('样品收集方式', collectionMethod, true)+
           field('快递公司', carrier, carrier !== '待确认')+
           field('运单号', tracking, tracking !== '待确认')+
-          field('物流备注', shippingRemark, !!shippingRemark)+
+          field('物流备注', shippingRemark, !!shippingRemark, true)+
         '</div>'+
       '</div>';
     }
-    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); botMsg('好的，请直接在下方输入需要补充或修改的内容～', false); }
-    function reupload(btn){ removeActionRow(btn); userMsg('更换资料'); askUpload(); }
+    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); openFieldEditor(); }
   </script><script>var _origST=window.setTimeout;window.setTimeout=function(fn,ms){fn();return 0};pickType('first');</script>
 </body>
 </html>

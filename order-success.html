@@ -119,6 +119,28 @@
   }
   .action.primary { background: var(--pool-500); color: #fff; box-shadow: 0 6px 16px rgba(65,105,225,.28); }
   .action.secondary { background: #fff; color: var(--pool-500); border: 1px solid #dce4fb; }
+  .reminder-banner {
+    width: 100%;
+    margin-top: 16px;
+    background: #fff9e6;
+    border: 1px solid #f5d96e;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+  }
+  .reminder-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: #f5a623;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700;
+    margin-top: 1px;
+  }
+  .reminder-text { font-size: 13px; line-height: 20px; color: #6b5a1e; }
+  .reminder-text strong { color: #4a3d0e; }
 </style>
 </head>
 <body>
@@ -157,6 +179,13 @@
           <div class="summary-row"><span>预计报告日期</span><span>2026-06-05</span></div>
         </div>
       </section>
+
+      <div class="reminder-banner">
+        <div class="reminder-icon">!</div>
+        <div class="reminder-text">
+          <strong>温馨提示：</strong>寄送样品时，请将<strong>订单参考编号（T单号）</strong>写在样品包装袋上，以便我们快速匹配您的样品。
+        </div>
+      </div>
 
       <div class="actions">
         <a class="action primary" href="orders.html">查看订单管理</a>
