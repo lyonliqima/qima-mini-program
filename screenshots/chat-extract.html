@@ -634,7 +634,7 @@
       <!-- 机器人欢迎 -->
       <div class="row bot">
         <img class="avatar bot" src="assets/robot.png" alt="下单助手" />
-        <div class="bubble">你好，我是下单助手 🤖<br>在开始之前，请先告诉我本次的需求类型～</div>
+        <div class="bubble">您好，我是下单助手 🤖<br>在开始之前，请先告诉我本次的需求类型～</div>
       </div>
 
       <!-- 选择类型卡片 -->
@@ -721,7 +721,7 @@
           <button class="edit-close" onclick="closeFieldEditor()" aria-label="关闭">×</button>
         </div>
         <div class="edit-modal-body">
-          <div class="edit-note">已复用历史信息作为默认值。你可以在这里补充或修改表单字段，空字段保存后仍会保持「待确认」。</div>
+          <div class="edit-note">已复用历史信息作为默认值。您可以在这里补充或修改表单字段，空字段保存后仍会保持「待确认」。</div>
           <div class="edit-grid" id="fieldEditorGrid"></div>
         </div>
         <div class="edit-modal-actions">
@@ -855,14 +855,14 @@
         userMsg('重测');
         const t = botTyping();
         setTimeout(()=>{ t.remove();
-          botMsg('好的～已为你匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
+          botMsg('好的～已为您匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
           botMsg(renderHistoryPanel('历史 Test', historyTests, '搜索 Test 编号、服务或产品'), true);
         }, 700);
       } else {
         userMsg('再次下单');
         const t = botTyping();
         setTimeout(()=>{ t.remove();
-          botMsg('好的～已为你匹配到历史订单，请选择要复用的 Order：', false);
+          botMsg('好的～已为您匹配到历史订单，请选择要复用的 Order：', false);
           botMsg(renderHistoryPanel('历史 Order', historyOrders, '搜索 Order 编号、服务或产品'), true);
         }, 700);
       }
@@ -981,7 +981,7 @@
         manualIndex = manualQuestions.length;
         Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
         Object.assign(manualAnswers, prefill.fields);
-        botMsg('已载入 <b>'+id+'</b> 的信息 ✅ 正在为你预填订单表单…', false);
+        botMsg('已载入 <b>'+id+'</b> 的信息 ✅ 正在为您预填订单表单…', false);
         const t2 = botTyping();
         setTimeout(()=>{
           t2.remove();
@@ -1018,7 +1018,7 @@
       removeActionRow(btn);
       userMsg('补充缺失项');
       if(manualAnswers['Carrier'] && manualAnswers['Tracking Number']){
-        botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
+        botMsg('当前预填信息里没有明显缺失项 ✅ 您可以直接去下单，或点击「编辑字段」微调内容。', false);
         return;
       }
       botMsg('历史记录里没有完整物流信息。请在下方补充本批样品的快递信息；如果暂时没有，也可以先生成订单草稿。', false);
@@ -1040,7 +1040,7 @@
         botMsg('已补充物流信息 ✅ 请再次确认订单信息。', false);
         return;
       }
-      botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+      botMsg('已记录为稍后补充。您仍然可以先生成订单草稿，之后再完善物流信息。', false);
     }
 
     function answerReuseShippingText(value){
@@ -1049,7 +1049,7 @@
         return;
       }
       if(/暂无|稍后|没有|待补/.test(value)){
-        botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+        botMsg('已记录为稍后补充。您仍然可以先生成订单草稿，之后再完善物流信息。', false);
         return;
       }
       const parts = value.split(/[，,;；\s]+/).filter(Boolean);
@@ -1161,7 +1161,7 @@
       manualIndex = 0;
       Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
       const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('没问题～我会用对话方式帮你逐项填写订单信息。请直接在底部输入框中填写答案，之后也能再编辑。', false); askManualField(); }, 650);
+      setTimeout(()=>{ t.remove(); botMsg('没问题～我会用对话方式帮您逐项填写订单信息。请直接在底部输入框中填写答案，之后也能再编辑。', false); askManualField(); }, 650);
     }
 
     function askManualField(){
@@ -1324,7 +1324,7 @@
         }, 500);
         return;
       }
-      botMsg('请补充物流信息。你可以拍照识别快递面单，也可以手动填写。', false);
+      botMsg('请补充物流信息。您可以拍照识别快递面单，也可以手动填写。', false);
       botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn" onclick="chooseShippingInput(\'photo\', this, \''+flowSource+'\')">拍照识别面单</button><button class="chip-btn" onclick="chooseShippingInput(\'manual\', this, \''+flowSource+'\')">手动填写物流</button><button class="chip-btn" onclick="chooseShippingInput(\'skip\', this, \''+flowSource+'\')">稍后补充</button></div></div>', true);
     }
 
@@ -1521,7 +1521,7 @@
     function finishManualFill(){
       const t = botTyping();
       setTimeout(()=>{ t.remove();
-        botMsg('已根据你的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
+        botMsg('已根据您的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
         botMsg(manualOrderCard(), true);
         botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
       }, 650);
@@ -1575,7 +1575,7 @@
           // 字段提取卡
           botMsg(extractCard(), true);
           // 总结 + 缺失确认
-          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，我们逐项补齐 👇', false);
+          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要您确认，我们逐项补齐 👇', false);
           askMissing();
         }, 1100);
       }, 700);
@@ -1904,7 +1904,7 @@
       const t = botTyping();
       setTimeout(()=>{ t.remove();
         botMsg(orderSummaryCard(), true);
-        botMsg('请确认以上订单信息是否正确。确认后我会帮你提交检测订单。', false);
+        botMsg('请确认以上订单信息是否正确。确认后我会帮您提交检测订单。', false);
         botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 返回编辑字段</button></div></div>', true);
       }, 700);
     }

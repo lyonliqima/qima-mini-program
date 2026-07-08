@@ -24,10 +24,10 @@
   body { display: flex; justify-content: center; }
 
   .phone {
-    position: relative; width: 390px; height: 844px;
+    position: relative;
     display: flex; flex-direction: column;
     background: linear-gradient(180deg, #eef1fb 0%, #faf9fd 55%, #fdfbfb 100%);
-    overflow: hidden; flex-shrink: 0;
+    overflow: hidden;
   }
 
   /* ===== 状态栏 ===== */
@@ -134,24 +134,62 @@
   .upload-option:active { background: #edf1ff; }
   .upload-option .up-ic { color: var(--pool-500); display: flex; align-items: center; }
   .upload-option .up-title { font-size: 13px; color: var(--carbon); font-weight: 600; }
+  .input-section + .input-section { margin-top: 14px; }
+  .input-section-label {
+    font-size: 13px; font-weight: 600; color: var(--carbon); margin-bottom: 8px;
+  }
+  .input-section-label.primary { font-size: 14px; color: var(--pool-500); }
+  .voice-panel {
+    border: 1px solid #dce4fb; border-radius: 12px;
+    background: #f7f9ff; padding: 10px 12px;
+  }
+  .voice-tips-title {
+    font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 6px;
+  }
+  .voice-tips-list {
+    font-size: 11px; line-height: 17px; color: var(--seal);
+    margin: 0; padding-left: 16px;
+  }
+  .voice-tips-list li { margin-bottom: 2px; }
+  .voice-btn {
+    width: 100%; margin-top: 10px; height: 42px;
+    border: 1.5px solid var(--pool-500); border-radius: 12px;
+    background: #fff; color: var(--pool-500);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .voice-btn.recording {
+    background: var(--pool-500); color: #fff;
+    animation: voice-pulse 1.2s infinite;
+  }
+  @keyframes voice-pulse { 0%,100%{ opacity:1; } 50%{ opacity:.82; } }
+  .upload-secondary {
+    margin-top: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .upload-secondary-btn {
+    border: none; background: transparent; color: var(--seal);
+    font-size: 12px; cursor: pointer; padding: 4px 0;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .upload-secondary-btn .up-ic { color: var(--seal); display: flex; align-items: center; }
   .uploaded-files {
-    display: none; flex-direction: column; gap: 7px;
-    margin-top: 10px;
+    display: none; flex-direction: row; flex-wrap: wrap; gap: 4px;
+    margin-top: 6px;
   }
   .uploaded-files.show { display: flex; }
   .uploaded-file {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    padding: 8px 10px; border: 1px solid #edf0f6; border-radius: 10px;
-    background: #fff; font-size: 12px; color: var(--carbon);
+    display: flex; align-items: center; gap: 4px;
+    padding: 3px 6px; border: 1px solid #edf0f6; border-radius: 8px;
+    background: #fff; font-size: 10px; color: var(--carbon);
+    max-width: calc(50% - 2px);
   }
   .uploaded-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .uploaded-file-status { color: var(--seal); font-size: 11px; flex-shrink: 0; }
+  .uploaded-file-status { display: none; }
   .uploaded-file-delete {
-    width: 24px; height: 24px; border: none; border-radius: 50%;
+    width: 16px; height: 16px; border: none; border-radius: 50%;
     background: #f4f6fa; color: var(--seal); cursor: pointer;
-    font-size: 16px; line-height: 24px; padding: 0; flex-shrink: 0;
+    font-size: 12px; line-height: 16px; padding: 0; flex-shrink: 0;
   }
-  .uploaded-file-delete:active { background: #e9edf7; color: var(--carbon); }
   .tip {
     margin-top: 12px; background: #fffaf0; border: 1px solid #ffe6b8; border-radius: 10px;
     padding: 10px 12px; font-size: 12px; color: #8a6d3b; line-height: 18px;
@@ -168,7 +206,7 @@
     color: var(--seal); font-size: 12px;
   }
   .waybill-photo::before {
-    content: "快递面单照片";
+    content: attr(data-photo-label);
     display: block;
   }
   .waybill-row {
@@ -180,7 +218,7 @@
 
   /* 链接输入 */
   .link-row {
-    margin-top: 12px; display: flex; flex-direction: column;
+    margin-top: 0; display: flex; flex-direction: column;
     align-items: stretch; gap: 8px;
   }
   .link-row input {
@@ -196,11 +234,11 @@
     background: #edf0f6; color: #aab0bc; cursor: default;
   }
   .manual-fill {
-    width: 100%; height: 40px; margin-top: 10px;
-    border: 1px solid #dce4fb; border-radius: 10px;
-    background: var(--pool-050); color: var(--pool-500);
+    width: 100%; margin-top: 10px; padding: 4px 0;
+    border: none; background: transparent; color: var(--pool-500);
     font-size: 13px; font-weight: 600; cursor: pointer;
   }
+  .manual-fill:active { opacity: .72; }
   .src-tabs {
     margin-top: 8px;
     font-size: 11px;
@@ -210,15 +248,18 @@
   }
 
   .upload-hint {
-    margin-top: 12px; background: #f7f9ff; border: 1px solid #e3e9fb;
-    border-radius: 10px; padding: 9px 10px;
+    margin-top: 8px; background: #f3f4f6; border: 1px solid #e5e7eb;
+    border-radius: 8px; padding: 6px 8px;
   }
   .upload-hint-head {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 7px;
+    margin-bottom: 3px;
   }
-  .upload-hint-title { font-size: 12px; font-weight: 600; color: var(--carbon); }
-  .upload-hint-tip { font-size: 11px; color: var(--seal); line-height: 16px; margin-bottom: 8px; }
+  .upload-hint-title { font-size: 11px; font-weight: 600; color: var(--carbon); }
+  .upload-hint-tip { font-size: 10px; color: var(--seal); line-height: 14px; margin-bottom: 4px; }
+  .upload-hint-tags {
+    font-size: 10px; line-height: 14px; color: var(--seal);
+  }
   .detail-link {
     border: none; background: transparent; color: var(--pool-500);
     font-size: 12px; cursor: pointer; padding: 0;
@@ -275,6 +316,45 @@
     border-radius: 10px; padding: 9px 10px; margin-bottom: 12px;
   }
 
+  .action-sheet {
+    width: 100%;
+    background: #fff;
+    border-radius: 18px 18px 0 0;
+    padding: 8px 16px 16px;
+    box-shadow: 0 -8px 28px rgba(25,25,25,.12);
+  }
+  .action-sheet-title {
+    text-align: center;
+    font-size: 12px;
+    color: var(--seal);
+    padding: 10px 0 8px;
+  }
+  .action-sheet-item {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-bottom: .5px solid #eef0f4;
+    background: #fff;
+    font-size: 16px;
+    color: var(--carbon);
+    cursor: pointer;
+  }
+  .action-sheet-item:active { background: #f7f9ff; }
+  .action-sheet-item:last-of-type { border-bottom: none; }
+  .action-sheet-cancel {
+    width: 100%;
+    height: 48px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 12px;
+    background: #f3f4f6;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--carbon);
+    cursor: pointer;
+  }
+  .action-sheet-cancel:active { background: #e9ebef; }
+
   /* 已上传缩略图（用户气泡内） */
   .thumbs { display: flex; gap: 6px; align-items: center; }
   .thumbs .t {
@@ -297,12 +377,19 @@
   /* 字段提取卡 */
   .extract-head {
     display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
     padding: 12px 14px; border-bottom: .5px solid #eef0f4;
   }
-  .extract-head .eh-title { font-size: 14px; font-weight: 600; }
+  .extract-head .eh-title {
+    font-size: 14px; font-weight: 600;
+    flex: 1; min-width: 0;
+    white-space: nowrap;
+  }
   .progress-pill {
     font-size: 11px; color: var(--kiwi); background: #eaf6f2; border: 1px solid #c9ecdc;
     border-radius: 20px; padding: 2px 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   .fields { padding: 6px 14px 12px; }
   .field { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: .5px solid #f3f4f7; }
@@ -354,9 +441,11 @@
   .missing-error { display: none; font-size: 12px; color: #ff5a43; line-height: 18px; }
   .missing-error.show { display: block; }
   .missing-submit {
-    height: 38px; border: none; border-radius: 10px;
+    width: 100%; height: 38px; margin-top: 10px;
+    border: none; border-radius: 10px;
     background: var(--pool-500); color: #fff;
     font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
   }
   .missing-submit.secondary {
     background: #fff; color: var(--pool-500);
@@ -390,11 +479,6 @@
     max-height: 540px; overflow-y: auto; padding: 12px 16px 16px;
   }
   .edit-modal-body::-webkit-scrollbar { display: none; }
-  .edit-note {
-    font-size: 12px; color: var(--seal); line-height: 18px;
-    background: #f7f9ff; border: 1px solid #e3e9fb;
-    border-radius: 10px; padding: 9px 10px; margin-bottom: 12px;
-  }
   .edit-grid { display: flex; flex-direction: column; gap: 12px; }
   .edit-section {
     border: 1px solid #edf0f6; border-radius: 12px;
@@ -420,6 +504,99 @@
     border-color: var(--pool-500);
     box-shadow: 0 0 0 3px rgba(65,105,225,.1);
   }
+  .edit-inline-add {
+    display: flex; gap: 8px; margin-top: 8px;
+  }
+  .edit-inline-add .edit-control { flex: 1; height: 36px; }
+  .edit-add-btn {
+    height: 36px; padding: 0 12px; border-radius: 9px;
+    border: 1px solid #dce4fb; background: var(--pool-050);
+    color: var(--pool-500); font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;
+  }
+  .edit-add-btn:active { background: #e8eeff; }
+  .edit-item-country .edit-item-label-row {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  }
+  .edit-item-country .edit-item-label-row label {
+    margin-bottom: 0; font-size: 12px; color: var(--seal);
+  }
+  .edit-info-icon {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--pool-100); color: var(--pool-500);
+    font-size: 10px; font-weight: 700; line-height: 14px; text-align: center;
+    flex-shrink: 0;
+  }
+  .edit-country-panel {
+    border: 1px solid #e8ecf4; border-radius: 10px;
+    background: #fafbfe; padding: 8px;
+  }
+  .edit-country-checks {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .edit-item-country .edit-country-line {
+    display: flex; align-items: center; gap: 7px;
+    width: 100%; min-width: 0; height: 38px; padding: 0 12px; margin-bottom: 0;
+    border: 1px solid #e1e5ee; border-radius: 9px;
+    background: #fff;
+    font-size: 12px; color: var(--carbon);
+    cursor: pointer; user-select: none;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .edit-item-country .edit-country-line:has(input:checked) {
+    border-color: #c0d0f8; background: var(--pool-050);
+    color: var(--pool-500); font-weight: 600;
+  }
+  .edit-item-country .edit-country-line input {
+    appearance: none; -webkit-appearance: none;
+    width: 16px; height: 16px; flex: 0 0 16px;
+    border: 1.5px solid #aeb7c8; border-radius: 4px;
+    background: #fff; margin: 0; cursor: pointer;
+    display: grid; place-content: center;
+  }
+  .edit-item-country .edit-country-line input:checked {
+    border-color: var(--pool-500); background: var(--pool-500);
+  }
+  .edit-item-country .edit-country-line input:checked::after {
+    content: "";
+    width: 5px; height: 9px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg); margin-top: -1px;
+  }
+  .edit-item-country .edit-country-line span {
+    min-width: 0; line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .edit-country-summary {
+    margin-top: 8px; padding: 8px 10px;
+    border-radius: 8px; background: #fff;
+    border: 1px dashed #dce4fb;
+    font-size: 11px; color: #24407a; line-height: 16px;
+  }
+  .edit-country-summary.empty { color: var(--seal); border-color: #e8ecf4; }
+  .edit-country-search { position: relative; margin-top: 10px; }
+  .edit-country-search::before {
+    content: ""; position: absolute; left: 11px; top: 50%;
+    width: 14px; height: 14px; transform: translateY(-50%);
+    background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='7' cy='7' r='4.5' stroke='%23999' stroke-width='1.4'/%3E%3Cpath d='M10.5 10.5 13 13' stroke='%23999' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .edit-country-search .edit-control {
+    height: 38px; font-size: 13px; color: var(--seal);
+    padding-left: 32px;
+  }
+  .edit-country-results {
+    position: static; margin-top: 6px; width: 100%;
+    max-height: 140px; overflow-y: auto;
+    background: #fff; border: 1px solid #e1e5ee; border-radius: 9px;
+    box-shadow: 0 8px 18px rgba(25,25,25,.1);
+    display: none;
+  }
+  .edit-country-results.show { display: block; }
+  .edit-country-option {
+    width: 100%; border: none; background: #fff; text-align: left;
+    padding: 10px 11px; font-size: 13px; color: var(--carbon); cursor: pointer;
+  }
+  .edit-country-option:hover { background: var(--pool-050); color: var(--pool-500); }
   .edit-modal-actions {
     display: flex; gap: 10px; padding: 12px 16px 16px;
     border-top: .5px solid #eef0f4;
@@ -593,6 +770,29 @@
   .choice-btn .cb-name { font-size: 14px; font-weight: 600; color: var(--carbon); display: flex; align-items: center; gap: 6px; }
   .choice-btn .cb-rec { font-size: 10px; color: var(--kiwi); background: #eaf6f2; border-radius: 4px; padding: 1px 6px; font-weight: 400; }
   .choice-btn .cb-desc { font-size: 12px; color: var(--seal); margin-top: 3px; line-height: 17px; }
+
+  .copy-orders-divider {
+    height: 1px; background: #eef0f6; margin: 14px 0 12px;
+  }
+  .copy-orders-title { font-size: 14px; font-weight: 600; color: var(--carbon); margin-bottom: 4px; }
+  .copy-orders-tip { font-size: 11px; color: var(--seal); line-height: 16px; margin-bottom: 10px; }
+  .copy-order-list { display: flex; flex-direction: column; }
+  .copy-order-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 0; border-bottom: .5px solid #eef0f6;
+    cursor: pointer;
+  }
+  .copy-order-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .copy-order-item:active { opacity: .72; }
+  .copy-order-badge {
+    width: 40px; height: 28px; border-radius: 6px;
+    background: #f5c400; color: #fff;
+    font-size: 11px; font-weight: 700; letter-spacing: .2px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .copy-order-body { min-width: 0; flex: 1; }
+  .copy-order-name { font-size: 14px; font-weight: 600; color: var(--carbon); line-height: 20px; }
+  .copy-order-date { font-size: 12px; color: var(--seal); line-height: 18px; margin-top: 1px; }
 
   /* 选择字段卡片 */
   .select-card {
@@ -786,6 +986,13 @@
     color: #fff; font-weight: 600;
   }
 </style>
+<link rel="stylesheet" href="assets/phone-shell.css" />
+<link rel="stylesheet" href="assets/lang-toggle.css" />
+<link rel="stylesheet" href="assets/i18n-en.css" />
+<script>window.PAGE_TITLE_KEY = 'title.orderChat';</script>
+<script src="assets/i18n/zh.js"></script>
+<script src="assets/i18n/en.js"></script>
+<script src="assets/i18n-runtime.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -801,10 +1008,10 @@
 
     <!-- 导航 -->
     <div class="navbar">
-      <a href="index.html" onclick="return openBackConfirm(event)"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
+      <a href="index.html" onclick="return openBackConfirm(event)"><img class="back" src="assets/vector52.svg" alt="返回" data-i18n-alt="common.back" /></a>
       <div class="nav-center">
-        <div class="nav-title">下单助手 <span class="ai-badge">AI</span></div>
-        <div class="nav-sub">智能创建检测订单</div>
+        <div class="nav-title"><span data-i18n="orderChat.title">下单助手</span> <span class="ai-badge">AI</span></div>
+        <div class="nav-sub" data-i18n="orderChat.navSub">智能创建检测订单</div>
       </div>
       <div class="nav-capsule">
         <img src="assets/share.svg" alt="" />
@@ -817,36 +1024,28 @@
     <div class="chat" id="chat">
       <!-- 机器人欢迎 -->
       <div class="row bot">
-        <img class="avatar bot" src="assets/robot.png" alt="下单助手" />
-        <div class="bubble">你好，我是下单助手 🤖<br>在开始之前，请先告诉我本次的需求类型～</div>
+        <img class="avatar bot" src="assets/robot.png" alt="下单助手" data-i18n-alt="orderChat.botAvatarAlt" />
+        <div class="bubble" data-i18n="orderChat.welcome" data-i18n-html="true">您好，我是下单助手 🤖<br>在开始之前，请选择首次测试，或直接复制历史订单快速下单～</div>
       </div>
 
       <!-- 选择类型卡片 -->
       <div class="row bot" id="typeCard">
-        <img class="avatar bot" src="assets/robot.png" alt="下单助手" />
+        <img class="avatar bot" src="assets/robot.png" alt="下单助手" data-i18n-alt="orderChat.botAvatarAlt" />
         <div class="wide">
           <div class="panel panel-pad">
-            <div class="panel-title">请选择本次需求类型</div>
+            <div class="panel-title" data-i18n="orderChat.selectType">请选择本次需求类型</div>
             <div class="choice">
               <div class="choice-btn" onclick="pickType('first')">
                 <div>
-                  <div class="cb-name">首次测试</div>
-                  <div class="cb-desc">全新产品，第一次创建检测订单</div>
-                </div>
-              </div>
-              <div class="choice-btn" onclick="pickType('retest')">
-                <div>
-                  <div class="cb-name">重测 <span class="cb-rec">选历史 Test</span></div>
-                  <div class="cb-desc">基于以往的测试重新检测，复用历史 Test 信息</div>
-                </div>
-              </div>
-              <div class="choice-btn" onclick="pickType('reorder')">
-                <div>
-                  <div class="cb-name">再次下单 <span class="cb-rec">选历史 Order</span></div>
-                  <div class="cb-desc">复用以往订单，快速再次提交</div>
+                  <div class="cb-name" data-i18n="orderChat.firstTest">首次测试</div>
+                  <div class="cb-desc" data-i18n="orderChat.firstTestDesc">全新产品，第一次创建检测订单</div>
                 </div>
               </div>
             </div>
+            <div class="copy-orders-divider"></div>
+            <div class="copy-orders-title" data-i18n="orderChat.copyHistory">复制历史订单</div>
+            <div class="copy-orders-tip" data-i18n="orderChat.copyHistoryTip">点选订单号即可复用信息，无需多次选择</div>
+            <div class="copy-order-list" id="copyOrderList"></div>
           </div>
         </div>
       </div>
@@ -856,44 +1055,54 @@
     <div class="examples-mask" id="uploadExamples" onclick="closeUploadExamples(event)">
       <div class="examples-modal" onclick="event.stopPropagation()">
         <div class="examples-head">
-          <div class="examples-title">资料示例</div>
-          <button class="examples-close" onclick="closeUploadExamples()" aria-label="关闭">×</button>
+          <div class="examples-title" data-i18n="orderChat.examplesTitle">资料示例</div>
+          <button class="examples-close" onclick="closeUploadExamples()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
         <div class="examples-body">
-          <div class="examples-note">以下是可上传资料的照片示例。资料越完整，AI 自动识别字段越准确。</div>
+          <div class="examples-note" data-i18n="orderChat.examplesNote">以下是可上传资料的照片示例。资料越完整，AI 自动识别字段越准确。</div>
           <div class="example-grid">
             <div class="example-card">
               <div class="example-thumb"><img src="assets/example-spec.jpg" alt="Product Spec / 规格书"></div>
-              <div class="example-name">Product Spec / 规格书</div>
-              <div class="example-desc">产品名称、SKU、材质、年龄段、尺寸</div>
+              <div class="example-name" data-i18n="orderChat.exampleSpec">Product Spec / 规格书</div>
+              <div class="example-desc" data-i18n="orderChat.exampleSpecDesc">产品名称、SKU、材质、年龄段、尺寸</div>
             </div>
             <div class="example-card">
               <div class="example-thumb"><img src="assets/example-photo.jpg" alt="Product Photos"></div>
-              <div class="example-name">Product Photos</div>
-              <div class="example-desc">产品正面、细节、铭牌、配件照片</div>
+              <div class="example-name" data-i18n="orderChat.examplePhoto">Product Photos</div>
+              <div class="example-desc" data-i18n="orderChat.examplePhotoDesc">产品正面、细节、铭牌、配件照片</div>
             </div>
             <div class="example-card">
               <div class="example-thumb"><img src="assets/example-packaging.jpg" alt="Packaging / Label"></div>
-              <div class="example-name">Packaging / Label</div>
-              <div class="example-desc">包装六面图、标签、警告语、条码</div>
+              <div class="example-name" data-i18n="orderChat.examplePackaging">Packaging / Label</div>
+              <div class="example-desc" data-i18n="orderChat.examplePackagingDesc">包装六面图、标签、警告语、条码</div>
             </div>
             <div class="example-card">
               <div class="example-thumb"><img src="assets/example-invoice.jpg" alt="PO / PI / Invoice"></div>
-              <div class="example-name">PO / PI / Invoice</div>
-              <div class="example-desc">采购单号、供应商、数量、收货信息</div>
+              <div class="example-name" data-i18n="orderChat.examplePo">PO / PI / Invoice</div>
+              <div class="example-desc" data-i18n="orderChat.examplePoDesc">采购单号、供应商、数量、收货信息</div>
             </div>
             <div class="example-card">
-              <div class="example-thumb"><img src="assets/example-report.jpg" alt="旧测试报告"></div>
-              <div class="example-name">旧测试报告</div>
-              <div class="example-desc">历史测试项目、标准、结果、实验室信息</div>
+              <div class="example-thumb"><img src="assets/example-report.jpg" alt="测试报告"></div>
+              <div class="example-name" data-i18n="orderChat.exampleReport">测试报告</div>
+              <div class="example-desc" data-i18n="orderChat.exampleReportDesc">历史测试项目、标准、结果、实验室信息</div>
             </div>
             <div class="example-card">
               <div class="example-thumb"><img src="assets/example-link.jpg" alt="商品链接"></div>
-              <div class="example-name">商品链接</div>
-              <div class="example-desc">Amazon、TEMU、Shopify 商品页链接</div>
+              <div class="example-name" data-i18n="orderChat.exampleLink">商品链接</div>
+              <div class="example-desc" data-i18n="orderChat.exampleLinkDesc">Amazon、TEMU、Shopify 商品页链接</div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 上传来源选择 -->
+    <div class="examples-mask" id="uploadSourcePicker" onclick="closeUploadSourcePicker(event)">
+      <div class="action-sheet" onclick="event.stopPropagation()">
+        <div class="action-sheet-title" data-i18n="orderChat.uploadSourceTitle">选择上传方式</div>
+        <button class="action-sheet-item" type="button" onclick="chooseUploadSource('wechat')" data-i18n="orderChat.uploadWechat">从微信上传</button>
+        <button class="action-sheet-item" type="button" onclick="chooseUploadSource('phone')" data-i18n="orderChat.uploadPhone">从手机上传</button>
+        <button class="action-sheet-cancel" type="button" onclick="closeUploadSourcePicker()" data-i18n="common.cancel">取消</button>
       </div>
     </div>
 
@@ -901,16 +1110,15 @@
     <div class="edit-mask" id="fieldEditor" onclick="closeFieldEditor(event)">
       <div class="edit-modal" onclick="event.stopPropagation()">
         <div class="edit-modal-head">
-          <div class="edit-modal-title">表单填写</div>
-          <button class="edit-close" onclick="closeFieldEditor()" aria-label="关闭">×</button>
+          <div class="edit-modal-title" data-i18n="orderChat.fieldEditorTitle">表单填写</div>
+          <button class="edit-close" onclick="closeFieldEditor()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
         <div class="edit-modal-body">
-          <div class="edit-note">已复用历史信息作为默认值。你可以在这里补充或修改表单字段；必填字段为空会保持「待确认」，备注等非必填字段可留空。</div>
           <div class="edit-grid" id="fieldEditorGrid"></div>
         </div>
         <div class="edit-modal-actions">
-          <button class="edit-action" onclick="closeFieldEditor()">取消</button>
-          <button class="edit-action primary" onclick="saveFieldEditor()">保存修改</button>
+          <button class="edit-action" onclick="closeFieldEditor()" data-i18n="common.cancel">取消</button>
+          <button class="edit-action primary" onclick="saveFieldEditor()" data-i18n="common.save">保存修改</button>
         </div>
       </div>
     </div>
@@ -919,13 +1127,13 @@
     <div class="order-confirm-mask" id="orderConfirmModal" onclick="closeOrderConfirm(event)">
       <div class="order-confirm-modal" onclick="event.stopPropagation()">
         <div class="order-confirm-head">
-          <div class="order-confirm-title">订单确认信息</div>
-          <button class="order-confirm-close" type="button" onclick="dismissOrderConfirm()" aria-label="关闭">×</button>
+          <div class="order-confirm-title" data-i18n="orderChat.orderConfirmTitle">订单确认信息</div>
+          <button class="order-confirm-close" type="button" onclick="dismissOrderConfirm()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
         <div class="order-confirm-body" id="orderConfirmBody"></div>
         <div class="order-confirm-actions">
-          <button class="order-confirm-action" type="button" onclick="editOrderFromConfirm()">返回修改</button>
-          <button class="order-confirm-action primary" type="button" onclick="submitOrderSuccess()">提交下单</button>
+          <button class="order-confirm-action" type="button" onclick="editOrderFromConfirm()" data-i18n="orderChat.backToEdit">返回修改</button>
+          <button class="order-confirm-action primary" type="button" onclick="submitOrderSuccess()" data-i18n="common.submit">提交下单</button>
         </div>
       </div>
     </div>
@@ -933,10 +1141,10 @@
     <!-- 返回主页确认弹窗 -->
     <div class="back-confirm-mask" id="backConfirmModal" onclick="closeBackConfirm(event)">
       <div class="back-confirm-dialog" onclick="event.stopPropagation()">
-        <div class="back-confirm-text">你确定返回主页吗？现在的进度将不会保存</div>
+        <div class="back-confirm-text" data-i18n="orderChat.backConfirmText">您确定返回主页吗？现在的进度将不会保存</div>
         <div class="back-confirm-actions">
-          <button class="back-confirm-action" type="button" onclick="closeBackConfirm()">取消</button>
-          <button class="back-confirm-action primary" type="button" onclick="goBackHome()">确定返回</button>
+          <button class="back-confirm-action" type="button" onclick="closeBackConfirm()" data-i18n="common.cancel">取消</button>
+          <button class="back-confirm-action primary" type="button" onclick="goBackHome()" data-i18n="orderChat.backConfirmOk">确定返回</button>
         </div>
       </div>
     </div>
@@ -947,30 +1155,30 @@
     <div class="supplier-mask" id="supplierPicker" onclick="closeSupplierPicker(event)">
       <div class="supplier-modal" onclick="event.stopPropagation()">
         <div class="supplier-head">
-          <div class="supplier-title">选择供应商</div>
+          <div class="supplier-title" data-i18n="orderChat.supplierTitle">选择供应商</div>
           <button class="supplier-close" type="button" onclick="closeSupplierPicker()" aria-label="关闭">×</button>
         </div>
         <div class="supplier-body">
           <div class="supplier-search">
             <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <input id="supplierSearch" type="text" placeholder="搜索" oninput="renderSupplierRows()" />
+            <input id="supplierSearch" type="text" placeholder="搜索" data-i18n-placeholder="common.search" oninput="renderSupplierRows()" />
           </div>
           <table class="supplier-table">
             <thead>
               <tr>
-                <th>供应商名称</th>
-                <th>地址</th>
-                <th>主要联系人</th>
+                <th data-i18n="orderChat.supplierNameCol">供应商名称</th>
+                <th data-i18n="orderChat.supplierAddressCol">地址</th>
+                <th data-i18n="orderChat.supplierContactCol">主要联系人</th>
               </tr>
             </thead>
             <tbody id="supplierRows"></tbody>
           </table>
         </div>
         <div class="supplier-foot">
-          <button class="supplier-add" type="button">添加新供应商?</button>
+          <button class="supplier-add" type="button" data-i18n="orderChat.supplierAddNew">添加新供应商?</button>
           <div class="supplier-actions">
-            <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()">取消</button>
-            <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled>选择</button>
+            <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()" data-i18n="common.cancel">取消</button>
+            <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled data-i18n="common.select">选择</button>
           </div>
         </div>
       </div>
@@ -980,21 +1188,21 @@
     <div class="form-modal-mask" id="manualFormModal" onclick="closeManualFormModal(event)">
       <div class="form-modal" onclick="event.stopPropagation()">
         <div class="form-modal-head">
-          <div class="form-modal-title">详细填写订单</div>
-          <button class="form-modal-close" type="button" onclick="closeManualFormModal()" aria-label="关闭">×</button>
+          <div class="form-modal-title" data-i18n="orderChat.manualFormTitle">详细填写订单</div>
+          <button class="form-modal-close" type="button" onclick="closeManualFormModal()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
         <div class="form-modal-body">
-          <div class="fm-section-title">基本信息</div>
+          <div class="fm-section-title" data-i18n="orderChat.basicInfo">基本信息</div>
 
           <div class="fm-row">
-            <div class="fm-label">产品名称 <span class="req">*</span></div>
-            <input class="fm-input" id="mf_productName" type="text" placeholder="请输入产品名称">
+            <div class="fm-label"><span data-i18n="index.productName">产品名称</span> <span class="req" data-i18n="common.required">*</span></div>
+            <input class="fm-input" id="mf_productName" type="text" placeholder="请输入产品名称" data-i18n-placeholder="index.productNamePlaceholder">
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">关联项目 <span class="req">*</span></div>
+            <div class="fm-label"><span data-i18n="index.project">关联项目</span> <span class="req" data-i18n="common.required">*</span></div>
             <select class="fm-select" id="mf_program">
-              <option value="" disabled selected>请选择关联项目</option>
+              <option value="" disabled selected data-i18n="index.projectPlaceholder">请选择关联项目</option>
               <option>TEMU 硬件 - 商家付款（商家付款，测试后退款）</option>
               <option>TEMU 玩具 - 商家付款</option>
               <option>Amazon Seller Program</option>
@@ -1002,9 +1210,9 @@
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">原产国家或地区 <span class="req">*</span></div>
+            <div class="fm-label"><span data-i18n="index.originCountry">原产国家或地区</span> <span class="req" data-i18n="common.required">*</span></div>
             <select class="fm-select" id="mf_origin">
-              <option value="" disabled selected>请选择原产国家或地区</option>
+              <option value="" disabled selected data-i18n="index.originCountryPlaceholder">请选择原产国家或地区</option>
               <option>奥兰群岛</option>
               <option>中国</option>
               <option>越南</option>
@@ -1013,74 +1221,74 @@
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">销售国家或地区 <span class="req">*</span></div>
+            <div class="fm-label"><span data-i18n="index.salesCountry">销售国家或地区</span> <span class="req" data-i18n="common.required">*</span></div>
             <div class="fm-check-grid">
-              <label class="fm-radio-line"><input type="checkbox" value="欧盟"> 欧盟</label>
-              <label class="fm-radio-line"><input type="checkbox" value="美国"> 美国</label>
-              <label class="fm-radio-line"><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
-              <label class="fm-radio-line"><input type="checkbox" value="加拿大"> 加拿大</label>
-              <label class="fm-radio-line"><input type="checkbox" value="南非"> 南非</label>
+              <label class="fm-radio-line"><input type="checkbox" value="欧盟"> <span data-dist-preset>欧盟</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="美国"> <span data-dist-preset>美国</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="澳大利亚"> <span data-dist-preset>澳大利亚</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="加拿大"> <span data-dist-preset>加拿大</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="南非"> <span data-dist-preset>南非</span></label>
             </div>
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">货号 / 型号 <span class="req">*</span></div>
-            <input class="fm-input" id="mf_sku" type="text" placeholder="请输入货号或型号">
+            <div class="fm-label"><span data-i18n="index.sku">货号 / 型号</span> <span class="req" data-i18n="common.required">*</span></div>
+            <input class="fm-input" id="mf_sku" type="text" placeholder="请输入货号或型号" data-i18n-placeholder="index.skuPlaceholder">
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">产品是否带电 <span class="req">*</span></div>
+            <div class="fm-label"><span data-i18n="index.electric">产品是否带电</span> <span class="req" data-i18n="common.required">*</span></div>
             <div class="fm-radio-stack">
-              <label class="fm-radio-line"><input type="radio" name="mf_electric" value="带电" onchange="mfToggleElectricDescription()"> 带电产品</label>
-              <label class="fm-radio-line"><input type="radio" name="mf_electric" value="非电" checked onchange="mfToggleElectricDescription()"> 非电产品</label>
+              <label class="fm-radio-line"><input type="radio" name="mf_electric" value="electric" onchange="mfToggleElectricDescription()"> <span data-i18n="index.electricYes">带电产品</span></label>
+              <label class="fm-radio-line"><input type="radio" name="mf_electric" value="non-electric" checked onchange="mfToggleElectricDescription()"> <span data-i18n="index.electricNo">非电产品</span></label>
             </div>
           </div>
 
           <div class="fm-row" id="mf_electricDescriptionRow" style="display:none;">
-            <div class="fm-label">产品说明 <span class="req">*</span></div>
-            <textarea class="fm-textarea" id="mf_electricDescription" placeholder="请说明产品的带电部件、电池/电源类型、额定参数、充电方式等信息"></textarea>
+            <div class="fm-label"><span data-i18n="index.productDesc">产品说明</span> <span class="req" data-i18n="common.required">*</span></div>
+            <textarea class="fm-textarea" id="mf_electricDescription" placeholder="请说明产品的带电部件、电池/电源类型、额定参数、充电方式等信息" data-i18n-placeholder="index.productDescPlaceholder"></textarea>
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">制造商 <span class="req">*</span></div>
-            <input class="fm-input" id="mf_manufacturer" type="text" placeholder="请输入制造商完整工厂全称">
-            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;">⚠ 请务必提供完整的工厂全称，不可简写</div>
+            <div class="fm-label"><span data-i18n="index.manufacturer">制造商</span> <span class="req" data-i18n="common.required">*</span></div>
+            <input class="fm-input" id="mf_manufacturer" type="text" placeholder="请输入制造商完整工厂全称" data-i18n-placeholder="index.manufacturerPlaceholder">
+            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;"><span data-i18n="index.manufacturerWarn">⚠ 请务必提供完整的工厂全称，不可简写</span></div>
           </div>
 
           <div class="fm-row">
-            <div class="fm-label">制造商地址 <span class="req">*</span></div>
-            <input class="fm-input" id="mf_manufacturerAddr" type="text" placeholder="请输入制造商完整地址（省/市/区/街道/门牌号）">
-            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;">⚠ 请务必提供完整地址，包括省、市、区、街道和门牌号</div>
+            <div class="fm-label"><span data-i18n="index.manufacturerAddress">制造商地址</span> <span class="req" data-i18n="common.required">*</span></div>
+            <input class="fm-input" id="mf_manufacturerAddr" type="text" placeholder="请输入制造商完整地址（省/市/区/街道/门牌号）" data-i18n-placeholder="index.manufacturerAddressPlaceholder">
+            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;"><span data-i18n="index.manufacturerAddressWarn">⚠ 请务必提供完整地址，包括省、市、区、街道和门牌号</span></div>
           </div>
 
-          <div class="fm-section-title">样品收集</div>
+          <div class="fm-section-title" data-i18n="orderChat.sampleCollection">样品收集</div>
 
           <div class="fm-row">
-            <div class="fm-label">样品收集方式 <span class="req">*</span></div>
+            <div class="fm-label"><span data-i18n="orderChat.sampleMethodLabel">样品收集方式</span> <span class="req" data-i18n="common.required">*</span></div>
             <div class="fm-radio-stack">
-              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="collect" checked onchange="mfToggleSampleFields()"> 启迈 QIMA 将在执行产品服务时收集样本</label>
-              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="ship" onchange="mfToggleSampleFields()"> 您或者供应商会寄送样本</label>
-              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="received" onchange="mfToggleSampleFields()"> 启迈 QIMA 已经拿到了样本</label>
+              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="ship" onchange="mfToggleSampleFields()"> <span data-sample-label>您或者供应商会寄送样本</span></label>
+              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="collect" onchange="mfToggleSampleFields()"> <span data-sample-label>启迈 QIMA 将在执行产品服务时收集样本</span></label>
+              <label class="fm-radio-line"><input type="radio" name="mf_sample" value="received" onchange="mfToggleSampleFields()"> <span data-sample-label>启迈 QIMA 已经拿到了样本</span></label>
             </div>
           </div>
 
           <div class="fm-row" id="mf_refNumberRow">
-            <div class="fm-label">产品检验订单参考编号</div>
+            <div class="fm-label" data-i18n="index.inspectionRef">产品检验订单参考编号</div>
             <select class="fm-select" id="mf_refNumber">
-              <option value="" disabled selected>请选择参考编号</option>
+              <option value="" disabled selected data-i18n="orderChat.refNumberPlaceholder">请选择参考编号</option>
               <option>T-25617004 · 实验室检测 · Toys</option>
               <option>T-25590011 · EN71 · Toys</option>
-              <option>Q202349103 · PSI 装运前检测 · Toys</option>
+              <option>Q202349103 · LT 装运前检测 · Toys</option>
             </select>
           </div>
 
           <div id="mf_labSection" style="display:none;">
             <div class="fm-row">
-              <div class="fm-label">寄送实验室 <span class="req">*</span></div>
+              <div class="fm-label"><span data-i18n="lab.sendToLab">寄送实验室</span> <span class="req" data-i18n="common.required">*</span></div>
               <div class="fm-radio-stack">
-                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="hangzhou" onchange="mfShowLabAddr('hangzhou')"> 杭州实验室</label>
-                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="shanghai" onchange="mfShowLabAddr('shanghai')"> 上海实验室</label>
-                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="dongguan" onchange="mfShowLabAddr('dongguan')"> 东莞实验室</label>
+                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="hangzhou" onchange="mfShowLabAddr('hangzhou')"> <span data-lab-label>杭州实验室</span></label>
+                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="shanghai" onchange="mfShowLabAddr('shanghai')"> <span data-lab-label>上海实验室</span></label>
+                <label class="fm-radio-line"><input type="radio" name="mf_lab" value="dongguan" onchange="mfShowLabAddr('dongguan')"> <span data-lab-label>东莞实验室</span></label>
               </div>
               <div class="fm-lab-addr" id="mf_labAddr"></div>
             </div>
@@ -1088,30 +1296,34 @@
 
           <div id="mf_shippingSection" style="display:none;">
             <div class="fm-row">
-              <div class="fm-label">快递公司</div>
+              <div class="fm-label" data-i18n="carrier.label">快递公司</div>
               <select class="fm-select" id="mf_carrier">
-                <option value="" disabled selected>请选择快递公司</option>
-                <option>TNT</option>
-                <option>DHL</option>
-                <option>FedEx</option>
-                <option>UPS</option>
+                <option value="" disabled selected data-i18n="carrier.selectPlaceholder">请选择快递公司</option>
+                <option>顺丰速运</option>
+                <option>中通快递</option>
+                <option>圆通速递</option>
+                <option>申通快递</option>
+                <option>韵达快递</option>
+                <option>京东物流</option>
+                <option>极兔速递</option>
+                <option>其他</option>
               </select>
             </div>
 
             <div class="fm-row">
-              <div class="fm-label">运单号</div>
-              <input class="fm-input" id="mf_trackingNo" type="text" placeholder="请输入运单号">
+              <div class="fm-label" data-i18n="carrier.trackingNo">运单号</div>
+              <input class="fm-input" id="mf_trackingNo" type="text" placeholder="请输入运单号" data-i18n-placeholder="carrier.trackingPlaceholder">
             </div>
 
             <div class="fm-row">
-              <div class="fm-label">备注</div>
-              <textarea class="fm-textarea" id="mf_shippingRemark" placeholder="请输入备注信息"></textarea>
+              <div class="fm-label" data-i18n="index.shippingRemark">备注</div>
+              <textarea class="fm-textarea" id="mf_shippingRemark" placeholder="请输入备注信息" data-i18n-placeholder="index.shippingRemarkPlaceholder"></textarea>
             </div>
           </div>
         </div>
         <div class="form-modal-actions">
-          <button class="form-modal-action" type="button" onclick="closeManualFormModal()">取消</button>
-          <button class="form-modal-action primary" type="button" onclick="submitManualForm()">提交下单</button>
+          <button class="form-modal-action" type="button" onclick="closeManualFormModal()" data-i18n="common.cancel">取消</button>
+          <button class="form-modal-action primary" type="button" onclick="submitManualForm()" data-i18n="common.submit">提交下单</button>
         </div>
       </div>
     </div>
@@ -1119,15 +1331,165 @@
     <!-- 输入栏 -->
     <div class="inputbar">
       <svg class="mic" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <input class="box" id="chatInput" type="text" placeholder="请输入您的消息..." onkeydown="handleInputKey(event)" />
-      <button class="send-btn" type="button" onclick="sendChatInput()">发送</button>
+      <input class="box" id="chatInput" type="text" placeholder="请输入您的消息..." data-i18n-placeholder="orderChat.chatPlaceholder" onkeydown="handleInputKey(event)" />
+      <button class="send-btn" type="button" onclick="sendChatInput()" data-i18n="orderChat.send">发送</button>
     </div>
   </div>
 
   <script>
+
+    /* ── i18n helpers ── */
+    function escapeHtml(str){ return I18n.escapeHtml(str); }
+
+    function sampleMethodShip(){ return t('index.sampleShip'); }
+    function sampleMethodCollect(){ return t('index.sampleCollect'); }
+    function sampleMethodReceived(){ return t('index.sampleReceived'); }
+    function isSampleCollect(val){ return val === sampleMethodCollect(); }
+    function isSampleShip(val){ return val === sampleMethodShip(); }
+
+    function getCarriers(){
+      return ['carrier.sf','carrier.zto','carrier.yto','carrier.sto','carrier.yunda','carrier.jd','carrier.jt','carrier.other'].map(function(k){ return t(k); });
+    }
+
+    function getProgramOptions(){
+      return [t('orderChat.projectTemuHardwareRefund'), t('orderChat.projectTemuToys'), t('orderChat.projectAmazon')];
+    }
+
+    function getOriginOptions(){
+      return [t('orderChat.originAland'), t('orderChat.originChina'), t('orderChat.originVietnam'), t('orderChat.originIndia')];
+    }
+
+    var FIELD_ELECTRIC = 'Electric Product';
+    var FIELD_ELECTRIC_DESC = 'Product Description';
+    var FIELD_TESTING_LAB = 'Testing Lab';
+    var FIELD_INSPECTION_REF = 'Product Inspection Order Reference Number';
+    var FIELD_REPORT_NEED = 'Report Fields on Certificate';
+    var FIELD_REPORT_DETAIL = 'Additional Report Fields';
+    var FIELD_LAB_ADDRESS = 'Testing Lab Address';
+
+    function isCameraInput(value){
+      return /拍照|相机|识别|photo|camera|scan|waybill/i.test(String(value || ''));
+    }
+    function isFillLaterInput(value){
+      const v = String(value || '').trim();
+      return v === t('carrier.fillLater') || v === t('orderChat.fillLaterNo') || /暂无|稍后|没有|待补|later|skip/i.test(v);
+    }
+    function isFillNowInput(value){
+      return String(value || '').trim() === t('orderChat.fillNow');
+    }
+
+    function editFieldsBtn(questionKey){
+      return '<button class="edit-fields" onclick="openFieldEditor()"><span>'+t(questionKey)+'</span>'+t('orderChat.goEdit')+'</button>';
+    }
+
+    function manualAnswer(key, legacyKey){
+      if(manualAnswers[key]) return manualAnswers[key];
+      if(legacyKey && manualAnswers[legacyKey]) return manualAnswers[legacyKey];
+      return '';
+    }
+
+    function fieldLabel(key){
+      var map = {
+        'Source ID': 'orderChat.sourceId',
+        'Service': 'orderChat.serviceType',
+        'Product Name': 'orderChat.fieldProductName',
+        'Program': 'orderChat.fieldProgram',
+        'Country of Origin': 'orderChat.fieldOrigin',
+        'Countries/Regions of Distribution': 'orderChat.fieldDistribution',
+        'Item#/model#': 'orderChat.fieldItemModel',
+        'Manufacturer': 'orderChat.fieldManufacturer',
+        'Manufacturer Address': 'orderChat.fieldManufacturerAddress',
+        'Sample Collection Method': 'orderChat.fieldSampleMethod',
+        'Carrier': 'carrier.label',
+        'Tracking Number': 'carrier.trackingNo',
+        'Shipping Remark': 'index.shippingRemark',
+        'Supplier': 'index.supplier',
+        '产品名称': 'orderChat.fieldProductName',
+        '关联项目': 'orderChat.fieldProject',
+        '原产国家或地区': 'orderChat.fieldOrigin',
+        '原产国': 'orderChat.fieldOrigin',
+        '销售国家或地区': 'orderChat.fieldDistribution',
+        '货号 / 型号': 'orderChat.fieldSku',
+        'Item # / model #': 'orderChat.fieldItemModel',
+        '产品是否带电': 'orderChat.fieldElectric',
+        '产品说明': 'orderChat.fieldElectricDesc',
+        '制造商': 'orderChat.fieldManufacturer',
+        '制造商地址': 'orderChat.fieldManufacturerAddress',
+        '样品收集方式': 'orderChat.fieldSampleMethod',
+        '产品检验订单参考编号': 'index.inspectionRef',
+        '寄送实验室': 'lab.sendToLab',
+        '快递公司': 'carrier.label',
+        '运单号': 'carrier.trackingNo',
+        '备注': 'index.shippingRemark',
+        '物流备注': 'orderChat.fieldLogisticsRemark',
+        '是否需要增加更多字段展示在报告上？': 'index.reportFieldsNeed',
+        '报告额外字段': 'index.reportFieldsDetail',
+        'Electric Product': 'orderChat.fieldElectric',
+        'Product Description': 'orderChat.fieldElectricDesc',
+        'Testing Lab': 'lab.sendToLab',
+        'Testing Lab Address': 'lab.sendToLab',
+        'Product Inspection Order Reference Number': 'index.inspectionRef',
+        'Report Fields on Certificate': 'index.reportFieldsNeed',
+        'Additional Report Fields': 'index.reportFieldsDetail'
+      };
+      return I18n.cleanFieldLabel(t(map[key] || key));
+    }
+
+    function chipsRow(inner){ return '<div style="width:268px"><div class="chips">'+inner+'</div></div>'; }
+
+    function placeOrderChips(extra){
+      var html = I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)') +
+        I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)');
+      if(extra) html += extra;
+      return chipsRow(html);
+    }
+
+    function populateManualFormI18n(){
+      var presets = I18n.getDistributionPresets();
+      document.querySelectorAll('#manualFormModal [data-dist-preset]').forEach(function(sp, i){
+        if(presets[i]){ sp.textContent = presets[i]; sp.previousElementSibling.value = presets[i]; }
+      });
+      var prog = document.getElementById('mf_program');
+      if(prog && prog.options.length > 1){
+        var opts = getProgramOptions();
+        for(var i=1;i<prog.options.length && i-1<opts.length;i++){ prog.options[i].textContent = opts[i-1]; prog.options[i].value = opts[i-1]; }
+      }
+      var origin = document.getElementById('mf_origin');
+      if(origin && origin.options.length > 1){
+        var origins = getOriginOptions();
+        for(var j=1;j<origin.options.length && j-1<origins.length;j++){ origin.options[j].textContent = origins[j-1]; origin.options[j].value = origins[j-1]; }
+      }
+      var sampleTexts = [sampleMethodShip(), sampleMethodCollect(), sampleMethodReceived()];
+      document.querySelectorAll('#manualFormModal [data-sample-label]').forEach(function(sp, i){
+        if(sampleTexts[i]) sp.textContent = sampleTexts[i];
+      });
+      var labs = I18n.getTestingLabs();
+      document.querySelectorAll('#manualFormModal [data-lab-label]').forEach(function(sp, i){
+        if(labs[i]) sp.textContent = labs[i].label;
+      });
+      var carrier = document.getElementById('mf_carrier');
+      if(carrier){
+        var carriers = getCarriers();
+        for(var k=1;k<carrier.options.length && k-1<carriers.length;k++){ carrier.options[k].textContent = carriers[k-1]; carrier.options[k].value = carriers[k-1]; }
+      }
+      var refSel = document.getElementById('mf_refNumber');
+      if(refSel && refSel.options.length > 1){
+        var refDescs = [t('orderChat.historyDescLtToys'), t('orderChat.historyDescEn71'), t('orderChat.historyDescLtPsi')];
+        for(var r=1;r<refSel.options.length && r-1<refDescs.length;r++) refSel.options[r].textContent = refSel.options[r].textContent.split('·')[0].trim() + ' · ' + refDescs[r-1];
+      }
+    }
+
+    function sampleLabelFromValue(val){
+      if(val === 'ship') return sampleMethodShip();
+      if(val === 'collect') return sampleMethodCollect();
+      if(val === 'received') return sampleMethodReceived();
+      return '';
+    }
+
+    function botAvatarHtml(){ return '<img class="avatar bot" src="assets/robot.png" alt="'+escapeHtml(t('orderChat.botAvatarAlt'))+'" />'; }
+
     const chat = document.getElementById('chat');
     const chatInput = document.getElementById('chatInput');
-    const BOT_AVATAR = '<img class="avatar bot" src="assets/robot.png" alt="下单助手" />';
     let pendingInput = null;
     function scrollBottom(){ chat.scrollTop = chat.scrollHeight; }
 
@@ -1140,7 +1502,7 @@
     function botMsg(html, wide){
       const row = document.createElement('div');
       row.className = 'row bot';
-      row.innerHTML = BOT_AVATAR + (wide ? '<div class="wide">'+html+'</div>' : '<div class="bubble">'+html+'</div>');
+      row.innerHTML = botAvatarHtml() + (wide ? '<div class="wide">'+html+'</div>' : '<div class="bubble">'+html+'</div>');
       chat.appendChild(row); scrollBottom();
       return row;
     }
@@ -1163,7 +1525,7 @@
       chatInput.value = '';
       userMsg(escapeHtml(value));
       if(!pendingInput){
-        botMsg('收到，我会把这条信息作为补充说明记录下来。', false);
+        botMsg(t('orderChat.supplementNote'), false);
         return;
       }
       const context = pendingInput;
@@ -1175,44 +1537,55 @@
       } else if(context.type === 'reuseShipping'){
         answerReuseShippingText(value);
       } else {
-        botMsg('已记录 ✅', false);
+        botMsg(t('orderChat.recorded'), false);
       }
     }
+
+    const recentCopyOrders = [
+      { id: 'T-25617004', date: '13-Jun-2026', badge: 'LT' },
+      { id: 'T-25617005', date: '28-Feb-2025', badge: 'LT' }
+    ];
+
+    function renderCopyOrderList(){
+      const list = document.getElementById('copyOrderList');
+      if(!list) return;
+      list.innerHTML = recentCopyOrders.map(order =>
+        '<div class="copy-order-item" onclick="pickCopyOrder(\''+order.id+'\')">'+
+          '<div class="copy-order-badge">'+order.badge+'</div>'+
+          '<div class="copy-order-body">'+
+            '<div class="copy-order-name">'+order.id+'</div>'+
+            '<div class="copy-order-date">'+order.date+'</div>'+
+          '</div>'+
+        '</div>'
+      ).join('');
+    }
+    renderCopyOrderList();
 
     // 1) 选择需求类型
     function pickType(type){
       document.getElementById('typeCard').style.display = 'none';
       if(type === 'first'){
-        userMsg('首次测试');
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); askUpload(); }, 700);
-      } else if(type === 'retest'){
-        userMsg('重测');
-        const t = botTyping();
-        setTimeout(()=>{ t.remove();
-          botMsg('好的～已为你匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
-          botMsg(renderHistoryPanel('历史 Test', historyTests, '搜索 Test 编号、服务或产品'), true);
-        }, 700);
-      } else {
-        userMsg('再次下单');
-        const t = botTyping();
-        setTimeout(()=>{ t.remove();
-          botMsg('好的～已为你匹配到历史订单，请选择要复用的 Order：', false);
-          botMsg(renderHistoryPanel('历史 Order', historyOrders, '搜索 Order 编号、服务或产品'), true);
-        }, 700);
+        userMsg(t('orderChat.firstTest'));
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); askUpload(); }, 700);
       }
+    }
+
+    function pickCopyOrder(id){
+      document.getElementById('typeCard').style.display = 'none';
+      startReuseOrder(id, t('orderChat.copyOrder'));
     }
     function histItem(id, desc){
       return '<div class="choice-btn history-item" data-keyword="'+escapeHtml((id+' '+desc).toLowerCase())+'" onclick="reuse(\''+id+'\')"><div><div class="cb-name">'+id+'</div><div class="cb-desc">'+desc+'</div></div></div>';
     }
     const historyTests = [
-      { id: 'T-25617004', desc: '实验室检测 · Toys' },
-      { id: 'T-25590011', desc: 'EN71 · Toys' },
-      { id: 'T-25581208', desc: 'CPSIA · Children Toys' }
+      { id: 'T-25617004', desc: t('orderChat.historyDescLtToys') },
+      { id: 'T-25590011', desc: t('orderChat.historyDescEn71') },
+      { id: 'T-25581208', desc: 'CPSIA · Toys' }
     ];
     const historyOrders = [
-      { id: 'Q202349103', desc: 'PSI 装运前检测 · Toys' },
-      { id: 'Q202310887', desc: '实验室检测 · Toys' }
+      { id: 'Q202349103', desc: t('orderChat.historyDescLtPsi') },
+      { id: 'Q202310887', desc: t('orderChat.historyDescLtToys') }
     ];
     function renderHistoryPanel(title, items, placeholder) {
       return '<div class="panel panel-pad history-panel">'+
@@ -1222,7 +1595,7 @@
           '<input type="text" placeholder="'+placeholder+'" oninput="filterHistoryItems(this)" autocomplete="off">'+
         '</div>'+
         '<div class="history-list">'+items.map((item) => histItem(item.id, item.desc)).join('')+'</div>'+
-        '<div class="history-empty">没有匹配的历史记录</div>'+
+        '<div class="history-empty">'+t('orderChat.noHistoryMatch')+'</div>'+
       '</div>';
     }
     function filterHistoryItems(input) {
@@ -1236,93 +1609,116 @@
       });
       panel.querySelector('.history-empty').classList.toggle('show', visibleCount === 0);
     }
-    const reusePrefills = {
-      'T-25617004': {
-        sourceType: '历史 Test',
-        sourceDesc: '实验室检测 · Toys',
-        fields: {
-          'Product Name': '智能机器人玩具',
-          'Program': 'TEMU Hardware- Seller Pay（商家付款，测试后退款）',
-          'Country of Origin': 'China (中国)',
-          'Countries/Regions of Distribution': 'European Union, United States',
-          'Item#/model#': 'RBT-2025-X9',
-          'Manufacturer': '深圳市智创玩具有限公司',
-          'Manufacturer Address': '深圳市宝安区工业路 88 号',
-          'Sample Collection Method': '您或者供应商会寄送样本',
-          'Carrier': 'DHL',
-          'Tracking Number': 'DHL-8572-4490-CN',
-          'Shipping Remark': ''
+    function getReusePrefills(){
+      return {
+        'T-25617004': {
+          sourceType: t('orderChat.historyOrder'),
+          sourceDesc: t('orderChat.historyDescLtToys'),
+          fields: {
+            'Product Name': t('orderChat.productRobotToy'),
+            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Country of Origin': t('orderChat.originChina'),
+            'Countries/Regions of Distribution': t('orderChat.distributionPresetEn'),
+            'Item#/model#': 'RBT-2025-X9',
+            'Manufacturer': t('orderChat.manufacturerDemo'),
+            'Manufacturer Address': t('orderChat.manufacturerAddrDemo'),
+            'Sample Collection Method': sampleMethodShip(),
+            'Carrier': t('carrier.sf'),
+            'Tracking Number': 'SF1234567890123',
+            'Shipping Remark': ''
+          }
+        },
+        'T-25617005': {
+          sourceType: t('orderChat.historyOrder'),
+          sourceDesc: t('orderChat.historyDescLtToysZh'),
+          fields: {
+            'Product Name': t('orderChat.productRobotToy'),
+            'Program': t('orderChat.projectTemuToys'),
+            'Country of Origin': t('orderChat.originChina'),
+            'Countries/Regions of Distribution': t('country.us'),
+            'Item#/model#': 'RBT-2025-X9',
+            'Manufacturer': t('orderChat.manufacturerDemo'),
+            'Manufacturer Address': t('orderChat.manufacturerAddrDemo'),
+            'Sample Collection Method': sampleMethodShip(),
+            'Carrier': '',
+            'Tracking Number': '',
+            'Shipping Remark': ''
+          }
+        },
+        'T-25590011': {
+          sourceType: t('orderChat.historyTest'),
+          sourceDesc: t('orderChat.historyDescEn71'),
+          fields: {
+            'Product Name': t('orderChat.productBlockToy'),
+            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Country of Origin': t('orderChat.originChina'),
+            'Countries/Regions of Distribution': t('country.eu'),
+            'Item#/model#': 'BLOCK-EN71-001',
+            'Manufacturer': t('orderChat.manufacturerDemo2'),
+            'Manufacturer Address': t('orderChat.manufacturerAddrDemo2'),
+            'Sample Collection Method': sampleMethodCollect(),
+            'Carrier': '',
+            'Tracking Number': '',
+            'Shipping Remark': ''
+          }
+        },
+        'Q202349103': {
+          sourceType: t('orderChat.historyOrderCap'),
+          sourceDesc: t('orderChat.historyDescLtPsi'),
+          fields: {
+            'Product Name': t('orderChat.productToysPsi'),
+            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Country of Origin': t('orderChat.originChina'),
+            'Countries/Regions of Distribution': t('orderChat.distributionUsCa'),
+            'Item#/model#': 'Q202349103',
+            'Manufacturer': 'QIMA Toy Factory',
+            'Manufacturer Address': 'Dongguan, Guangdong, China',
+            'Sample Collection Method': sampleMethodReceived(),
+            'Carrier': '',
+            'Tracking Number': '',
+            'Shipping Remark': ''
+          }
+        },
+        'Q202310887': {
+          sourceType: t('orderChat.historyOrderCap'),
+          sourceDesc: t('orderChat.historyDescLtToys'),
+          fields: {
+            'Product Name': t('orderChat.productRobotToy'),
+            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Country of Origin': t('orderChat.originChina'),
+            'Countries/Regions of Distribution': t('orderChat.distributionPresetAll'),
+            'Item#/model#': 'Q202310887',
+            'Manufacturer': t('orderChat.manufacturerDemo'),
+            'Manufacturer Address': t('orderChat.manufacturerAddrDemo'),
+            'Sample Collection Method': sampleMethodShip(),
+            'Carrier': t('carrier.zto'),
+            'Tracking Number': 'FDX-202310887',
+            'Shipping Remark': ''
+          }
         }
-      },
-      'T-25590011': {
-        sourceType: '历史 Test',
-        sourceDesc: 'EN71 · Toys',
-        fields: {
-          'Product Name': '儿童积木玩具',
-          'Program': 'TEMU Hardware- Seller Pay（商家付款，测试后退款）',
-          'Country of Origin': 'China (中国)',
-          'Countries/Regions of Distribution': 'European Union',
-          'Item#/model#': 'BLOCK-EN71-001',
-          'Manufacturer': '东莞启明玩具有限公司',
-          'Manufacturer Address': '东莞市松山湖科技园',
-          'Sample Collection Method': '启迈 QIMA 将在执行产品服务时收集样本',
-          'Carrier': '',
-          'Tracking Number': '',
-          'Shipping Remark': ''
-        }
-      },
-      'Q202349103': {
-        sourceType: '历史 Order',
-        sourceDesc: 'PSI 装运前检测 · Toys',
-        fields: {
-          'Product Name': 'Toys 装运前检测',
-          'Program': 'TEMU Hardware- Seller Pay（商家付款，测试后退款）',
-          'Country of Origin': 'China (中国)',
-          'Countries/Regions of Distribution': 'United States, Canada',
-          'Item#/model#': 'Q202349103',
-          'Manufacturer': 'QIMA Toy Factory',
-          'Manufacturer Address': 'Dongguan, Guangdong, China',
-          'Sample Collection Method': '启迈 QIMA 已经拿到了样本',
-          'Carrier': '',
-          'Tracking Number': '',
-          'Shipping Remark': ''
-        }
-      },
-      'Q202310887': {
-        sourceType: '历史 Order',
-        sourceDesc: '实验室检测 · Toys',
-        fields: {
-          'Product Name': '智能机器人玩具',
-          'Program': 'TEMU Hardware- Seller Pay（商家付款，测试后退款）',
-          'Country of Origin': 'China (中国)',
-          'Countries/Regions of Distribution': 'European Union, United States, Australia',
-          'Item#/model#': 'Q202310887',
-          'Manufacturer': '深圳市智创玩具有限公司',
-          'Manufacturer Address': '深圳市宝安区工业路 88 号',
-          'Sample Collection Method': '您或者供应商会寄送样本',
-          'Carrier': 'FedEx',
-          'Tracking Number': 'FDX-202310887',
-          'Shipping Remark': ''
-        }
-      }
-    };
-
+      };
+    }
     function reuse(id){
-      userMsg('复用 '+id);
-      const t = botTyping();
+      startReuseOrder(id);
+    }
+
+    function startReuseOrder(id, actionLabel){
+      const label = actionLabel || t('orderChat.reuse');
+      userMsg(label + ' ' + id);
+      const typingRow = botTyping();
       setTimeout(()=>{
-        t.remove();
-        const prefill = reusePrefills[id] || reusePrefills['T-25617004'];
-        manualIndex = manualQuestions.length;
+        typingRow.remove();
+        const prefill = getReusePrefills()[id] || getReusePrefills()['T-25617004'];
+        manualIndex = getManualQuestions().length;
         Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
         Object.assign(manualAnswers, prefill.fields);
-        botMsg('已载入 <b>'+id+'</b> 的信息 ✅ 正在为你预填订单表单…', false);
-        const t2 = botTyping();
+        botMsg(tHtml('orderChat.loadedOrder', {id: id}), false);
+        const typingRow2 = botTyping();
         setTimeout(()=>{
-          t2.remove();
-          botMsg('已基于'+prefill.sourceType+'「<b>'+id+'</b>」预填完成。请检查以下信息，缺失或不准确的字段可以继续编辑。', false);
+          typingRow2.remove();
+          botMsg(tHtml('orderChat.prefillDone', {sourceType: prefill.sourceType, id: id}), false);
           botMsg(reuseOrderCard(id, prefill), true);
-          botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button><button class="chip-btn" onclick="continueReuseMissing(this)">'+ciIcon('plus')+' 补充缺失项</button></div></div>', true);
+          botMsg(chipsRow(I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)')+I18n.chipHtml('orderChat.chipAddMissing','plus','continueReuseMissing(this)')), true);
         }, 700);
       }, 700);
     }
@@ -1330,7 +1726,7 @@
     function reuseOrderCard(id, prefill){
       const fields = prefill.fields;
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">预填订单信息</div><div class="progress-pill">来自 '+prefill.sourceType+'</div></div>'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.prefillCardTitle')+'</div><div class="progress-pill">'+t('orderChat.fromSource', {source: prefill.sourceType})+'</div></div>'+
         '<div class="fields">'+
           field('Source ID', id, true)+
           field('Service', prefill.sourceDesc, true)+
@@ -1342,51 +1738,51 @@
           field('Manufacturer', fields['Manufacturer'], !!fields['Manufacturer'])+
           field('Manufacturer Address', fields['Manufacturer Address'], !!fields['Manufacturer Address'])+
           field('Sample Collection Method', fields['Sample Collection Method'], !!fields['Sample Collection Method'])+
-          (fields['Sample Collection Method'] === '启迈 QIMA 将在执行产品服务时收集样本' ? '' :
+          (isSampleCollect(fields['Sample Collection Method']) ? '' :
             field('Carrier', fields['Carrier'], !!fields['Carrier'])+
             field('Tracking Number', fields['Tracking Number'], !!fields['Tracking Number'])+
             field('Shipping Remark', fields['Shipping Remark'], !!fields['Shipping Remark'], true)
           )+
-        '</div><button class="edit-fields" onclick="openFieldEditor()"><span>需要调整？</span>去编辑</button>'+
+        '</div>'+editFieldsBtn('orderChat.needAdjust')+
       '</div>';
     }
 
     function continueReuseMissing(btn){
       removeActionRow(btn);
-      userMsg('补充缺失项');
+      userMsg(t('orderChat.chipAddMissing'));
       if(manualAnswers['Carrier'] && manualAnswers['Tracking Number']){
-        botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
+        botMsg(t('orderChat.noMissingReuse'), false);
         return;
       }
-      botMsg('历史记录里没有完整物流信息。请在下方补充本批样品的快递信息；如果暂时没有，也可以先生成订单草稿。', false);
+      botMsg(t('orderChat.reuseShippingHint'), false);
       botMsg(shippingManualForm('reuseShipping'), true);
     }
 
     function answerReuseShipping(btn, value){
       const row = btn.closest('.row'); if(row) row.remove();
       userMsg(value);
-      if(value === '打开相机拍照识别面单'){
+      if(value === t('orderChat.openCameraWaybill')){
         openWaybillCamera('manual');
         return;
       }
-      if(value === '手动填写快递信息'){
-        manualAnswers['Carrier'] = 'DHL';
-        manualAnswers['Tracking Number'] = 'DHL-8572-4490-CN';
+      if(value === t('carrier.manualFill')){
+        manualAnswers['Carrier'] = t('carrier.sf');
+        manualAnswers['Tracking Number'] = 'SF1234567890123';
         setFieldValue('Carrier', manualAnswers['Carrier']);
         setFieldValue('Tracking Number', manualAnswers['Tracking Number']);
-        botMsg('已补充物流信息 ✅ 请再次确认订单信息。', false);
+        botMsg(t('orderChat.shippingRecordedConfirm'), false);
         return;
       }
-      botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+      botMsg(t('orderChat.fillLaterDraftHint'), false);
     }
 
     function answerReuseShippingText(value){
-      if(/拍照|相机|识别/.test(value)){
+      if(/拍照|相机|识别|photo|camera|scan|waybill/i.test(value)){
         openWaybillCamera('manual');
         return;
       }
-      if(/暂无|稍后|没有|待补/.test(value)){
-        botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+      if(isFillLaterInput(value)){
+        botMsg(t('orderChat.fillLaterDraftHint'), false);
         return;
       }
       const parts = value.split(/[，,;；\s]+/).filter(Boolean);
@@ -1400,46 +1796,77 @@
       if(manualAnswers['Tracking Number']){
         setFieldValue('Tracking Number', manualAnswers['Tracking Number']);
       }
-      botMsg('已补充物流信息 ✅ 请再次确认订单信息。', false);
+      botMsg(t('orderChat.shippingRecordedConfirm'), false);
     }
 
     // 2) 首次测试 → 请求上传资料 / 链接
     function askUpload(){
       hasUploadedFiles = false;
-      botMsg('收到！这是一次<b>全新产品</b>的检测。<br>请上传任意产品相关资料，或粘贴商品链接，我来自动识别并填写表单 👇', false);
+      botMsg(tHtml('orderChat.newProductMsg'), false);
       const card =
         '<div class="panel panel-pad">'+
-          '<div class="panel-title">上传产品资料</div>'+
-          '<div class="upload-options">'+
-            '<div class="upload-option" onclick="doUpload()">'+
-              '<div class="up-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>'+
-              '<div class="up-title">相机拍摄</div>'+
+          '<div class="panel-title">'+t('orderChat.uploadTitle')+'</div>'+
+          '<div class="input-section">'+
+            '<div class="input-section-label primary">'+t('orderChat.linkSectionTitle')+'</div>'+
+            '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"><button class="parse-btn" id="parseBtn" onclick="doParse()" disabled>'+t('orderChat.parseBtn')+'</button></div>'+
+          '</div>'+
+          '<div class="input-section">'+
+            '<div class="input-section-label">'+t('orderChat.voiceSectionTitle')+'</div>'+
+            '<div class="voice-panel" id="voicePanel">'+
+              '<div class="voice-tips-title">'+t('orderChat.voiceTipsTitle')+'</div>'+
+              '<ul class="voice-tips-list">'+t('orderChat.voiceTipsList')+'</ul>'+
+              '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
             '</div>'+
-            '<div class="upload-option" onclick="doUpload()">'+
-              '<div class="up-ic"><svg width="20" height="20" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M506.942 345.921c25.259 0 42.134-16.916 42.134-42.107 0-25.477-16.848-41.956-42.134-41.956-25.299 0-50.668 16.48-50.668 41.956 0.028 25.204 25.409 42.107 50.668 42.107v0zM506.942 345.921z" fill="currentColor"/><path d="M271.257 261.857c-25.259 0-50.79 16.48-50.79 41.956 0 25.19 25.532 42.107 50.79 42.107 25.163 0 42.012-16.916 42.012-42.107-0.014-25.477-16.834-41.956-42.012-41.956v0zM271.257 261.857z" fill="currentColor"/><path d="M1010.654 615.492c0-133.202-123.563-246.702-275.237-258.512 0.205-1.652 0.301-3.373-0.068-5.092-30.406-141.79-182.886-248.695-354.7-248.695-194.15 0-352.119 135.387-352.119 301.793 0 89.279 45.574 169.725 131.946 233.158l-30.106 90.508c-1.939 5.885-0.177 12.37 4.506 16.452 2.853 2.458 6.445 3.741 10.076 3.741 2.335 0 4.697-0.546 6.867-1.625l113.036-56.565 13.926 2.827c34.802 7.154 64.853 13.353 101.868 13.353 10.895 0 40.878-3.987 43.404-7.182 40.755 101.99 153.094 175.61 285.273 175.61 33.86 0 68.13-8.164 98.891-15.866l87.136 47.636c2.307 1.257 4.847 1.911 7.359 1.911 3.441 0 6.881-1.161 9.639-3.413 4.847-3.932 6.841-10.404 5.038-16.33l-22.255-74.001c74.602-58.955 115.521-129.488 115.521-199.708v0zM409.798 665.75c-9.626 0.833-19.388 1.243-29.082 1.243-32.686 0-60.334-5.652-92.31-12.26l-18.582-3.755c-3.195-0.683-6.567-0.245-9.503 1.269l-81.687 40.892 21.231-63.775c2.076-6.24-0.205-13.053-5.57-16.821-82.070-57.207-123.659-126.894-123.659-207.093 0-144.179 139.087-261.516 310.067-261.516 151.142 0 284.959 91.955 312.579 214.261-158.475 2.076-286.706 113.487-286.706 250.32 0 19.893 3.018 39.171 8.11 57.767-1.542-0.382-3.168-0.683-4.887-0.532v0zM860.371 788.699c-4.875 3.673-6.935 10.007-5.188 15.852l13.804 45.903-56.647-30.993c-2.157-1.188-4.588-1.803-7.004-1.803-1.188 0-2.389 0.15-3.564 0.464-30.379 7.674-61.822 15.593-92.433 15.593-142.186 0-257.857-97.717-257.857-217.811 0-120.095 115.658-217.771 257.857-217.771 139.469 0 257.325 99.724 257.325 217.771 0 59.87-37.738 121.255-106.291 172.797v0zM616.454 506.006c-16.848 0-33.696 16.971-33.696 33.792 0 16.944 16.848 33.669 33.696 33.669 25.313 0 42.038-16.725 42.038-33.669 0-16.848-16.725-33.792-42.038-33.792v0zM801.58 506.006c-16.603 0-33.451 16.971-33.451 33.792 0 16.944 16.848 33.669 33.451 33.669 25.231 0 42.257-16.725 42.257-33.669 0-16.848-16.998-33.792-42.257-33.792v0z" fill="currentColor"/></svg></div>'+
-              '<div class="up-title">从微信上传</div>'+
-            '</div>'+
+          '</div>'+
+          '<div class="upload-secondary">'+
+            '<button class="upload-secondary-btn" type="button" onclick="openUploadSourcePicker()">'+
+              '<span class="up-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>'+
+              t('orderChat.uploadDocOptional')+
+            '</button>'+
           '</div>'+
           '<div class="uploaded-files" id="uploadedFiles"></div>'+
-          '<div class="src-tabs">支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB</div>'+
-          '<div class="upload-hint">'+
-            '<div class="upload-hint-head"><span class="upload-hint-title">可上传 / 粘贴的信息</span><button class="detail-link" onclick="showUploadExamples()">查看详情</button></div>'+
-            '<div class="upload-hint-tip">资料越完整，可自动识别的字段越多。</div>'+
-            '<div class="type-grid">'+
-              '<div class="type-item">Product Spec</div>'+
-              '<div class="type-item">Product Photos</div>'+
-              '<div class="type-item">Packaging / Label</div>'+
-              '<div class="type-item">PO / PI</div>'+
-              '<div class="type-item">Invoice</div>'+
-              '<div class="type-item">旧测试报告</div>'+
-              '<div class="type-item">Amazon Link</div>'+
-              '<div class="type-item">TEMU / Shopify</div>'+
-            '</div>'+
-          '</div>'+
-          '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 链接" oninput="updateParseButtonState()"><button class="parse-btn" id="parseBtn" onclick="doParse()" disabled>开始解析</button></div>'+
-          '<button class="manual-fill" onclick="startManualFill()">暂无资料，直接填写</button>'+
+          '<button class="manual-fill" onclick="startManualFill()">'+t('orderChat.noDataFill')+'</button>'+
         '</div>';
       botMsg(card, true);
+    }
+
+    let voiceRecording = false;
+    let voiceTimer = null;
+
+    function voiceMicIcon(){
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+    }
+
+    function voiceBtnIdleHtml(){
+      return voiceMicIcon()+'<span>'+t('orderChat.voiceStart')+'</span>';
+    }
+
+    function voiceBtnRecordingHtml(){
+      return voiceMicIcon()+'<span>'+t('orderChat.voiceRecording')+'</span>';
+    }
+
+    function toggleVoiceInput(btn){
+      if(voiceRecording){
+        stopVoiceInput(btn, true);
+        return;
+      }
+      voiceRecording = true;
+      btn.classList.add('recording');
+      btn.innerHTML = voiceBtnRecordingHtml();
+      voiceTimer = setTimeout(()=> stopVoiceInput(btn, true), 2200);
+    }
+
+    function stopVoiceInput(btn, completed){
+      if(voiceTimer){ clearTimeout(voiceTimer); voiceTimer = null; }
+      voiceRecording = false;
+      if(btn){
+        btn.classList.remove('recording');
+        btn.innerHTML = voiceBtnIdleHtml();
+      }
+      if(completed){
+        userMsg('🎤 '+escapeHtml(t('orderChat.voiceDemoTranscript')));
+        runRecognize(t('orderChat.recognizeSourceVoice'));
+      }
     }
 
     function showUploadExamples(){
@@ -1450,14 +1877,28 @@
       document.getElementById('uploadExamples').classList.remove('show');
     }
 
+    function openUploadSourcePicker(){
+      document.getElementById('uploadSourcePicker').classList.add('show');
+    }
+
+    function closeUploadSourcePicker(event){
+      if(event && event.target !== event.currentTarget) return;
+      document.getElementById('uploadSourcePicker').classList.remove('show');
+    }
+
+    function chooseUploadSource(source){
+      closeUploadSourcePicker();
+      doUpload(source);
+    }
+
     let hasUploadedFiles = false;
     let uploadedFileList = [];
 
-    function doUpload(){
+    function doUpload(source){
       uploadedFileList = [
-        { icon:'🧸', name:'产品照片.jpg' },
-        { icon:'📄', name:'产品规格书.pdf' },
-        { icon:'🧾', name:'采购单.pdf' }
+        { icon:'🧸', name: t('orderChat.demoFilePhoto') },
+        { icon:'📄', name: t('orderChat.demoFileSpec') },
+        { icon:'🧾', name: t('orderChat.demoFilePo') }
       ];
       renderUploadedFiles();
     }
@@ -1469,8 +1910,7 @@
       uploadedFiles.innerHTML = uploadedFileList.map((file, index) =>
         '<div class="uploaded-file">'+
           '<span class="uploaded-file-name">'+file.icon+' '+escapeHtml(file.name)+'</span>'+
-          '<span class="uploaded-file-status">已上传</span>'+
-          '<button class="uploaded-file-delete" type="button" aria-label="删除 '+escapeHtml(file.name)+'" onclick="removeUploadedFile('+index+', event)">×</button>'+
+          '<button class="uploaded-file-delete" type="button" aria-label="'+escapeHtml(t('orderChat.deleteFile', {name: file.name}))+'" onclick="removeUploadedFile('+index+', event)">×</button>'+
         '</div>'
       ).join('');
       uploadedFiles.classList.toggle('show', hasUploadedFiles);
@@ -1485,24 +1925,24 @@
 
     function uploadedFilesSummary(){
       const icons = uploadedFileList.map(file => '<span class="t">'+file.icon+'</span>').join('');
-      return '<div class="thumbs">'+icons+'<span style="margin-left:4px">已上传 '+uploadedFileList.length+' 个文件</span></div>';
+      return '<div class="thumbs">'+icons+'<span style="margin-left:4px">'+t('orderChat.uploadedCount', {count: uploadedFileList.length})+'</span></div>';
     }
 
     function doParse(){
       const v = (document.getElementById('linkIn')||{}).value || '';
       if(!hasUploadedFiles && !v.trim()) return;
       if(hasUploadedFiles && v.trim()){
-        userMsg(uploadedFilesSummary()+'<div style="margin-top:6px">🔗 商品链接：'+escapeHtml(v.slice(0,28))+'…</div>');
-        runRecognize('图片/文档和商品链接');
+        userMsg(uploadedFilesSummary()+'<div style="margin-top:6px">🔗 '+t('orderChat.productLink')+'：'+escapeHtml(v.slice(0,28))+'…</div>');
+        runRecognize(t('orderChat.recognizeSourceBoth'));
         return;
       }
       if(hasUploadedFiles){
         userMsg(uploadedFilesSummary());
-        runRecognize('图片/文档');
+        runRecognize(t('orderChat.recognizeSourceDoc'));
         return;
       }
-      userMsg('🔗 商品链接：'+(v.length>4 ? escapeHtml(v.slice(0,28))+'…' : 'amazon.com/dp/B0XXXXX…'));
-      runRecognize('商品链接');
+      userMsg('🔗 '+t('orderChat.productLink')+'：'+(v.length>4 ? escapeHtml(v.slice(0,28))+'…' : 'amazon.com/dp/B0XXXXX…'));
+      runRecognize(t('orderChat.recognizeSourceLink'));
     }
 
     function updateParseButtonState(){
@@ -1511,39 +1951,43 @@
       if(parseBtn) parseBtn.disabled = !hasUploadedFiles && !linkValue.trim();
     }
 
-    const manualQuestions = [
-      { key:'Product Name', q:'好的，我们直接填写。请先告诉我<b>产品名称（Product Name）</b>。', options:['智能机器人玩具','儿童积木玩具','黑色复合面料'] },
-      { key:'Program', q:'请选择<b>Program</b>。', options:['TEMU Hardware- Seller Pay（商家付款，测试后退款）','TEMU Toys- Seller Pay','Amazon Seller Program'], control:'select', selectTitle:'Program', selectDesc:'请选择本次订单所属的 Program。' },
-      { key:'Country of Origin', q:'请选择<b>原产国家或地区（Country or Region of origin）</b>。', options:['Aland','China (中国)','Vietnam (越南)','India (印度)'], control:'select', selectTitle:'Country or Region of origin', selectDesc:'请选择产品实际生产或加工所在国家/地区。' },
-      { key:'Countries/Regions of Distribution', q:'请选择<b>销售国家或地区（Countries or Regions of distribution）</b>。可输入多个，用逗号分隔。', options:['European Union, United States','Australia, Canada','South Africa','European Union, United States, Australia, Canada, South Africa'] },
-      { key:'Item#/model#', q:'请填写<b>Item # / model #</b>。', options:['RBT-2025-X9','SKU-TOY-001','暂不确定'] },
-      { key:'Manufacturer', q:'请提供<b>制造商（Manufacturer）</b>。', options:['深圳市智创玩具有限公司','供应商即制造商','暂不确定'] },
-      { key:'Manufacturer Address', q:'请提供<b>制造商地址（Manufacturer address）</b>。', options:['深圳市宝安区工业路 88 号','东莞市松山湖科技园','暂不确定'] },
-      { key:'Sample Collection', q:'请选择<b>样品收集方式（Sample Collection）</b>。', options:['启迈 QIMA 将在执行产品服务时收集样本','您或者供应商会寄送样本','启迈 QIMA 已经拿到了样本'] }
-    ];
+    function getManualQuestions(){
+      return [
+        { key:'Product Name', q: tHtml('orderChat.manualQProductName'), options:[t('orderChat.productRobotToy'), t('orderChat.productBlockToy'), t('orderChat.productBlackFabric')] },
+        { key:'Program', q: tHtml('orderChat.manualQProgram'), options: getProgramOptions(), control:'select', selectTitle: t('orderChat.selectProgramTitle'), selectDesc: t('orderChat.selectProgramDesc') },
+        { key:'Country of Origin', q: tHtml('orderChat.manualQOrigin'), options: getOriginOptions(), control:'select', selectTitle: t('orderChat.selectOriginTitle'), selectDesc: t('orderChat.selectOriginDesc') },
+        { key:'Countries/Regions of Distribution', q: tHtml('orderChat.manualQDistribution'), options:[t('orderChat.distributionPresetEn'), t('orderChat.distributionPresetAuCa'), t('orderChat.distributionPresetZa'), t('orderChat.distributionPresetAll')] },
+        { key:'Item#/model#', q: tHtml('orderChat.manualQItemModel'), options:['RBT-2025-X9','SKU-TOY-001', t('orderChat.uncertain')] },
+        { key:'Manufacturer', q: tHtml('orderChat.manualQManufacturer'), options:[t('orderChat.manufacturerDemo'), t('orderChat.supplierAsManufacturer'), t('orderChat.uncertain')] },
+        { key:'Manufacturer Address', q: tHtml('orderChat.manualQManufacturerAddress'), options:[t('orderChat.manufacturerAddrDemo'), t('orderChat.manufacturerAddrDemo2'), t('orderChat.uncertain')] },
+        { key:'Sample Collection', q: tHtml('orderChat.manualQSample'), options:[sampleMethodShip(), sampleMethodCollect(), sampleMethodReceived()] }
+      ];
+    }
     let manualIndex = 0;
     const manualAnswers = {};
 
     function startManualFill(){
-      userMsg('暂无资料，直接填写');
-      manualIndex = manualQuestions.length;
+      userMsg(t('orderChat.noDataFill'));
+      manualIndex = getManualQuestions().length;
       Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
-      const t = botTyping();
+      const typingRow = botTyping();
       setTimeout(()=>{
-        t.remove();
-        botMsg('好的，请在弹出的表单中填写完整的订单信息。', false);
+        typingRow.remove();
+        botMsg(t('orderChat.manualFormPrompt'), false);
         openManualFormModal();
       }, 400);
     }
 
-    const mfLabAddresses = {
-      'hangzhou': '浙江省杭州市萧山区经济技术开发区建设三路 733 号 QIMA 启迈实验室',
-      'shanghai': '上海市浦东新区张江高科技园区科苑路 88 号 QIMA 启迈实验室',
-      'dongguan': '广东省东莞市松山湖高新技术产业开发区工业南路 8 号 QIMA 启迈实验室'
-    };
-
+    function getMfLabAddresses(){
+      var labs = I18n.getTestingLabs();
+      var map = {};
+      labs.forEach(function(l){ map[l.key] = l.address; });
+      return map;
+    }
     function openManualFormModal(){
       document.getElementById('manualFormModal').classList.add('show');
+      populateManualFormI18n();
+      mfToggleSampleFields();
     }
 
     function closeManualFormModal(e){
@@ -1552,7 +1996,8 @@
     }
 
     function mfToggleSampleFields(){
-      const val = document.querySelector('input[name="mf_sample"]:checked').value;
+      const selected = document.querySelector('input[name="mf_sample"]:checked');
+      const val = selected ? selected.value : '';
       document.getElementById('mf_refNumberRow').style.display = val === 'collect' ? 'block' : 'none';
       document.getElementById('mf_labSection').style.display = val === 'ship' ? 'block' : 'none';
       document.getElementById('mf_shippingSection').style.display = (val === 'ship' || val === 'received') ? 'block' : 'none';
@@ -1560,7 +2005,7 @@
 
     function mfShowLabAddr(key){
       const box = document.getElementById('mf_labAddr');
-      box.textContent = mfLabAddresses[key] || '';
+      box.textContent = getMfLabAddresses()[key] || '';
       box.classList.add('show');
     }
 
@@ -1568,7 +2013,7 @@
       const selected = document.querySelector('input[name="mf_electric"]:checked');
       const row = document.getElementById('mf_electricDescriptionRow');
       if(!selected || !row) return;
-      row.style.display = selected.value === '带电' ? 'block' : 'none';
+      row.style.display = selected.value === 'electric' ? 'block' : 'none';
     }
 
     function submitManualForm(){
@@ -1577,21 +2022,25 @@
       const origin = document.getElementById('mf_origin').value;
       const sku = document.getElementById('mf_sku').value.trim();
       const electric = document.querySelector('input[name="mf_electric"]:checked');
-      const electricLabel = electric ? electric.parentElement.textContent.trim() : '';
+      const electricLabel = electric ? (electric.value === 'electric' ? t('index.electricYes') : t('index.electricNo')) : '';
       const electricVal = electric ? electric.value : '';
       const electricDescription = document.getElementById('mf_electricDescription').value.trim();
       const manufacturer = document.getElementById('mf_manufacturer').value.trim();
       const manufacturerAddr = document.getElementById('mf_manufacturerAddr').value.trim();
       const sampleMethod = document.querySelector('input[name="mf_sample"]:checked');
-      const sampleLabel = sampleMethod ? sampleMethod.parentElement.textContent.trim() : '';
       const sampleVal = sampleMethod ? sampleMethod.value : '';
+      const sampleLabel = sampleLabelFromValue(sampleVal);
+      if(!sampleMethod){
+        alert(t('orderChat.alertSelectSample'));
+        return;
+      }
 
       const salesChecked = document.querySelectorAll('#mf_shippingSection .fm-check-grid input:checked, #manualFormModal .fm-check-grid input:checked');
       let salesCountries = [];
       document.querySelectorAll('#manualFormModal .fm-check-grid input:checked').forEach(function(cb){ salesCountries.push(cb.value); });
 
       const labRadio = document.querySelector('input[name="mf_lab"]:checked');
-      const labName = labRadio ? labRadio.parentElement.textContent.trim() : '';
+      const labName = labRadio ? (labRadio.parentElement.querySelector('[data-lab-label]') || {}).textContent || '' : '';
       const carrier = document.getElementById('mf_carrier').value;
       const trackingNo = document.getElementById('mf_trackingNo').value.trim();
       const shippingRemark = document.getElementById('mf_shippingRemark').value.trim();
@@ -1599,58 +2048,58 @@
       manualAnswers['Product Name'] = productName || '';
       manualAnswers['Program'] = program || '';
       manualAnswers['Country of Origin'] = origin || '';
-      manualAnswers['Countries/Regions of Distribution'] = salesCountries.join(', ');
+      manualAnswers['Countries/Regions of Distribution'] = salesCountries.join(t('orderChat.listSep'));
       manualAnswers['Item#/model#'] = sku || '';
-      manualAnswers['产品是否带电'] = electricLabel || '';
-      manualAnswers['产品说明'] = electricVal === '带电' ? electricDescription : '';
+      manualAnswers[FIELD_ELECTRIC] = electricLabel || '';
+      manualAnswers[FIELD_ELECTRIC_DESC] = electricVal === 'electric' ? electricDescription : '';
       manualAnswers['Manufacturer'] = manufacturer || '';
       manualAnswers['Manufacturer Address'] = manufacturerAddr || '';
       manualAnswers['Sample Collection Method'] = sampleLabel;
       manualAnswers['Carrier'] = carrier || '';
       manualAnswers['Tracking Number'] = trackingNo || '';
       manualAnswers['Shipping Remark'] = shippingRemark || '';
-      if(labName) manualAnswers['寄送实验室'] = labName;
+      if(labName) manualAnswers[FIELD_TESTING_LAB] = labName;
 
       closeManualFormModal();
 
-      const t = botTyping();
+      const typingRow = botTyping();
       setTimeout(()=>{
-        t.remove();
-        botMsg('已收到表单信息 ✅ 请确认以下订单信息，确认无误后即可下单。', false);
+        typingRow.remove();
+        botMsg(t('orderChat.manualFormReceived'), false);
         botMsg(mfConfirmCard(productName, program, origin, salesCountries, sku, electricLabel, electricVal, electricDescription, manufacturer, manufacturerAddr, sampleLabel, sampleVal, labName, carrier, trackingNo, shippingRemark), true);
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
+        botMsg(placeOrderChips(), true);
       }, 500);
     }
 
     function mfConfirmCard(pn, prog, origin, countries, sku, electricLabel, electricVal, electricDescription, mfr, mfrAddr, sampleLabel, sampleVal, lab, carrier, tracking, remark){
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">订单信息确认</div><div class="progress-pill">待提交</div></div>'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.confirmCardTitle')+'</div><div class="progress-pill">'+t('orderChat.pendingSubmit')+'</div></div>'+
         '<div class="fields">'+
-          field('产品名称', pn, !!pn)+
-          field('关联项目', prog, !!prog)+
-          field('原产国家或地区', origin, !!origin)+
-          field('销售国家或地区', countries.join('、'), countries.length > 0)+
-          field('货号 / 型号', sku, !!sku)+
-          field('产品是否带电', electricLabel, !!electricLabel)+
-          (electricVal === '带电' ? field('产品说明', electricDescription, !!electricDescription) : '')+
-          field('制造商', mfr, !!mfr)+
-          field('制造商地址', mfrAddr, !!mfrAddr)+
-          field('样品收集方式', sampleLabel, !!sampleLabel)+
-          (sampleVal === 'collect' ? field('产品检验订单参考编号', document.getElementById('mf_refNumber').value || '', !!document.getElementById('mf_refNumber').value) : '')+
-          (sampleVal === 'ship' && lab ? field('寄送实验室', lab, true) : '')+
-          (sampleVal !== 'collect' ? 
-            field('快递公司', carrier, !!carrier)+
-            field('运单号', tracking, !!tracking)+
-            field('备注', remark, !!remark)
+          field('Product Name', pn, !!pn)+
+          field('Program', prog, !!prog)+
+          field('Country of Origin', origin, !!origin)+
+          field('Countries/Regions of Distribution', countries.map(function(c){ return I18n.displayCountry(c); }).join(t('orderChat.listSep')), countries.length > 0)+
+          field('Item#/model#', sku, !!sku)+
+          field(FIELD_ELECTRIC, electricLabel, !!electricLabel)+
+          (electricVal === 'electric' ? field(FIELD_ELECTRIC_DESC, electricDescription, !!electricDescription) : '')+
+          field('Manufacturer', mfr, !!mfr)+
+          field('Manufacturer Address', mfrAddr, !!mfrAddr)+
+          field('Sample Collection Method', sampleLabel, !!sampleLabel)+
+          (sampleVal === 'collect' ? field(FIELD_INSPECTION_REF, document.getElementById('mf_refNumber').value || '', !!document.getElementById('mf_refNumber').value) : '')+
+          (sampleVal === 'ship' && lab ? field(FIELD_TESTING_LAB, lab, true) : '')+
+          (sampleVal !== 'collect' ?
+            field('Carrier', carrier, !!carrier)+
+            field('Tracking Number', tracking, !!tracking)+
+            field('Shipping Remark', remark, !!remark)
           : '')+
         '</div>'+
-        '<button class="edit-fields" onclick="openFieldEditor()"><span>需要修改？</span>编辑</button>'+
+        '<button class="edit-fields" onclick="openFieldEditor()"><span>'+t('orderChat.chipNeedModify')+'</span>'+t('orderChat.chipEdit')+'</button>'+
       '</div>';
     }
 
     function askManualField(){
-      if(manualIndex >= manualQuestions.length){ finishManualFill(); return; }
-      const item = manualQuestions[manualIndex];
+      if(manualIndex >= getManualQuestions().length){ finishManualFill(); return; }
+      const item = getManualQuestions()[manualIndex];
       botMsg(item.q, false);
       if(item.control === 'select'){
         pendingInput = null;
@@ -1673,12 +2122,12 @@
     function selectFieldCard(item, source){
       const selectId = 'select-' + source + '-' + String(item.key || item.q).replace(/[^a-zA-Z0-9]/g, '-');
       return '<div class="select-card">'+
-        '<div class="select-card-title">'+(item.selectTitle || item.key || '请选择')+'</div>'+
-        '<div class="select-card-desc">'+(item.selectDesc || '请从下拉框中选择一个选项，然后点击确定。')+'</div>'+
+        '<div class="select-card-title">'+(item.selectTitle || item.key || t('common.select'))+'</div>'+
+        '<div class="select-card-desc">'+(item.selectDesc || t('orderChat.selectCardDefaultDesc'))+'</div>'+
         '<select class="select-control" id="'+selectId+'">'+
           item.options.map(opt => '<option value="'+escapeHtml(opt)+'">'+escapeHtml(opt)+'</option>').join('')+
         '</select>'+
-        '<button class="select-confirm" onclick="confirmSelectField(this,\''+source+'\',\''+escapeJs(item.key || '')+'\')">确定</button>'+
+        '<button class="select-confirm" onclick="confirmSelectField(this,\''+source+'\',\''+escapeJs(item.key || '')+'\')">'+t('orderChat.selectCardConfirm')+'</button>'+
       '</div>';
     }
 
@@ -1694,18 +2143,18 @@
     }
 
     function distributionCard(){
-      const options = ['European Union', 'United States', 'Australia', 'Canada', 'South Africa'];
+      const options = getDistributionPresets();
       return '<div class="select-card distribution-card">'+
-        '<div class="select-card-title">销售国家或地区</div>'+
-        '<div class="select-card-desc">请选择一个或多个选项，也可以添加新的国家或地区。</div>'+
+        '<div class="select-card-title">'+t('orderChat.distributionTitle')+'</div>'+
+        '<div class="select-card-desc">'+t('orderChat.distributionDesc')+'</div>'+
         '<div class="distribution-options">'+
-          options.map(option => distributionOption(option, option === 'European Union' || option === 'United States')).join('')+
+          options.map(function(option, i){ return distributionOption(option, i < 2); }).join('')+
         '</div>'+
         '<div class="distribution-add">'+
-          '<input class="distribution-input" type="text" placeholder="添加其他国家或地区">'+
-          '<button type="button" onclick="addDistributionOption(this)">添加</button>'+
+          '<input class="distribution-input" type="text" placeholder="'+t('orderChat.distributionAddPlaceholder')+'">'+
+          '<button type="button" onclick="addDistributionOption(this)">'+t('orderChat.distributionAdd')+'</button>'+
         '</div>'+
-        '<button class="select-confirm" type="button" onclick="confirmDistributionSelection(this)">确定</button>'+
+        '<button class="select-confirm" type="button" onclick="confirmDistributionSelection(this)">'+t('orderChat.selectCardConfirm')+'</button>'+
       '</div>';
     }
 
@@ -1728,34 +2177,34 @@
       const selected = card ? Array.from(card.querySelectorAll('.distribution-option input:checked')).map(input => input.value.trim()).filter(Boolean) : [];
       const row = btn.closest('.row'); if(row) row.remove();
       const value = selected.join(', ');
-      userMsg(escapeHtml(value || '暂不确定'));
-      manualAnswers['Countries/Regions of Distribution'] = value || '暂不确定';
+      userMsg(escapeHtml(value || t('orderChat.uncertain')));
+      manualAnswers['Countries/Regions of Distribution'] = value || t('orderChat.uncertain');
       manualIndex++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askManualField(); }, 500);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.recorded'), false); askManualField(); }, 500);
     }
 
     function answerManualField(btn, value){
       const row = btn.closest('.row'); if(row) row.remove();
-      const item = manualQuestions[manualIndex];
+      const item = getManualQuestions()[manualIndex];
       userMsg(escapeHtml(value));
-      if(item.key === 'Sample Collection' && value === '打开相机拍照识别面单'){
+      if(item.key === 'Sample Collection' && value === t('orderChat.openCameraWaybill')){
         openWaybillCamera('manual');
         return;
       }
-      if(item.key === 'Sample Collection' && value === '手动填写快递信息'){
-        manualAnswers['Carrier'] = 'DHL';
-        manualAnswers['Tracking Number'] = 'DHL-8572-4490-CN';
+      if(item.key === 'Sample Collection' && value === t('carrier.manualFill')){
+        manualAnswers['Carrier'] = t('carrier.sf');
+        manualAnswers['Tracking Number'] = 'SF1234567890123';
       }
       manualAnswers[item.key] = value;
       manualIndex++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askManualField(); }, 500);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.recorded'), false); askManualField(); }, 500);
     }
 
     function answerManualText(item, value){
       if(item.key === 'Sample Collection'){
-        if(/拍照|相机|识别/.test(value)){
+        if(/拍照|相机|识别|photo|camera|scan|waybill/i.test(value)){
           openWaybillCamera('manual');
           return;
         }
@@ -1770,19 +2219,19 @@
         manualAnswers[item.key] = value;
       }
       manualIndex++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askManualField(); }, 500);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.recorded'), false); askManualField(); }, 500);
     }
 
     function sampleCollectionCard(source){
       const cardSource = source || 'manual';
       return '<div class="select-card">'+
-        '<div class="select-card-title">样品收集方式</div>'+
-        '<div class="select-card-desc">请选择本次样品将如何提供。</div>'+
+        '<div class="select-card-title">'+t('orderChat.sampleCollectionTitle')+'</div>'+
+        '<div class="select-card-desc">'+t('orderChat.sampleCollectionDesc')+'</div>'+
         '<div class="shipping-methods">'+
-          shippingMethodButton('ship', '您或者供应商会寄送样本', '选择后可拍照识别快递面单，或手动填写物流信息。', cardSource)+
-          shippingMethodButton('collect', '启迈 QIMA 将在执行产品服务时收集样本', '无需填写承运商和运单号。', cardSource)+
-          shippingMethodButton('received', '启迈 QIMA 已经拿到了样本', '可补充已有物流信息或备注，便于追踪。', cardSource)+
+          shippingMethodButton('ship', sampleMethodShip(), t('orderChat.sampleShipDesc'), cardSource)+
+          shippingMethodButton('collect', sampleMethodCollect(), t('orderChat.sampleCollectDesc'), cardSource)+
+          shippingMethodButton('received', sampleMethodReceived(), t('orderChat.sampleReceivedDesc'), cardSource)+
         '</div>'+
       '</div>';
     }
@@ -1800,35 +2249,34 @@
       setFieldValue('Sample Collection Method', label);
       renderReadonlySampleCollection(btn, label);
       if(value === 'collect'){
-        const t = botTyping();
+        const typingRow = botTyping();
         setTimeout(()=>{
-          t.remove();
-          botMsg('请再选择本次要参考的<b>产品检验订单参考编号</b>。', false);
+          typingRow.remove();
+          botMsg(tHtml('orderChat.selectRefPrompt'), false);
           botMsg(refNumberCard(flowSource), true);
         }, 500);
         return;
       }
-      const t2 = botTyping();
+      const typingRow2 = botTyping();
       setTimeout(()=>{
-        t2.remove();
-        botMsg('请选择寄送实验室，将样品寄至对应地址。', false);
+        typingRow2.remove();
+        botMsg(t('orderChat.selectLabPrompt'), false);
         botMsg(labSelectionCard(flowSource), true);
       }, 500);
     }
 
-    const labs = [
-      { name: '杭州实验室', address: '浙江省杭州市萧山区经济技术开发区建设三路 733 号 QIMA 启迈实验室', icon: '🔬' },
-      { name: '上海实验室', address: '上海市浦东新区张江高科技园区科苑路 88 号 QIMA 启迈实验室', icon: '🧪' },
-      { name: '东莞实验室', address: '广东省东莞市松山湖高新技术产业开发区工业南路 8 号 QIMA 启迈实验室', icon: '🧫' }
-    ];
-
+    function getLabs(){
+      return I18n.getTestingLabs().map(function(lab, i){
+        return { name: lab.label, address: lab.address, icon: ['🔬','🧪','🧫'][i] || '🔬', key: lab.key };
+      });
+    }
     function labSelectionCard(source){
       const cardSource = source || 'manual';
       return '<div class="select-card">'+
-        '<div class="select-card-title">选择寄送实验室</div>'+
-        '<div class="select-card-desc">请选择一个实验室，将样品寄至对应地址。</div>'+
+        '<div class="select-card-title">'+t('lab.selectLab')+'</div>'+
+        '<div class="select-card-desc">'+t('lab.selectLabDesc')+'</div>'+
         '<div class="shipping-methods">'+
-          labs.map(function(lab){ return labOptionButton(lab, cardSource); }).join('')+
+          getLabs().map(function(lab){ return labOptionButton(lab, cardSource); }).join('')+
         '</div>'+
       '</div>';
     }
@@ -1843,20 +2291,20 @@
     function selectLab(name, address, source, btn){
       const flowSource = source || 'manual';
       userMsg(escapeHtml(name));
-      manualAnswers['寄送实验室'] = name;
-      manualAnswers['实验室地址'] = address;
+      manualAnswers[FIELD_TESTING_LAB] = name;
+      manualAnswers[FIELD_LAB_ADDRESS] = address;
       renderReadonlyLabSelection(btn, name, address);
-      botMsg('请补充物流信息。你可以拍照识别快递面单，也可以手动填写。', false);
-      botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn" onclick="chooseShippingInput(\'photo\', this, \''+flowSource+'\')">拍照识别面单</button><button class="chip-btn" onclick="chooseShippingInput(\'manual\', this, \''+flowSource+'\')">手动填写物流</button><button class="chip-btn" onclick="chooseShippingInput(\'skip\', this, \''+flowSource+'\')">稍后补充</button></div></div>', true);
+      botMsg(t('orderChat.shippingInfoPrompt'), false);
+      botMsg(chipsRow(I18n.chipHtml('orderChat.chipPhotoWaybill','check','chooseShippingInput(\'photo\', this, \''+flowSource+'\')')+I18n.chipHtml('orderChat.chipManualShipping','edit','chooseShippingInput(\'manual\', this, \''+flowSource+'\')')+I18n.chipHtml('orderChat.chipFillLater','refresh','chooseShippingInput(\'skip\', this, \''+flowSource+'\')')), true);
     }
 
     function renderReadonlyLabSelection(btn, name, address){
       const card = btn ? btn.closest('.select-card') : null;
       if(!card) return;
       card.innerHTML =
-        '<div class="select-card-title">选择寄送实验室</div>'+
+        '<div class="select-card-title">'+t('lab.selectLab')+'</div>'+
         '<div class="readonly-choice">'+
-          '<div class="readonly-choice-label">已选择</div>'+
+          '<div class="readonly-choice-label">'+t('orderChat.selected')+'</div>'+
           '<div class="readonly-choice-value">'+escapeHtml(name)+'</div>'+
           '<div class="shipping-method-desc" style="margin-top:4px">'+escapeHtml(address)+'</div>'+
         '</div>';
@@ -1866,9 +2314,9 @@
       const card = btn ? btn.closest('.select-card') : null;
       if(!card) return;
       card.innerHTML =
-        '<div class="select-card-title">样品收集方式</div>'+
+        '<div class="select-card-title">'+t('orderChat.sampleCollectionTitle')+'</div>'+
         '<div class="readonly-choice">'+
-          '<div class="readonly-choice-label">已选择</div>'+
+          '<div class="readonly-choice-label">'+t('orderChat.selected')+'</div>'+
           '<div class="readonly-choice-value">'+escapeHtml(label)+'</div>'+
         '</div>';
     }
@@ -1876,12 +2324,12 @@
     function refNumberCard(source){
       const cardSource = source || 'manual';
       return '<div class="select-card ref-card">'+
-        '<div class="select-card-title">产品检验订单参考编号</div>'+
-        '<div class="select-card-desc">请选择一个历史 Test / Order 作为本次收集样本的参考。</div>'+
+        '<div class="select-card-title">'+t('orderChat.refNumberTitle')+'</div>'+
+        '<div class="select-card-desc">'+t('orderChat.refNumberDesc')+'</div>'+
         '<div class="history-list">'+
-          refNumberItem('T-25617004', '实验室检测 · Toys', cardSource)+
-          refNumberItem('T-25590011', 'EN71 · Toys', cardSource)+
-          refNumberItem('Q202349103', 'PSI 装运前检测 · Toys', cardSource)+
+          refNumberItem('T-25617004', t('orderChat.historyDescLtToys'), cardSource)+
+          refNumberItem('T-25590011', t('orderChat.historyDescEn71'), cardSource)+
+          refNumberItem('Q202349103', t('orderChat.historyDescLtPsi'), cardSource)+
         '</div>'+
       '</div>';
     }
@@ -1897,22 +2345,22 @@
       renderReadonlyRefNumber(btn, id, desc);
       if(flowSource === 'missing'){
         mi++;
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已记录参考编号 ✅', false); askMissing(); }, 500);
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.refRecorded'), false); askMissing(); }, 500);
         return;
       }
       manualIndex++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录参考编号 ✅', false); askManualField(); }, 500);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.refRecorded'), false); askManualField(); }, 500);
     }
 
     function renderReadonlyRefNumber(btn, id, desc){
       const card = btn ? btn.closest('.select-card') : null;
       if(!card) return;
       card.innerHTML =
-        '<div class="select-card-title">产品检验订单参考编号</div>'+
+        '<div class="select-card-title">'+t('orderChat.refNumberTitle')+'</div>'+
         '<div class="readonly-choice">'+
-          '<div class="readonly-choice-label">已选择</div>'+
+          '<div class="readonly-choice-label">'+t('orderChat.selected')+'</div>'+
           '<div class="readonly-choice-value">'+escapeHtml(id)+'</div>'+
           '<div class="shipping-method-desc">'+escapeHtml(desc)+'</div>'+
         '</div>';
@@ -1922,38 +2370,39 @@
       const flowSource = source || 'manual';
       const row = btn.closest('.row'); if(row) row.remove();
       if(type === 'photo'){
-        userMsg('拍照识别面单');
+        userMsg(t('orderChat.chipPhotoWaybill'));
         openWaybillCamera(flowSource);
         return;
       }
       if(type === 'skip'){
-        userMsg('稍后补充');
+        userMsg(t('orderChat.chipFillLater'));
         if(flowSource === 'missing'){
           mi++;
-          const t = botTyping();
-          setTimeout(()=>{ t.remove(); botMsg('已记录为稍后补充 ✅', false); askMissing(); }, 500);
+          const typingRow = botTyping();
+          setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.fillLaterRecorded'), false); askMissing(); }, 500);
           return;
         }
         manualIndex++;
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已记录为稍后补充 ✅', false); askManualField(); }, 500);
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.fillLaterRecorded'), false); askManualField(); }, 500);
         return;
       }
-      userMsg('手动填写物流');
+      userMsg(t('orderChat.chipManualShipping'));
       botMsg(shippingManualForm(flowSource), true);
     }
 
     let shippingFormSource = 'manual';
     function shippingManualForm(source){
       shippingFormSource = source || 'manual';
+      const carrierOpts = getCarriers().map(function(c){ return '<option>'+escapeHtml(c)+'</option>'; }).join('');
       return '<div class="select-card">'+
-        '<div class="select-card-title">填写物流信息</div>'+
-        '<div class="select-card-desc">请填写承运商、运单追踪号和备注。</div>'+
+        '<div class="select-card-title">'+t('orderChat.shippingFormTitle')+'</div>'+
+        '<div class="select-card-desc">'+t('orderChat.shippingFormDesc')+'</div>'+
         '<div class="shipping-form">'+
-          '<div><label class="shipping-label">承运商</label><select class="select-control" id="manualCarrier"><option value="">请选择</option><option>DHL</option><option>FedEx</option><option>UPS</option><option>TNT</option><option>其他</option></select></div>'+
-          '<div><label class="shipping-label">运单追踪号</label><input class="select-control" id="manualTrackingNo" placeholder="请输入运单追踪号"></div>'+
-          '<div><label class="shipping-label">备注</label><textarea class="shipping-textarea" id="manualShippingRemark" maxlength="3600" placeholder="请输入备注"></textarea></div>'+
-          '<button class="select-confirm" type="button" onclick="confirmManualShipping()">确定</button>'+
+          '<div><label class="shipping-label">'+t('orderChat.shippingCarrier')+'</label><select class="select-control" id="manualCarrier"><option value="">'+t('common.selectPlaceholder')+'</option>'+carrierOpts+'</select></div>'+
+          '<div><label class="shipping-label">'+t('carrier.trackingSearch')+'</label><input class="select-control" id="manualTrackingNo" placeholder="'+t('carrier.trackingSearchPlaceholder')+'"></div>'+
+          '<div><label class="shipping-label">'+t('index.shippingRemark')+'</label><textarea class="shipping-textarea" id="manualShippingRemark" maxlength="3600" placeholder="'+t('index.shippingRemarkPlaceholder')+'"></textarea></div>'+
+          '<button class="select-confirm" type="button" onclick="confirmManualShipping()">'+t('orderChat.selectCardConfirm')+'</button>'+
         '</div>'+
       '</div>';
     }
@@ -1965,35 +2414,37 @@
       manualAnswers['Carrier'] = carrier;
       manualAnswers['Tracking Number'] = tracking;
       manualAnswers['Shipping Remark'] = remark;
-      userMsg((carrier || '未选择承运商') + (tracking ? ' · ' + tracking : ''));
+      userMsg((carrier || t('carrier.noCarrierSelected')) + (tracking ? ' · ' + tracking : ''));
       if(shippingFormSource === 'missing'){
         setFieldValue('Carrier', carrier);
         setFieldValue('Tracking Number', tracking);
         mi++;
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅', false); askMissing(); }, 500);
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.shippingRecorded'), false); askMissing(); }, 500);
         shippingFormSource = 'manual';
         return;
       }
       if(shippingFormSource === 'reuseShipping'){
         setFieldValue('Carrier', carrier);
         setFieldValue('Tracking Number', tracking);
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅ 请再次确认订单信息。', false); }, 500);
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.shippingRecordedConfirm'), false); }, 500);
         shippingFormSource = 'manual';
         return;
       }
       manualIndex++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录物流信息 ✅', false); askManualField(); }, 500);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.shippingRecorded'), false); askManualField(); }, 500);
     }
 
-    const supplierOptions = [
-      { name:'Shenzhen Zhichuang Co., Ltd.', address:'深圳市宝安区工业路 88 号', contact:'Sally Xu' },
-      { name:'Qiming Toy Supplier Co., Ltd.', address:'东莞市松山湖科技园', contact:'David Chen' },
-      { name:'QIMA Toy Supplier', address:'Dongguan, Guangdong, China', contact:'Amy Li' },
-      { name:'同制造商', address:'与制造商信息一致', contact:'-' }
-    ];
+    function getSupplierOptions(){
+      return [
+        { name:'Shenzhen Zhichuang Co., Ltd.', address: t('orderChat.manufacturerAddrDemo'), contact:'Sally Xu' },
+        { name:'Qiming Toy Supplier Co., Ltd.', address: t('orderChat.manufacturerAddrDemo2'), contact:'David Chen' },
+        { name:'QIMA Toy Supplier', address:'Dongguan, Guangdong, China', contact:'Amy Li' },
+        { name: t('orderDetail.sameAsManufacturer'), address: t('orderDetail.sameAsManufacturerAddr'), contact:'-' }
+      ];
+    }
     let supplierPickerSource = '';
     let selectedSupplier = null;
 
@@ -2013,13 +2464,13 @@
     function renderSupplierRows(){
       const keyword = (document.getElementById('supplierSearch').value || '').trim().toLowerCase();
       const rows = document.getElementById('supplierRows');
-      const matched = supplierOptions.filter(item =>
+      const matched = getSupplierOptions().filter(item =>
         item.name.toLowerCase().includes(keyword) ||
         item.address.toLowerCase().includes(keyword) ||
         item.contact.toLowerCase().includes(keyword)
       );
       if(!matched.length){
-        rows.innerHTML = '<tr><td class="supplier-empty" colspan="3">无数据</td></tr>';
+        rows.innerHTML = '<tr><td class="supplier-empty" colspan="3">'+t('common.noData')+'</td></tr>';
         return;
       }
       rows.innerHTML = matched.map((item, index) =>
@@ -2032,7 +2483,7 @@
     }
 
     function selectSupplier(index, name){
-      selectedSupplier = supplierOptions.find(item => item.name === name) || null;
+      selectedSupplier = getSupplierOptions().find(item => item.name === name) || null;
       document.getElementById('supplierSelectBtn').disabled = !selectedSupplier;
       renderSupplierRows();
     }
@@ -2045,25 +2496,25 @@
       userMsg(escapeHtml(selectedSupplier.name));
       if(supplierPickerSource === 'manual'){
         manualIndex++;
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已选择供应商 ✅', false); askManualField(); }, 500);
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.supplierSelected'), false); askManualField(); }, 500);
       } else {
-        botMsg('已更新供应商 ✅', false);
+        botMsg(t('orderChat.supplierUpdated'), false);
       }
     }
 
     function finishManualFill(){
-      const t = botTyping();
-      setTimeout(()=>{ t.remove();
-        botMsg('已根据你的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove();
+        botMsg(t('orderChat.manualDone'), false);
         botMsg(manualOrderCard(), true);
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
+        botMsg(placeOrderChips(), true);
       }, 650);
     }
 
     function manualOrderCard(){
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">订单信息确认</div><div class="progress-pill">待提交</div></div>'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.confirmCardTitle')+'</div><div class="progress-pill">'+t('orderChat.pendingSubmit')+'</div></div>'+
         '<div class="fields">'+
           field('Product Name', manualAnswers['Product Name'] || '', !!manualAnswers['Product Name'])+
           field('Program', manualAnswers['Program'] || '', !!manualAnswers['Program'])+
@@ -2076,7 +2527,7 @@
           field('Carrier', manualAnswers['Carrier'] || '', !!manualAnswers['Carrier'])+
           field('Tracking Number', manualAnswers['Tracking Number'] || '', !!manualAnswers['Tracking Number'])+
           field('Shipping Remark', manualAnswers['Shipping Remark'] || '', !!manualAnswers['Shipping Remark'], true)+
-        '</div><button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
+        '</div>'+editFieldsBtn('orderChat.hasError')+
       '</div>';
     }
 
@@ -2097,94 +2548,78 @@
 
     // 3) AI 识别 → 字段提取卡 + 进度 + 缺失确认
     function runRecognize(src){
-      const t = botTyping();
-      setTimeout(()=>{ t.remove();
-        botMsg('收到！'+src+'上传成功 ✅<br>我已开始识别商品信息，请稍候…', false);
-        const t2 = botTyping();
-        setTimeout(()=>{ t2.remove();
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove();
+        botMsg(tHtml('orderChat.uploadSuccess', {src: src}), false);
+        const typingRow2 = botTyping();
+        setTimeout(()=>{ typingRow2.remove();
           // 疑似商品
           botMsg('<div class="panel panel-pad"><div class="prod"><div class="pimg">🤖</div>'+
-            '<div><div class="ptag">疑似商品</div><div class="pname">智能机器人玩具</div>'+
-            '<div class="pmeta">品牌：未知 ｜ 类别：玩具 Toys</div></div></div></div>', true);
+            '<div><div class="ptag">'+t('orderChat.suspectedProduct')+'</div><div class="pname">'+t('orderChat.productRobotToy')+'</div>'+
+            '<div class="pmeta">'+t('orderChat.brandUnknown')+'</div></div></div></div>', true);
           // 字段提取卡
           botMsg(extractCard(), true);
           // 总结 + 缺失确认
-          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，请在下方一次性补充 👇', false);
+          botMsg(tHtml('orderChat.recognizeDone'), false);
           botMsg(missingFieldsCard(), true);
         }, 1100);
       }, 700);
     }
 
-    function fieldLabel(key){
-      const labels = {
-        'Source ID': '来源编号',
-        'Service': '服务类型',
-        'Product Name': '产品名称',
-        'Program': 'Program',
-        'Country of Origin': '原产国家或地区',
-        'Countries/Regions of Distribution': '销售国家或地区',
-        'Item#/model#': 'Item # / model #',
-        'Manufacturer': '制造商',
-        'Manufacturer Address': '制造商地址',
-        'Sample Collection Method': '样品收集方式',
-        'Carrier': '快递公司',
-        'Tracking Number': '运单号',
-        'Shipping Remark': '备注'
-      };
-      return labels[key] || key;
-    }
-
     function field(k, v, ok, optional){
       const label = fieldLabel(k);
       const opt = optional ? ' data-optional="true"' : '';
-      if(ok) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">'+v+'</div><div class="badge-ok">✓</div></div>';
+      const pending = t('orderChat.fieldPending');
+      const missing = t('orderChat.fieldMissing');
+      if(ok) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">'+escapeHtml(v)+'</div><div class="badge-ok">✓</div></div>';
       if(optional) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">—</div></div>';
-      return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv miss">待确认</div><div class="badge-miss">缺失</div></div>';
+      return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv miss">'+pending+'</div><div class="badge-miss">'+missing+'</div></div>';
     }
     function extractCard(){
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">已识别的表单字段</div><div class="progress-pill">已完成 70%</div></div>'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.extractTitle')+'</div><div class="progress-pill">'+t('orderChat.progress70')+'</div></div>'+
         '<div class="fields">'+
-          field('Product Name','智能机器人玩具', true)+
-          field('Program','TEMU Hardware- Seller Pay（商家付款，测试后退款）', true)+
-          field('Country of Origin','Aland', true)+
-          field('Countries/Regions of Distribution','European Union, United States', true)+
-          field('Item#/model#','RBT-2025-X9', true)+
-          field('Manufacturer','深圳市智创玩具有限公司', true)+
-          field('Manufacturer Address','深圳市宝安区工业路 88 号', true)+
+          field('Product Name', t('orderChat.productRobotToy'), true)+
+          field('Program', t('orderChat.projectTemuHardwareRefund'), true)+
+          field('Country of Origin', t('orderChat.originAland'), true)+
+          field('Countries/Regions of Distribution', t('orderChat.distributionPresetEn'), true)+
+          field('Item#/model#', 'RBT-2025-X9', true)+
+          field('Manufacturer', t('orderChat.manufacturerDemo'), true)+
+          field('Manufacturer Address', t('orderChat.manufacturerAddrDemo'), true)+
           field('Sample Collection Method','', false)+
           field('Carrier','', false)+
           field('Tracking Number','', false)+
           field('Shipping Remark','', false, true)+
         '</div>'+
-        '<button class="edit-fields" onclick="openFieldEditor()"><span>有错误？</span>去编辑</button>'+
+        '<button class="edit-fields" onclick="openFieldEditor()"><span>'+t('orderChat.hasError')+'</span>'+t('orderChat.goEdit')+'</button>'+
       '</div>';
     }
 
-    const editableSections = [
-      {
-        title: '基本信息',
-        fields: [
-          { name:'Product Name', fallback:'智能机器人玩具' },
-          { name:'Program', fallback:'TEMU Hardware- Seller Pay（商家付款，测试后退款）', type:'select', options:['TEMU Hardware- Seller Pay（商家付款，测试后退款）', 'TEMU Toys- Seller Pay', 'Amazon Seller Program'] },
-          { name:'Country of Origin', fallback:'Aland', type:'select', options:['Aland', 'China (中国)', 'Vietnam (越南)', 'India (印度)'] },
-          { name:'Countries/Regions of Distribution', fallback:'European Union, United States' },
-          { name:'Item#/model#', fallback:'RBT-2025-X9' },
-          { name:'Manufacturer', fallback:'深圳市智创玩具有限公司' },
-          { name:'Manufacturer Address', fallback:'深圳市宝安区工业路 88 号' }
-        ]
-      },
-      {
-        title: 'Sample Collection',
-        fields: [
-          { name:'Sample Collection Method', fallback:'', type:'select', options:['', '启迈 QIMA 将在执行产品服务时收集样本', '您或者供应商会寄送样本', '启迈 QIMA 已经拿到了样本'] },
-          { name:'Carrier', fallback:'', type:'select', options:['', 'TNT', 'DHL', 'FedEx', 'UPS', '其他'] },
-          { name:'Tracking Number', fallback:'' },
-          { name:'Shipping Remark', fallback:'' }
-        ]
-      }
-    ];
-
+    function getEditableSections(){
+      return [
+        {
+          title: t('orderChat.basicInfo'),
+          fields: [
+            { name:'Product Name', fallback: t('orderChat.productRobotToy') },
+            { name:'Program', fallback: t('orderChat.projectTemuHardwareRefund'), type:'select', options: getProgramOptions() },
+            { name:'Country of Origin', fallback: t('orderChat.originAland'), type:'select', options: getOriginOptions() },
+            { name:'Countries/Regions of Distribution', fallback: t('orderChat.distributionPresetEn'), type:'multi-country' },
+            { name:'Item#/model#', fallback: 'RBT-2025-X9' },
+            { name:'Manufacturer', fallback: t('orderChat.manufacturerDemo') },
+            { name:'Manufacturer Address', fallback: t('orderChat.manufacturerAddrDemo') }
+          ]
+        },
+        {
+          title: t('orderChat.sampleCollection'),
+          fields: [
+            { name:'Sample Collection Method', fallback:'', type:'select', options:['', sampleMethodShip(), sampleMethodCollect(), sampleMethodReceived()] },
+            { name:'Carrier', fallback:'', type:'select', options:[''].concat(getCarriers()) },
+            { name:'Tracking Number', fallback:'' },
+            { name:'Shipping Remark', fallback:'' }
+          ]
+        }
+      ];
+    }
     function removeActionRow(btn){
       const row = btn ? btn.closest('.row') : null;
       const keepChips = btn ? btn.closest('.chips[data-keep="true"]') : null;
@@ -2195,7 +2630,7 @@
     function openFieldEditor(btn){
       removeActionRow(btn);
       const grid = document.getElementById('fieldEditorGrid');
-      grid.innerHTML = editableSections.map(section =>
+      grid.innerHTML = getEditableSections().map(section =>
         '<div class="edit-section">'+
           '<div class="edit-section-title">'+section.title+'</div>'+
           '<div class="edit-section-body">'+
@@ -2206,22 +2641,184 @@
       document.getElementById('fieldEditor').classList.add('show');
     }
 
+    function addEditSelectOption(btn){
+      const wrap = btn.closest('.edit-item-combo');
+      if(!wrap) return;
+      const input = wrap.querySelector('.edit-inline-add input');
+      const select = wrap.querySelector('select');
+      const value = (input.value || '').trim();
+      if(!value || !select) return;
+      const exists = Array.from(select.options).some(option => option.value === value);
+      if(!exists){
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      }
+      select.value = value;
+      input.value = '';
+    }
+
+    function getDistributionPresets(){ return I18n.getDistributionPresets(); }
+    function getDistributionSearchList(){ return I18n.getDistributionSearchList(); }
+    function normalizeDistributionCountries(raw){
+      if(!raw) return [];
+      return raw.split(/[,，、]/).map(part => part.trim()).filter(Boolean).map(part => I18n.resolveCountryKey(part) || part);
+    }
+
+    function getEditCountryWrap(el){
+      return el ? el.closest('.edit-item-country') : null;
+    }
+
+    function getEditCountryList(wrap){
+      return wrap ? wrap.querySelector('[data-role="country-list"]') : null;
+    }
+
+    function getEditCountryHidden(wrap){
+      return wrap ? wrap.querySelector('input[type="hidden"][data-field-name]') : null;
+    }
+
+    function syncEditCountryHidden(wrap){
+      const hidden = getEditCountryHidden(wrap);
+      const list = getEditCountryList(wrap);
+      if(!hidden || !list) return;
+      const selected = Array.from(list.querySelectorAll('.edit-country-line input:checked')).map(input => input.value.trim()).filter(Boolean);
+      hidden.value = selected.join(', ');
+      syncEditCountrySummary(wrap, selected);
+    }
+
+    function syncEditCountrySummary(wrap, selected){
+      const summary = wrap ? wrap.querySelector('.edit-country-summary') : null;
+      if(!summary) return;
+      const items = selected || Array.from(getEditCountryList(wrap)?.querySelectorAll('.edit-country-line input:checked') || []).map(input => input.value.trim()).filter(Boolean);
+      if(!items.length){
+        summary.textContent = t('common.selectAtLeastOneCountry');
+        summary.classList.add('empty');
+      } else {
+        summary.textContent = t('common.selectedCount', {count: items.length, list: items.map(function(c){ return I18n.displayCountry(c); }).join(t('orderChat.listSep'))});
+        summary.classList.remove('empty');
+      }
+    }
+
+    function editCountryCheckbox(value, checked, extra){
+      const label = I18n.displayCountry(value);
+      return '<label class="edit-country-line'+(extra ? ' extra' : '')+'">'+
+        '<input type="checkbox" value="'+escapeHtml(value)+'"'+(checked ? ' checked' : '')+' onchange="toggleEditCountry(this)">'+
+        '<span>'+escapeHtml(label)+'</span>'+
+      '</label>';
+    }
+
+    function toggleEditCountry(checkbox){
+      const wrap = getEditCountryWrap(checkbox);
+      syncEditCountryHidden(wrap);
+    }
+
+    function renderEditCountryResults(input){
+      const wrap = getEditCountryWrap(input);
+      const results = wrap ? wrap.querySelector('.edit-country-results') : null;
+      const list = getEditCountryList(wrap);
+      if(!results || !list) return;
+      const keyword = (input.value || '').trim().toLowerCase();
+      const existing = new Set(Array.from(list.querySelectorAll('.edit-country-line input')).map(el => el.value));
+      const matches = getDistributionSearchList()
+        .filter(country => country.toLowerCase().includes(keyword))
+        .filter(country => !Array.from(existing).some(value => I18n.displayCountry(value) === country))
+        .slice(0, 6);
+      if(!keyword){
+        results.classList.remove('show');
+        results.innerHTML = '';
+        return;
+      }
+      if(!matches.length && keyword){
+        const raw = input.value.trim();
+        results.innerHTML = '<button class="edit-country-option" type="button" data-country="'+escapeHtml(raw)+'" onmousedown="addEditCountryOption(this)">'+t('common.addCountry', {value: escapeHtml(raw)})+'</button>';
+        results.classList.add('show');
+        return;
+      }
+      results.innerHTML = matches.map(country =>
+        '<button class="edit-country-option" type="button" data-country="'+escapeHtml(country)+'" onmousedown="addEditCountryOption(this)">'+escapeHtml(country)+'</button>'
+      ).join('');
+      results.classList.add('show');
+    }
+
+    function addEditCountryOption(btn, country){
+      const wrap = getEditCountryWrap(btn);
+      const list = getEditCountryList(wrap);
+      const search = wrap ? wrap.querySelector('.edit-country-search input') : null;
+      const results = wrap ? wrap.querySelector('.edit-country-results') : null;
+      const displayValue = (country || btn.dataset.country || '').trim();
+      if(!displayValue || !list) return;
+      const value = I18n.resolveCountryKey(displayValue);
+      const exists = Array.from(list.querySelectorAll('.edit-country-line input')).find(input => input.value === value);
+      if(exists){
+        exists.checked = true;
+      } else {
+        list.insertAdjacentHTML('beforeend', editCountryCheckbox(value, true));
+      }
+      if(search) search.value = '';
+      if(results){
+        results.classList.remove('show');
+        results.innerHTML = '';
+      }
+      syncEditCountryHidden(wrap);
+    }
+
+    function renderEditMultiCountryField(field){
+      const current = getFieldValue(field.name) || manualAnswers[field.name] || field.fallback || '';
+      const selected = new Set(normalizeDistributionCountries(current));
+      const presetKeys = ['us', 'eu', 'ca', 'za', 'au'];
+      const extras = [...selected].filter(country => !presetKeys.includes(country));
+      const presetHtml = presetKeys.map(key => editCountryCheckbox(key, selected.has(key))).join('');
+      const extraHtml = extras.map(country => editCountryCheckbox(country, true, true)).join('');
+      const hiddenValue = [...selected].join(', ');
+      const summaryText = selected.size ? t('common.selectedCount', {count: selected.size, list: [...selected].map(function(c){ return I18n.displayCountry(c); }).join(t('orderChat.listSep'))}) : t('common.selectAtLeastOneCountry');
+      return '<div class="edit-item edit-item-country">'+
+        '<div class="edit-item-label-row">'+
+          '<label>'+escapeHtml(fieldLabel(field.name))+' <span class="req">*</span></label>'+
+          '<span class="edit-info-icon" title="'+t('orderDetail.countryInfoTip')+'">i</span>'+
+        '</div>'+
+        '<div class="edit-country-panel">'+
+          '<div class="edit-country-checks" data-role="country-list">'+presetHtml+extraHtml+'</div>'+
+          '<div class="edit-country-summary'+(!selected.size ? ' empty' : '')+'">'+escapeHtml(summaryText)+'</div>'+
+        '</div>'+
+        '<div class="edit-country-search">'+
+          '<input class="edit-control" type="text" placeholder="'+t('common.searchOtherCountry')+'" autocomplete="off" oninput="renderEditCountryResults(this)" onfocus="renderEditCountryResults(this)">'+
+          '<div class="edit-country-results"></div>'+
+        '</div>'+
+        '<input type="hidden" data-field-name="'+field.name+'" value="'+escapeHtml(hiddenValue)+'">'+
+      '</div>';
+    }
+
     function renderEditField(field){
       const current = getFieldValue(field.name) || manualAnswers[field.name] || field.fallback || '';
-      if(field.type === 'select'){
-        const options = field.options.map(opt => {
+      if(field.type === 'multi-country'){
+        return renderEditMultiCountryField(field);
+      }
+      if(field.type === 'select' || field.type === 'select-addable'){
+        const optionValues = [...field.options];
+        if(current && !optionValues.includes(current)) optionValues.unshift(current);
+        const options = optionValues.map(opt => {
           const selected = opt === current ? ' selected' : '';
-          const label = opt || '请选择';
+          const label = opt || t('common.selectPlaceholder');
           return '<option value="'+escapeHtml(opt)+'"'+selected+'>'+escapeHtml(label)+'</option>';
         }).join('');
-        return '<div class="edit-item">'+
-          '<label>'+fieldLabel(field.name)+'</label>'+
-          '<select class="edit-control" data-field-name="'+field.name+'">'+options+'</select>'+
-        '</div>';
+        const selectHtml =
+          '<div class="edit-item'+(field.type === 'select-addable' ? ' edit-item-combo' : '')+'">'+
+            '<label>'+fieldLabel(field.name)+'</label>'+
+            '<select class="edit-control" data-field-name="'+field.name+'">'+options+'</select>';
+        if(field.type === 'select-addable'){
+          return selectHtml+
+            '<div class="edit-inline-add">'+
+              '<input class="edit-control" type="text" placeholder="'+(field.addPlaceholder || t('orderChat.inputNewOption'))+'">'+
+              '<button class="edit-add-btn" type="button" onclick="addEditSelectOption(this)">'+t('orderChat.addOption')+'</button>'+
+            '</div>'+
+          '</div>';
+        }
+        return selectHtml+'</div>';
       }
       return '<div class="edit-item">'+
         '<label>'+fieldLabel(field.name)+'</label>'+
-        '<input class="edit-control" data-field-name="'+field.name+'" value="'+escapeHtml(current)+'" placeholder="请输入'+fieldLabel(field.name)+'">'+
+        '<input class="edit-control" data-field-name="'+field.name+'" value="'+escapeHtml(current)+'" placeholder="'+t('orderChat.fieldInputPlaceholder', {field: fieldLabel(field.name)})+'">'+
       '</div>';
     }
 
@@ -2235,10 +2832,20 @@
       return field.classList.contains('miss') || field.textContent.trim() === '—' ? '' : field.textContent.trim();
     }
 
+    document.addEventListener('click', (event) => {
+      if(!event.target.closest('.edit-country-search')){
+        document.querySelectorAll('.edit-country-results.show').forEach(results => {
+          results.classList.remove('show');
+          results.innerHTML = '';
+        });
+      }
+    });
+
     function saveFieldEditor(){
       const inputs = document.querySelectorAll('#fieldEditorGrid input, #fieldEditorGrid select, #fieldEditorGrid textarea');
       inputs.forEach(input => {
         const name = input.dataset.fieldName;
+        if(!name) return;
         const value = input.value.trim();
         manualAnswers[name] = value;
         const field = document.querySelector('.field[data-field="'+cssEscape(name)+'"]');
@@ -2259,47 +2866,69 @@
           valueNode.classList.remove('miss');
           if(statusNode) statusNode.style.display = 'none';
         } else {
-          valueNode.textContent = '待确认';
+          valueNode.textContent = t('orderChat.fieldPending');
           valueNode.classList.add('miss');
           if(statusNode){
             statusNode.className = 'badge-miss';
-            statusNode.textContent = '缺失';
+            statusNode.textContent = t('orderChat.fieldMissing');
             statusNode.style.display = '';
           }
         }
       });
       closeFieldEditor();
-      userMsg('已编辑识别字段');
+      userMsg(t('orderChat.editedFields'));
       const completion = calculateRequiredCompletion();
-      botMsg('已保存修改 ✅<br>当前必填字段完成度 <b>'+completion+'%</b>，我会以更新后的字段继续确认。', false);
+      const missing = getMissingRequiredFields();
       if(completion === 100){
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 继续编辑</button></div></div>', true);
+        botMsg(tHtml('orderChat.savedEditComplete'), false);
+        botMsg(chipsRow(I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
+      } else {
+        botMsg(tHtml('orderChat.savedEditPartial', {percent: completion, count: missing.length}), false);
+        botMsg(pendingRequiredFieldsCard(), true);
+        botMsg(chipsRow(I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
       }
     }
 
+    const REQUIRED_ORDER_FIELDS = [
+      'Product Name',
+      'Program',
+      'Country of Origin',
+      'Countries/Regions of Distribution',
+      'Item#/model#',
+      'Manufacturer',
+      'Manufacturer Address',
+      'Sample Collection Method'
+    ];
+
+    function getFieldDisplayValue(name){
+      const value = manualAnswers[name] || getFieldValue(name);
+      return value && value !== t('orderChat.fieldPending') ? value : '';
+    }
+
+    function getMissingRequiredFields(){
+      return REQUIRED_ORDER_FIELDS.filter(name => !getFieldDisplayValue(name));
+    }
+
+    function pendingRequiredFieldsCard(){
+      const missing = getMissingRequiredFields();
+      if(!missing.length) return '';
+      return '<div class="panel">'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.pendingRequiredTitle')+'</div><div class="progress-pill">'+t('orderChat.pendingCount', {count: missing.length})+'</div></div>'+
+        '<div class="fields">'+missing.map(name => field(name, '', false)).join('')+'</div>'+
+        '<button class="edit-fields" onclick="openFieldEditor()"><span>'+t('orderChat.continueFill')+'</span>'+t('orderChat.goEdit')+'</button>'+
+      '</div>';
+    }
+
     function calculateRequiredCompletion(){
-      const requiredFields = [
-        'Product Name',
-        'Program',
-        'Country of Origin',
-        'Countries/Regions of Distribution',
-        'Item#/model#',
-        'Manufacturer',
-        'Manufacturer Address',
-        'Sample Collection Method'
-      ];
-      const filled = requiredFields.filter(name => {
-        const value = manualAnswers[name] || getFieldValue(name);
-        return value && value !== '待确认';
-      }).length;
-      return Math.round((filled / requiredFields.length) * 100);
+      const missingCount = getMissingRequiredFields().length;
+      return Math.round(((REQUIRED_ORDER_FIELDS.length - missingCount) / REQUIRED_ORDER_FIELDS.length) * 100);
     }
 
     let waybillOrigin = '';
     function openWaybillCamera(origin){
       waybillOrigin = origin || '';
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('请对准快递面单拍照，尽量让运单号和快递公司完整入镜。', false); }, 300);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.waybillCameraHint'), false); }, 300);
       const input = document.getElementById('waybillCamera');
       input.value = '';
       input.click();
@@ -2309,17 +2938,17 @@
 
     function processWaybillPhoto(fromDemo){
       if(!waybillOrigin) return;
-      userMsg('已拍摄快递面单照片');
-      const t = botTyping();
-      setTimeout(()=>{ t.remove();
-        const carrier = 'DHL';
-        const tracking = 'DHL-8572-4490-CN';
+      userMsg(t('orderChat.userWaybillPhoto'));
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove();
+        const carrier = t('carrier.sf');
+        const tracking = 'SF1234567890123';
         manualAnswers['Carrier'] = carrier;
         manualAnswers['Tracking Number'] = tracking;
         setFieldValue('Carrier', carrier);
         setFieldValue('Tracking Number', tracking);
-        botMsg('<div class="waybill-card"><div class="waybill-photo"></div><div class="waybill-row"><span>Carrier</span><span>'+carrier+'</span></div><div class="waybill-row"><span>Tracking Number</span><span>'+tracking+'</span></div></div>', true);
-        botMsg('已从面单照片中识别出快递信息 ✅', false);
+        botMsg('<div class="waybill-card"><div class="waybill-photo" data-photo-label="'+escapeHtml(t('carrier.waybillPhoto'))+'"></div><div class="waybill-row"><span>'+t('carrier.label')+'</span><span>'+escapeHtml(carrier)+'</span></div><div class="waybill-row"><span>'+t('carrier.trackingNo')+'</span><span>'+escapeHtml(tracking)+'</span></div></div>', true);
+        botMsg(t('orderChat.waybillRecognized'), false);
         if(waybillOrigin === 'manual'){
           manualIndex++;
           waybillOrigin = '';
@@ -2347,53 +2976,61 @@
     }
 
     function missingFieldsCard(){
+      const carrierOpts = getCarriers().map(function(c, i){ return '<option'+(i===0?' selected':'')+'>'+escapeHtml(c)+'</option>'; }).join('');
+      const labOpts = getLabs().map(function(lab, i){ return '<option'+(i===0?' selected':'')+'>'+escapeHtml(lab.name)+' · '+escapeHtml(lab.address)+'</option>'; }).join('');
       return '<div class="panel missing-card">'+
-        '<div class="missing-title">补充缺失信息</div>'+
-        '<div class="missing-desc">请一次性确认样品收集方式和物流信息，提交后我会直接更新订单字段。</div>'+
+        '<div class="missing-title">'+t('orderChat.missingTitle')+'</div>'+
+        '<div class="missing-desc">'+t('orderChat.missingDesc')+'</div>'+
         '<div class="missing-form">'+
           '<div class="missing-group">'+
-            '<div class="missing-label">样品收集方式 <span class="req">*</span></div>'+
-            missingRadio('ship', '您或者供应商会寄送样本', true)+
-            missingRadio('collect', '启迈 QIMA 将在执行产品服务时收集样本', false)+
-            missingRadio('received', '启迈 QIMA 已经拿到了样本', false)+
+            '<div class="missing-label">'+t('orderChat.sampleMethodLabel')+' <span class="req">*</span></div>'+
+            missingRadio('ship', sampleMethodShip(), true)+
+            missingRadio('collect', sampleMethodCollect(), false)+
+            missingRadio('received', sampleMethodReceived(), false)+
           '</div>'+
           '<div class="missing-subsection" data-section="ref">'+
             '<div class="missing-group">'+
-              '<div class="missing-label">产品检验订单参考编号 <span class="req">*</span></div>'+
-              '<select class="missing-select" id="missingRefNumber"><option value="">请选择参考编号</option><option>T-25617004 · 实验室检测 · Toys</option><option>T-25590011 · EN71 · Toys</option><option>Q202349103 · PSI 装运前检测 · Toys</option></select>'+
-              '<div class="missing-hint">QIMA 收集样本时，需要参考历史 Test / Order 便于安排取样。</div>'+
+              '<div class="missing-label">'+t('index.inspectionRef')+' <span class="req">*</span></div>'+
+              '<select class="missing-select" id="missingRefNumber"><option value="">'+t('orderChat.refNumberPlaceholder')+'</option><option>T-25617004 · '+t('common.serviceLabTestDot')+'</option><option>T-25590011 · EN71 · Toys</option><option>Q202349103 · '+t('orderChat.historyDescLtPsiShort')+'</option></select>'+
+              '<div class="missing-hint">'+t('orderChat.missingRefHint')+'</div>'+
             '</div>'+
           '</div>'+
           '<div class="missing-subsection show" data-section="lab">'+
             '<div class="missing-group">'+
-              '<div class="missing-label">寄送实验室 <span class="req">*</span></div>'+
-              '<select class="missing-select" id="missingLab"><option value="">请选择实验室</option><option selected>杭州实验室 · 浙江省杭州市萧山区经济技术开发区建设三路 733 号</option><option>上海实验室 · 上海市浦东新区张江高科技园区科苑路 88 号</option><option>东莞实验室 · 广东省东莞市松山湖高新技术产业开发区工业南路 8 号</option></select>'+
+              '<div class="missing-label">'+t('lab.sendToLab')+' <span class="req">*</span></div>'+
+              '<select class="missing-select" id="missingLab"><option value="">'+t('orderChat.missingSelectLab')+'</option>'+labOpts+'</select>'+
             '</div>'+
           '</div>'+
           '<div class="missing-subsection show" data-section="shipping">'+
-            '<button class="waybill-scan-btn" type="button" onclick="scanWaybillIntoMissingCard(this)">拍照识别面单</button>'+
+            '<button class="waybill-scan-btn" type="button" onclick="scanWaybillIntoMissingCard(this)">'+t('orderChat.chipPhotoWaybill')+'</button>'+
             '<div class="missing-row">'+
               '<div class="missing-group">'+
-                '<div class="missing-label">快递公司</div>'+
-                '<select class="missing-select" id="missingCarrier"><option value="">请选择</option><option selected>DHL</option><option>FedEx</option><option>UPS</option><option>TNT</option><option>其他</option></select>'+
+                '<div class="missing-label">'+t('carrier.label')+'</div>'+
+                '<select class="missing-select" id="missingCarrier"><option value="">'+t('common.selectPlaceholder')+'</option>'+carrierOpts+'</select>'+
               '</div>'+
               '<div class="missing-group">'+
-                '<div class="missing-label">运单号</div>'+
-                '<input class="missing-input" id="missingTracking" value="DHL-8572-4490-CN" placeholder="如 DHL-8572-4490-CN">'+
+                '<div class="missing-label">'+t('carrier.trackingNo')+'</div>'+
+                '<input class="missing-input" id="missingTracking" value="SF1234567890123" placeholder="SF1234567890123">'+
               '</div>'+
             '</div>'+
             '<div class="missing-group">'+
-              '<div class="missing-label">备注</div>'+
-              '<textarea class="missing-textarea" id="missingRemark" placeholder="可填写样品寄送说明或其他备注"></textarea>'+
+              '<div class="missing-label">'+t('index.shippingRemark')+'</div>'+
+              '<textarea class="missing-textarea" id="missingRemark" placeholder="'+t('orderChat.missingRemarkPlaceholder')+'"></textarea>'+
             '</div>'+
           '</div>'+
           '<div class="missing-group">'+
-            '<div class="missing-label">是否需要增加更多字段展示在报告上？ <span class="req">*</span></div>'+
-            missingReportRadio('是', false)+
-            missingReportRadio('否', true)+
+            '<div class="missing-label">'+t('index.reportFieldsNeed')+' <span class="req">*</span></div>'+
+            missingReportRadio(t('common.yes'), false)+
+            missingReportRadio(t('common.no'), true)+
           '</div>'+
-          '<div class="missing-error" id="missingFormError">请先补充当前样品收集方式下需要的信息。</div>'+
-          '<button class="missing-submit" type="button" onclick="submitMissingFields(this)">确认并更新字段</button>'+
+          '<div class="missing-subsection" data-section="report-fields-detail">'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">'+t('index.reportFieldsDetail')+' <span class="req">*</span></div>'+
+              '<textarea class="missing-textarea" id="missingReportFieldsDetail" placeholder="'+t('index.reportFieldsDetailPlaceholder')+'"></textarea>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-error" id="missingFormError">'+t('orderChat.missingError')+'</div>'+
+          '<button class="missing-submit" type="button" onclick="submitMissingFields(this)">'+t('orderChat.confirmUpdateFields')+'</button>'+
         '</div>'+
       '</div>';
     }
@@ -2407,21 +3044,29 @@
 
     function missingReportRadio(value, checked){
       return '<label class="missing-radio">'+
-        '<input type="radio" name="missingReportFields" value="'+value+'" '+(checked ? 'checked' : '')+'>'+
+        '<input type="radio" name="missingReportFields" value="'+value+'" '+(checked ? 'checked' : '')+' onchange="toggleMissingReportFields(this)">'+
         '<span>'+value+'</span>'+
       '</label>';
+    }
+
+    function toggleMissingReportFields(input){
+      const card = input.closest('.missing-card');
+      const section = card.querySelector('[data-section="report-fields-detail"]');
+      const isYes = input.value === t('common.yes') && input.checked;
+      section.classList.toggle('show', isYes);
+      card.querySelector('#missingFormError').classList.remove('show');
     }
 
     function scanWaybillIntoMissingCard(btn){
       const card = btn.closest('.missing-card');
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = '识别中...';
+      btn.textContent = t('carrier.scanning');
       setTimeout(()=>{
-        card.querySelector('#missingCarrier').value = 'DHL';
-        card.querySelector('#missingTracking').value = 'DHL-8572-4490-CN';
+        card.querySelector('#missingCarrier').value = t('carrier.sf');
+        card.querySelector('#missingTracking').value = 'SF1234567890123';
         card.querySelector('#missingFormError').classList.remove('show');
-        btn.textContent = '已识别面单';
+        btn.textContent = t('carrier.scanned');
         setTimeout(()=>{ btn.disabled = false; btn.textContent = originalText; }, 900);
       }, 600);
     }
@@ -2447,44 +3092,52 @@
       const carrier = (card.querySelector('#missingCarrier') || {}).value || '';
       const tracking = ((card.querySelector('#missingTracking') || {}).value || '').trim();
       const remark = ((card.querySelector('#missingRemark') || {}).value || '').trim();
-      const reportFields = ((card.querySelector('input[name="missingReportFields"]:checked') || {}).value || '否').trim();
+      const reportFields = ((card.querySelector('input[name="missingReportFields"]:checked') || {}).value || t('common.no')).trim();
+      const reportFieldsDetail = ((card.querySelector('#missingReportFieldsDetail') || {}).value || '').trim();
       const isCollect = selected && selected.value === 'collect';
       const isShip = selected && selected.value === 'ship';
       const needsShipping = selected && (selected.value === 'ship' || selected.value === 'received');
       const error = card.querySelector('#missingFormError');
 
       if(isCollect && !refNumber){
-        error.textContent = '请选择产品检验订单参考编号。';
+        error.textContent = t('orderChat.missingErrorRef');
         error.classList.add('show');
         card.querySelector('#missingRefNumber').focus();
         return;
       }
       if(isShip && !lab){
-        error.textContent = '请选择寄送实验室。';
+        error.textContent = t('orderChat.missingErrorLab');
         error.classList.add('show');
         card.querySelector('#missingLab').focus();
         return;
       }
       if(needsShipping && (!carrier || !tracking)){
-        error.textContent = '请补充快递公司和运单号。';
+        error.textContent = t('orderChat.missingErrorShipping');
         error.classList.add('show');
         (carrier ? card.querySelector('#missingTracking') : card.querySelector('#missingCarrier')).focus();
+        return;
+      }
+      if(reportFields === t('common.yes') && !reportFieldsDetail){
+        error.textContent = t('orderChat.missingErrorReport');
+        error.classList.add('show');
+        card.querySelector('#missingReportFieldsDetail').focus();
         return;
       }
 
       error.classList.remove('show');
       manualAnswers['Sample Collection Method'] = sampleLabel;
       manualAnswers['Product Inspection Order Reference Number'] = refNumber;
-      manualAnswers['寄送实验室'] = lab;
+      manualAnswers[FIELD_TESTING_LAB] = lab;
       manualAnswers['Carrier'] = carrier;
       manualAnswers['Tracking Number'] = tracking;
       manualAnswers['Shipping Remark'] = remark;
-      manualAnswers['是否需要增加更多字段展示在报告上'] = reportFields;
+      manualAnswers[FIELD_REPORT_NEED] = reportFields;
+      manualAnswers[FIELD_REPORT_DETAIL] = reportFields === t('common.yes') ? reportFieldsDetail : '';
       setFieldValue('Sample Collection Method', sampleLabel);
       if(carrier) setFieldValue('Carrier', carrier);
       if(tracking) setFieldValue('Tracking Number', tracking);
       if(remark) setFieldValue('Shipping Remark', remark);
-      userMsg('已补充缺失信息');
+      userMsg(t('orderChat.userMissingFilled'));
       const row = btn.closest('.row');
       if(row) row.remove();
       finishConfirm();
@@ -2501,7 +3154,7 @@
 
     // 4) 对话式逐项确认缺失字段
     const missingQueue = [
-      { key:'Sample Collection', q: '请选择<b>样品收集方式（Sample Collection）</b>。' }
+      { key:'Sample Collection', q: tHtml('orderChat.manualQSample') }
     ];
     let mi = 0;
     function askMissing(){
@@ -2534,31 +3187,31 @@
       // 移除该组 chips
       const wide = btn.closest('.row'); if(wide) wide.remove();
       userMsg(val);
-      if(val === '打开相机拍照识别面单'){
+      if(val === t('orderChat.openCameraWaybill')){
         openWaybillCamera('missing');
         return;
       }
-      if(key === 'Shipping' && val === '现在填写'){
+      if(key === 'Shipping' && isFillNowInput(val)){
         botMsg(shippingManualForm('missing'), true);
         return;
       }
-      if(key === 'Shipping' && val === '暂无，稍后补充'){
+      if(key === 'Shipping' && (val === t('carrier.fillLater') || val === t('orderChat.fillLaterNo'))){
         mi++;
-        const t = botTyping();
-        setTimeout(()=>{ t.remove(); botMsg('已记录为稍后补充 ✅', false); askMissing(); }, 600);
+        const typingRow = botTyping();
+        setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.fillLaterRecorded'), false); askMissing(); }, 600);
         return;
       }
       if(key){
         setFieldValue(key, val);
       }
       mi++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askMissing(); }, 600);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.recorded'), false); askMissing(); }, 600);
     }
 
     function answerMissingText(item, value){
       if(item.key === 'Shipping'){
-        if(/拍照|相机|识别/.test(value)){
+        if(/拍照|相机|识别|photo|camera|scan|waybill/i.test(value)){
           openWaybillCamera('missing');
           return;
         }
@@ -2577,58 +3230,127 @@
         manualAnswers[item.key] = value;
       }
       mi++;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('已记录 ✅', false); askMissing(); }, 600);
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.recorded'), false); askMissing(); }, 600);
     }
 
     function finishConfirm(){
       const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '';
       const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || '';
       const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '';
-      const needShipping = collectionMethod !== '启迈 QIMA 将在执行产品服务时收集样本';
+      const needShipping = !isSampleCollect(collectionMethod);
       const shippingComplete = !needShipping || (carrier && tracking);
       const pct = shippingComplete ? 100 : 85;
-      const t = botTyping();
-      setTimeout(()=>{ t.remove();
-        botMsg('太好了！信息已'+(shippingComplete ? '全部补齐' : '基本补齐')+'，<b>表单完成度 '+pct+'%</b> 🎉<br>'+(shippingComplete ? '' : '物流信息尚未填写，将先生成订单草稿，之后仍可补充。<br>')+'请确认订单信息，确认无误后即可去下单。', false);
-        const chips = '<div class="chips" data-keep="true">'+
-          '<button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button>'+
-          '<button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button>'+
-          '</div>';
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove();
+        botMsg(tHtml(shippingComplete ? 'orderChat.finishComplete' : 'orderChat.finishPartial', {pct: pct}), false);
+        const chips = '<div class="chips" data-keep="true">'+I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)')+'</div>';
         botMsg('<div style="width:268px">'+chips+'</div>', true);
       }, 700);
     }
     function confirmOrderInfo(btn){
       removeActionRow(btn);
-      userMsg('确认订单信息');
-      const t = botTyping();
-      setTimeout(()=>{ t.remove();
+      userMsg(t('orderChat.confirmOrderInfo'));
+      const typingRow = botTyping();
+      setTimeout(()=>{ typingRow.remove();
         botMsg(orderSummaryCard(), true);
-        botMsg('请确认以上订单信息是否正确。确认后我会帮你提交检测订单。', false);
-        botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 返回编辑字段</button></div></div>', true);
+        botMsg(t('orderChat.confirmOrderPrompt'), false);
+        botMsg(chipsRow(I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipBackEditFields','edit','openFieldEditor(this)')), true);
       }, 700);
     }
     function orderSummaryCard(){
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">订单信息确认</div><div class="progress-pill">待提交</div></div>'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.confirmCardTitle')+'</div><div class="progress-pill">'+t('orderChat.pendingSubmit')+'</div></div>'+
         '<div class="fields">'+
-          field('Product Name', getFieldValue('Product Name') || '智能机器人玩具', true)+
-          field('Program', getFieldValue('Program') || 'TEMU Hardware- Seller Pay（商家付款，测试后退款）', true)+
-          field('Country of Origin', getFieldValue('Country of Origin') || 'Aland', true)+
-          field('Countries/Regions of Distribution', getFieldValue('Countries/Regions of Distribution') || 'European Union, United States', true)+
+          field('Product Name', getFieldValue('Product Name') || t('orderChat.productRobotToy'), true)+
+          field('Program', getFieldValue('Program') || t('orderChat.projectTemuHardwareRefund'), true)+
+          field('Country of Origin', getFieldValue('Country of Origin') || t('orderChat.originAland'), true)+
+          field('Countries/Regions of Distribution', getFieldValue('Countries/Regions of Distribution') || t('orderChat.distributionPresetEn'), true)+
           field('Item#/model#', getFieldValue('Item#/model#') || 'RBT-2025-X9', true)+
-          field('Manufacturer', getFieldValue('Manufacturer') || '深圳市智创玩具有限公司', true)+
-          field('Manufacturer Address', getFieldValue('Manufacturer Address') || '深圳市宝安区工业路 88 号', true)+
-          field('Sample Collection Method', getFieldValue('Sample Collection Method') || '您或者供应商会寄送样本', true)+
-          field('Carrier', getFieldValue('Carrier') || '待确认', !!getFieldValue('Carrier'))+
-          field('Tracking Number', getFieldValue('Tracking Number') || '待确认', !!getFieldValue('Tracking Number'))+
+          field('Manufacturer', getFieldValue('Manufacturer') || t('orderChat.manufacturerDemo'), true)+
+          field('Manufacturer Address', getFieldValue('Manufacturer Address') || t('orderChat.manufacturerAddrDemo'), true)+
+          field('Sample Collection Method', getFieldValue('Sample Collection Method') || t('orderChat.fieldPending'), !!getFieldValue('Sample Collection Method'))+
+          field('Carrier', getFieldValue('Carrier') || t('orderChat.fieldPending'), !!getFieldValue('Carrier'))+
+          field('Tracking Number', getFieldValue('Tracking Number') || t('orderChat.fieldPending'), !!getFieldValue('Tracking Number'))+
           field('Shipping Remark', getFieldValue('Shipping Remark') || '', !!getFieldValue('Shipping Remark'), true)+
         '</div>'+
       '</div>';
     }
-    function placeOrder(btn, skipReportFieldsQuestion){
-      if (!manualAnswers['是否需要增加更多字段展示在报告上']) manualAnswers['是否需要增加更多字段展示在报告上'] = '否';
+    function reportFieldsCard(){
+      return '<div class="panel missing-card report-fields-card">'+
+        '<div class="missing-title">'+t('index.reportFieldsNeed')+'</div>'+
+        '<div class="missing-form">'+
+          '<div class="missing-group">'+
+            chatReportRadio(t('common.yes'), false)+
+            chatReportRadio(t('common.no'), true)+
+          '</div>'+
+          '<div class="missing-subsection" data-section="chat-report-fields-detail">'+
+            '<div class="missing-group">'+
+              '<div class="missing-label">'+t('index.reportFieldsDetail')+' <span class="req">*</span></div>'+
+              '<textarea class="missing-textarea" id="chatReportFieldsDetail" placeholder="'+t('index.reportFieldsDetailPlaceholder')+'"></textarea>'+
+            '</div>'+
+          '</div>'+
+          '<div class="missing-error" id="chatReportFieldsError">'+t('orderChat.missingErrorReport')+'</div>'+
+          '<button class="missing-submit" type="button" onclick="submitReportFieldsCard(this)">'+t('common.confirm')+'</button>'+
+        '</div>'+
+      '</div>';
+    }
+
+    function chatReportRadio(value, checked){
+      return '<label class="missing-radio">'+
+        '<input type="radio" name="chatReportFields" value="'+escapeHtml(value)+'" '+(checked ? 'checked' : '')+' onchange="toggleChatReportFields(this)">'+
+        '<span>'+escapeHtml(value)+'</span>'+
+      '</label>';
+    }
+
+    function toggleChatReportFields(input){
+      const card = input.closest('.report-fields-card');
+      if(!card) return;
+      const section = card.querySelector('[data-section="chat-report-fields-detail"]');
+      const isYes = input.value === t('common.yes') && input.checked;
+      section.classList.toggle('show', isYes);
+      const error = card.querySelector('#chatReportFieldsError');
+      if(error) error.classList.remove('show');
+    }
+
+    function askReportFieldsStep(btn){
       removeActionRow(btn);
+      botMsg(reportFieldsCard(), true);
+    }
+
+    function submitReportFieldsCard(btn){
+      const card = btn.closest('.report-fields-card');
+      if(!card) return;
+      const reportFields = ((card.querySelector('input[name="chatReportFields"]:checked') || {}).value || t('common.no')).trim();
+      const reportFieldsDetail = ((card.querySelector('#chatReportFieldsDetail') || {}).value || '').trim();
+      const error = card.querySelector('#chatReportFieldsError');
+      if(reportFields === t('common.yes') && !reportFieldsDetail){
+        if(error) error.classList.add('show');
+        const input = card.querySelector('#chatReportFieldsDetail');
+        if(input) input.focus();
+        return;
+      }
+      if(error) error.classList.remove('show');
+      const summary = reportFields === t('common.yes')
+        ? reportFields + ' · ' + reportFieldsDetail
+        : reportFields;
+      userMsg(escapeHtml(summary));
+      const row = btn.closest('.row');
+      if(row) row.remove();
+      manualAnswers[FIELD_REPORT_NEED] = reportFields;
+      manualAnswers[FIELD_REPORT_DETAIL] = reportFields === t('common.yes') ? reportFieldsDetail : '';
+      placeOrder(null, true);
+    }
+
+    function placeOrder(btn, skipReportFieldsQuestion){
+      if(!skipReportFieldsQuestion && manualAnswers[FIELD_REPORT_NEED] === undefined){
+        askReportFieldsStep(btn);
+        return;
+      }
+      removeActionRow(btn);
+      if(manualAnswers[FIELD_REPORT_NEED] === undefined){
+        manualAnswers[FIELD_REPORT_NEED] = t('common.no');
+      }
       document.getElementById('orderConfirmBody').innerHTML = readonlyOrderConfirmCard();
       document.getElementById('orderConfirmModal').classList.add('show');
     }
@@ -2654,7 +3376,7 @@
 
     function dismissOrderConfirm(){
       closeOrderConfirm();
-      botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 提交下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 继续修改</button></div></div>', true);
+      botMsg(chipsRow(I18n.chipHtml('orderChat.chipSubmitOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipContinueModify','edit','openFieldEditor(this)')), true);
     }
 
     function editOrderFromConfirm(){
@@ -2662,47 +3384,73 @@
       openFieldEditor();
     }
 
+    function resolveLabKey(value){
+      if(!value) return '';
+      const text = String(value).toLowerCase();
+      const hangzhou = t('lab.hangzhou').toLowerCase();
+      const shanghai = t('lab.shanghai').toLowerCase();
+      const dongguan = t('lab.dongguan').toLowerCase();
+      if(text.includes('dongguan') || text.includes(dongguan) || value === t('lab.dongguan')) return 'dongguan';
+      if(text.includes('shanghai') || text.includes(shanghai) || value === t('lab.shanghai')) return 'shanghai';
+      if(text.includes('hangzhou') || text.includes(hangzhou) || value === t('lab.hangzhou')) return 'hangzhou';
+      return '';
+    }
+
+    function buildSuccessPageUrl(){
+      const params = new URLSearchParams();
+      params.set('order', 'T-25617004');
+      const labKey = resolveLabKey(manualAnswer(FIELD_TESTING_LAB, '寄送实验室') || manualAnswer(FIELD_LAB_ADDRESS, '实验室地址') || '');
+      if(labKey) params.set('lab', labKey);
+      return 'order-success.html?' + params.toString();
+    }
+
     function submitOrderSuccess(){
-      window.location.href = 'order-success.html';
+      window.location.href = buildSuccessPageUrl();
     }
 
     function readonlyOrderConfirmCard(){
-      const productName = manualAnswers['Product Name'] || getFieldValue('Product Name') || '智能机器人玩具';
-      const program = manualAnswers['Program'] || getFieldValue('Program') || 'TEMU Hardware- Seller Pay（商家付款，测试后退款）';
-      const manufacturer = manualAnswers['Manufacturer'] || getFieldValue('Manufacturer') || '深圳市智创玩具有限公司';
-      const origin = manualAnswers['Country of Origin'] || getFieldValue('Country of Origin') || 'Aland';
-      const distribution = manualAnswers['Countries/Regions of Distribution'] || getFieldValue('Countries/Regions of Distribution') || 'European Union, United States';
+      const productName = manualAnswers['Product Name'] || getFieldValue('Product Name') || t('orderChat.productRobotToy');
+      const program = manualAnswers['Program'] || getFieldValue('Program') || t('orderChat.projectTemuHardwareRefund');
+      const manufacturer = manualAnswers['Manufacturer'] || getFieldValue('Manufacturer') || t('orderChat.manufacturerDemo');
+      const origin = manualAnswers['Country of Origin'] || getFieldValue('Country of Origin') || t('orderChat.originAland');
+      const distribution = manualAnswers['Countries/Regions of Distribution'] || getFieldValue('Countries/Regions of Distribution') || t('orderChat.distributionPresetEn');
       const itemModel = manualAnswers['Item#/model#'] || getFieldValue('Item#/model#') || 'RBT-2025-X9';
-      const electricType = manualAnswers['产品是否带电'] || '';
-      const electricDescription = manualAnswers['产品说明'] || '';
-      const manufacturerAddress = manualAnswers['Manufacturer Address'] || getFieldValue('Manufacturer Address') || '深圳市宝安区工业路 88 号';
-      const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || '待确认';
-      const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '待确认';
-      const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '启迈 QIMA 将在执行产品服务时收集样本';
+      const electricType = manualAnswer(FIELD_ELECTRIC, '产品是否带电');
+      const electricDescription = manualAnswer(FIELD_ELECTRIC_DESC, '产品说明');
+      const manufacturerAddress = manualAnswers['Manufacturer Address'] || getFieldValue('Manufacturer Address') || t('orderChat.manufacturerAddrDemo');
+      const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || t('orderChat.fieldPending');
+      const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || t('orderChat.fieldPending');
+      const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || t('orderChat.fieldPending');
       const shippingRemark = manualAnswers['Shipping Remark'] || getFieldValue('Shipping Remark') || '';
-      const reportFieldsNeed = manualAnswers['是否需要增加更多字段展示在报告上'] || '否';
+      const reportFieldsNeed = manualAnswer(FIELD_REPORT_NEED, '是否需要增加更多字段展示在报告上') || t('common.no');
+      const reportFieldsDetail = manualAnswer(FIELD_REPORT_DETAIL, '报告额外字段');
       return '<div class="panel">'+
         '<div class="fields">'+
-          field('产品名称', productName, true)+
+          field('Product Name', productName, true)+
           field('Program', program, true)+
-          field('原产国', origin, true)+
-          field('销售国家或地区', distribution, true)+
-          field('Item # / model #', itemModel, true)+
-          (electricType ? field('产品是否带电', electricType, true) : '')+
-          (electricDescription ? field('产品说明', electricDescription, true) : '')+
-          field('制造商', manufacturer, true)+
-          field('制造商地址', manufacturerAddress, true)+
-          field('样品收集方式', collectionMethod, true)+
-          field('是否需要增加更多字段展示在报告上？', reportFieldsNeed, true)+
-          (collectionMethod === '启迈 QIMA 将在执行产品服务时收集样本' ? '' :
-            field('快递公司', carrier, carrier !== '待确认')+
-            field('运单号', tracking, tracking !== '待确认')+
-            field('物流备注', shippingRemark, !!shippingRemark, true)
+          field('Country of Origin', origin, true)+
+          field('Countries/Regions of Distribution', distribution, true)+
+          field('Item#/model#', itemModel, true)+
+          (electricType ? field(FIELD_ELECTRIC, electricType, true) : '')+
+          (electricDescription ? field(FIELD_ELECTRIC_DESC, electricDescription, true) : '')+
+          field('Manufacturer', manufacturer, true)+
+          field('Manufacturer Address', manufacturerAddress, true)+
+          field('Sample Collection Method', collectionMethod, true)+
+          field(FIELD_REPORT_NEED, reportFieldsNeed, true)+
+          (reportFieldsNeed === t('common.yes') && reportFieldsDetail ? field(FIELD_REPORT_DETAIL, reportFieldsDetail, true) : '')+
+          (isSampleCollect(collectionMethod) ? '' :
+            field('Carrier', carrier, carrier !== t('orderChat.fieldPending'))+
+            field('Tracking Number', tracking, tracking !== t('orderChat.fieldPending'))+
+            field('Shipping Remark', shippingRemark, !!shippingRemark, true)
           )+
         '</div>'+
       '</div>';
     }
-    function reedit(btn){ removeActionRow(btn); userMsg('补充商品信息'); openFieldEditor(); }
+    function reedit(btn){ removeActionRow(btn); userMsg(t('orderChat.userSupplementProduct')); openFieldEditor(); }
+    if (window.I18n) {
+      I18n.onLangApplied = function () { populateManualFormI18n(); };
+      I18n.initLangToggle();
+    }
   </script>
 </body>
 </html>

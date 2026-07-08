@@ -25,13 +25,10 @@
   body { display: flex; justify-content: center; }
   .phone {
     position: relative;
-    width: 390px;
-    height: 844px;
     display: flex;
     flex-direction: column;
     background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
     overflow: hidden;
-    flex-shrink: 0;
   }
   .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
   .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .07; left: 230px; top: -130px; transform: rotate(30deg); }
@@ -76,7 +73,7 @@
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 14px rgba(25,25,25,.08);
-    padding: 34px 22px 24px;
+    padding: 34px 22px 20px;
     text-align: center;
   }
   .success-icon {
@@ -104,24 +101,10 @@
   }
   .summary-row span:first-child { color: var(--seal); }
   .summary-row span:last-child { color: var(--carbon); font-weight: 600; text-align: right; }
-  .actions {
-    width: 100%;
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  .card-block-divider {
+    height: 1px; background: #eef0f4; margin: 18px 0;
   }
-  .action {
-    width: 100%; height: 46px; border-radius: 13px;
-    display: flex; align-items: center; justify-content: center;
-    text-decoration: none;
-    font-size: 15px; font-weight: 600;
-  }
-  .action.primary { background: var(--pool-500); color: #fff; box-shadow: 0 6px 16px rgba(65,105,225,.28); }
-  .action.secondary { background: #fff; color: var(--pool-500); border: 1px solid #dce4fb; }
   .reminder-banner {
-    width: 100%;
-    margin-top: 16px;
     background: #fff9e6;
     border: 1px solid #f5d96e;
     border-radius: 12px;
@@ -141,7 +124,62 @@
   }
   .reminder-text { font-size: 13px; line-height: 20px; color: #6b5a1e; }
   .reminder-text strong { color: #4a3d0e; }
+  .lab-section { text-align: left; }
+  .lab-section-title { font-size: 14px; font-weight: 700; color: var(--carbon); margin-bottom: 10px; }
+  .lab-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .lab-tab {
+    height: 32px; padding: 0 12px; border-radius: 999px;
+    border: 1px solid #dce4fb; background: #fff;
+    color: var(--seal); font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .lab-tab.active {
+    background: var(--pool-050); border-color: #b8c6ee; color: var(--pool-500);
+  }
+  .lab-address-box {
+    background: #f7f9ff; border: 1px solid #e3e9fb; border-radius: 10px;
+    padding: 12px;
+  }
+  .lab-address-label { font-size: 11px; color: var(--seal); margin-bottom: 6px; }
+  .lab-address {
+    font-size: 13px; line-height: 20px; color: var(--carbon); word-break: break-all;
+  }
+  .copy-btn {
+    margin-top: 10px; width: 100%; height: 36px; border-radius: 10px;
+    border: 1px solid #dce4fb; background: #fff; color: var(--pool-500);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .copy-btn:active { background: var(--pool-050); }
+  .copy-toast {
+    position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%);
+    background: rgba(25,25,25,.86); color: #fff; font-size: 13px;
+    padding: 10px 14px; border-radius: 10px; opacity: 0; pointer-events: none;
+    transition: opacity .2s ease; z-index: 20;
+  }
+  .copy-toast.show { opacity: 1; }
+  .content { overflow-y: auto; }
+  .actions {
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .action {
+    width: 100%; height: 46px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    font-size: 15px; font-weight: 600;
+  }
+  .action.primary { background: var(--pool-500); color: #fff; box-shadow: 0 6px 16px rgba(65,105,225,.28); }
+  .action.secondary { background: #fff; color: var(--pool-500); border: 1px solid #dce4fb; }
 </style>
+<link rel="stylesheet" href="assets/phone-shell.css" />
+<link rel="stylesheet" href="assets/lang-toggle.css" />
+<link rel="stylesheet" href="assets/i18n-en.css" />
+<script>window.PAGE_TITLE_KEY = 'title.orderSuccess';</script>
+<script src="assets/i18n/zh.js"></script>
+<script src="assets/i18n/en.js"></script>
+<script src="assets/i18n-runtime.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -158,8 +196,8 @@
     </div>
 
     <div class="navbar">
-      <a href="order-chat.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
-      <div class="title">下单成功</div>
+      <a href="order-chat.html"><img class="back" src="assets/vector52.svg" alt="返回" data-i18n-alt="common.back" /></a>
+      <div class="title" data-i18n="orderSuccess.title">下单成功</div>
       <div class="nav-capsule">
         <img src="assets/share.svg" alt="" />
         <div class="divider"></div>
@@ -170,28 +208,144 @@
     <main class="content">
       <section class="success-card">
         <div class="success-icon">✓</div>
-        <div class="success-title">下单成功</div>
-        <div class="success-desc">检测订单已提交，QIMA 团队将继续处理样品收集、测试安排和报告生成。</div>
+        <div class="success-title" data-i18n="orderSuccess.heading">下单成功</div>
+        <div class="success-desc" data-i18n="orderSuccess.desc">检测订单已提交，QIMA 团队将继续处理样品收集、测试安排和报告生成。</div>
         <div class="summary">
-          <div class="summary-row"><span>订单参考编号</span><span>T-25617004</span></div>
-          <div class="summary-row"><span>服务类型</span><span>实验室检测</span></div>
-          <div class="summary-row"><span>订单状态</span><span>待录入数据</span></div>
-          <div class="summary-row"><span>预计报告日期</span><span>2026-06-05</span></div>
+          <div class="summary-row"><span data-i18n="common.orderRef">订单参考编号</span><span id="orderRefId">T-25617004</span></div>
+          <div class="summary-row"><span data-i18n="orderSuccess.serviceType">服务类型</span><span data-i18n="common.serviceLabTest">实验室检测</span></div>
+          <div class="summary-row"><span data-i18n="orderSuccess.orderStatus">订单状态</span><span data-i18n="status.pendingVerification">待验证</span></div>
+        </div>
+
+        <div class="card-block-divider"></div>
+
+        <div class="reminder-banner">
+          <div class="reminder-icon">!</div>
+          <div class="reminder-text">
+            <strong data-i18n="orderSuccess.reminderTitle">温馨提示：</strong><span data-i18n="orderSuccess.reminderBody" data-i18n-html="true">寄送样品时，请将<strong>订单参考编号（T单号）</strong>写在样品包装袋上，以便我们快速匹配您的样品。</span>
+          </div>
+        </div>
+
+        <div class="card-block-divider"></div>
+
+        <div class="lab-section">
+          <div class="lab-section-title" data-i18n="lab.sendToLab">寄送实验室</div>
+          <div class="lab-tabs" id="labTabs"></div>
+          <div class="lab-address-box">
+            <div class="lab-address-label" data-i18n="lab.addressLabel">实验室地址</div>
+            <div class="lab-address" id="labAddressText"></div>
+            <button class="copy-btn" type="button" onclick="copyLabAddress()" data-i18n="common.copyAddress">复制地址</button>
+          </div>
         </div>
       </section>
 
-      <div class="reminder-banner">
-        <div class="reminder-icon">!</div>
-        <div class="reminder-text">
-          <strong>温馨提示：</strong>寄送样品时，请将<strong>订单参考编号（T单号）</strong>写在样品包装袋上，以便我们快速匹配您的样品。
-        </div>
-      </div>
-
       <div class="actions">
-        <a class="action primary" href="orders.html">查看订单管理</a>
-        <a class="action secondary" href="index.html">返回首页</a>
+        <a class="action primary" id="viewOrderLink" href="order-detail.html?order=T-25617004" data-i18n="orderSuccess.viewOrders">查看订单管理</a>
+        <a class="action secondary" href="index.html" data-i18n="orderSuccess.backHome">返回首页</a>
       </div>
     </main>
+    <div class="copy-toast" id="copyToast" data-i18n="common.addressCopied">地址已复制</div>
   </div>
+  <script>
+    let activeLab = 'hangzhou';
+
+    const DEFAULT_ORDER_ID = 'T-25617004';
+
+    function getOrderId() {
+      const param = new URLSearchParams(window.location.search).get('order');
+      return param || DEFAULT_ORDER_ID;
+    }
+
+    function applyOrderContext() {
+      const orderId = getOrderId();
+      const refEl = document.getElementById('orderRefId');
+      if (refEl) refEl.textContent = orderId;
+      const link = document.getElementById('viewOrderLink');
+      if (link) link.href = 'order-detail.html?order=' + encodeURIComponent(orderId);
+    }
+
+    function getInitialLabKey() {
+      const param = new URLSearchParams(window.location.search).get('lab');
+      return ['hangzhou', 'shanghai', 'dongguan'].includes(param) ? param : 'hangzhou';
+    }
+
+    function renderLabTabs() {
+      const tabs = document.getElementById('labTabs');
+      if (!tabs || !window.I18n) return;
+      const labs = I18n.getTestingLabs();
+      tabs.innerHTML = labs.map(function (lab) {
+        const active = lab.key === activeLab ? ' active' : '';
+        return '<button class="lab-tab' + active + '" type="button" data-lab="' + lab.key + '" onclick="selectLab(\'' + lab.key + '\', this)">' + lab.label + '</button>';
+      }).join('');
+    }
+
+    function updateLabAddress() {
+      const el = document.getElementById('labAddressText');
+      if (!el || !window.I18n) return;
+      const lab = I18n.getTestingLabs().find(function (item) { return item.key === activeLab; });
+      el.textContent = lab ? lab.address : '';
+    }
+
+    function selectLab(key, btn) {
+      activeLab = key;
+      document.querySelectorAll('.lab-tab').forEach(function (tab) { tab.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      updateLabAddress();
+    }
+
+    function showCopyToast(messageKey) {
+      const toast = document.getElementById('copyToast');
+      toast.textContent = typeof t === 'function' ? t(messageKey) : messageKey;
+      toast.classList.add('show');
+      clearTimeout(showCopyToast.timer);
+      showCopyToast.timer = setTimeout(function () { toast.classList.remove('show'); }, 1600);
+    }
+
+    function copyLabAddress() {
+      const lab = window.I18n
+        ? I18n.getTestingLabs().find(function (item) { return item.key === activeLab; })
+        : null;
+      const text = lab ? lab.address : '';
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          showCopyToast('common.addressCopied');
+        }).catch(fallbackCopy);
+        return;
+      }
+      fallbackCopy();
+      function fallbackCopy() {
+        const input = document.createElement('textarea');
+        input.value = text;
+        input.setAttribute('readonly', '');
+        input.style.position = 'absolute';
+        input.style.left = '-9999px';
+        document.body.appendChild(input);
+        input.select();
+        try {
+          document.execCommand('copy');
+          showCopyToast('common.addressCopied');
+        } catch (err) {
+          showCopyToast('common.copyFailed');
+        }
+        document.body.removeChild(input);
+      }
+    }
+
+    window.onLangApplied = function () {
+      renderLabTabs();
+      updateLabAddress();
+      applyOrderContext();
+    };
+
+    applyOrderContext();
+    activeLab = getInitialLabKey();
+    renderLabTabs();
+    updateLabAddress();
+
+    if (window.I18n) {
+      I18n.onLangApplied = window.onLangApplied;
+      I18n.initLangToggle();
+    }
+  </script>
 </body>
 </html>

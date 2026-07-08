@@ -26,13 +26,10 @@
   body { display: flex; justify-content: center; }
   .phone {
     position: relative;
-    width: 390px;
-    height: 844px;
     display: flex;
     flex-direction: column;
     background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
     overflow: hidden;
-    flex-shrink: 0;
   }
   .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
   .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .07; left: 230px; top: -130px; transform: rotate(30deg); }
@@ -81,7 +78,20 @@
     margin-bottom: 12px;
   }
   .summary-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .summary-actions { display: flex; align-items: flex-start; flex-shrink: 0; }
+  .order-title-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
   .order-title { font-size: 18px; font-weight: 700; color: var(--carbon); line-height: 26px; }
+  .summary-edit-btn {
+    height: 28px; padding: 0 10px;
+    border: 1px solid #dce4fb; border-radius: 8px;
+    background: var(--pool-050); color: var(--pool-500);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .summary-edit-btn:active { background: #e8eeff; }
+  .summary-edit-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
   .order-sub { font-size: 12px; color: var(--seal); margin-top: 4px; line-height: 18px; }
   .status {
     flex-shrink: 0;
@@ -92,18 +102,6 @@
   .status.blue { background: var(--pool-050); color: var(--pool-500); border: 1px solid #dce4fb; }
   .status.green { background: #eaf6f2; color: var(--kiwi); border: 1px solid #c9ecdc; }
   .status.orange { background: #fef0ee; color: #ff5f4e; border: 1px solid #ffd8d2; }
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 14px;
-  }
-  .metric {
-    background: #f7f8fb; border-radius: 10px;
-    padding: 10px;
-  }
-  .metric .label { font-size: 11px; color: var(--seal); line-height: 16px; }
-  .metric .value { font-size: 13px; color: var(--carbon); line-height: 20px; margin-top: 2px; font-weight: 500; }
 
   .section-card {
     background: #fff; border-radius: 12px;
@@ -147,6 +145,9 @@
     font-size: 11px;
     line-height: 16px;
   }
+  .contact-note {
+    font-size: 11px; color: var(--seal); line-height: 16px;
+  }
   .product-card {
     display: flex; align-items: center; gap: 12px;
     padding: 14px;
@@ -170,25 +171,243 @@
     font-size: 11px; line-height: 18px;
     padding: 0 7px; border-radius: 5px;
   }
-  .table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .table th {
-    background: #f3f4f6; color: var(--seal);
-    text-align: left; font-weight: 600;
-    padding: 9px 10px;
-  }
-  .table td {
-    color: var(--carbon);
-    border-top: .5px solid #eef0f4;
-    padding: 9px 10px;
-    vertical-align: top;
-  }
-  .table td:nth-child(2) {
-    color: var(--pool-500);
-    text-decoration: underline;
-  }
-  .table .check { width: 18px; color: var(--pool-500); }
   .inline-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .file-list { display: flex; flex-direction: column; }
+  .file-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; text-align: left;
+    padding: 11px 14px;
+    border: none; border-bottom: .5px solid #eef0f4;
+    background: #fff; cursor: pointer;
+  }
+  .file-item:last-child { border-bottom: none; }
+  .file-item:active { background: #f7f9ff; }
+  .file-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; letter-spacing: .2px; flex-shrink: 0;
+  }
+  .file-icon.pdf { background: #fdecec; color: #d64545; }
+  .file-icon.doc { background: #e8eeff; color: #4169e1; }
+  .file-icon.img { background: #eaf6f2; color: #1f9d6b; }
+  .file-body { min-width: 0; flex: 1; }
+  .file-tag { font-size: 11px; color: var(--seal); line-height: 16px; margin-bottom: 2px; }
+  .file-name {
+    font-size: 13px; color: var(--carbon); font-weight: 500; line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .file-action {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--pool-050); color: var(--pool-500);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .file-action svg { width: 14px; height: 14px; }
+
+  .recipient-list, .edit-recipient-list { display: flex; flex-direction: column; gap: 10px; }
+  .recipient-card, .edit-recipient-card {
+    border: 1px solid #e6e9f2; border-radius: 12px;
+    background: #fafbfe; padding: 11px;
+  }
+  .recipient-email {
+    font-size: 13px; font-weight: 600; color: var(--carbon);
+    line-height: 18px; word-break: break-all;
+  }
+  .recipient-type {
+    display: inline-flex; margin-top: 8px; padding: 0 8px;
+    height: 22px; align-items: center;
+    border-radius: 11px; background: var(--pool-050); color: var(--pool-500);
+    font-size: 11px; font-weight: 600;
+  }
+  .recipient-empty { color: var(--seal); font-size: 12px; line-height: 18px; }
+  .edit-recipient-head { display: flex; align-items: center; gap: 8px; }
+  .edit-recipient-head .edit-control { flex: 1; min-width: 0; }
+  .edit-recipient-remove {
+    width: 28px; height: 28px; border: none; border-radius: 8px;
+    background: #fff0f1; color: #d9363e;
+    font-size: 18px; font-weight: 700; line-height: 28px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .edit-recipient-types {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px; margin-top: 10px;
+  }
+  .edit-recipient-types label {
+    display: flex; align-items: center; gap: 6px;
+    min-height: 32px; padding: 6px 8px; margin-bottom: 0;
+    border: 1px solid #e1e5ee; border-radius: 9px;
+    background: #fff; color: var(--carbon);
+    font-size: 11px; line-height: 16px;
+  }
+  .edit-recipient-types input {
+    accent-color: var(--pool-500); margin: 0; flex-shrink: 0;
+  }
+  .edit-recipient-add {
+    width: 100%; height: 38px; margin-top: 10px;
+    border: 1px solid #dce4fb; border-radius: 10px;
+    background: var(--pool-100); color: var(--pool-500);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+
+  /* ===== 字段编辑浮窗 ===== */
+  .edit-mask {
+    position: absolute; inset: 0; z-index: 40;
+    background: rgba(25,25,25,.42);
+    display: none; align-items: flex-end;
+  }
+  .edit-mask.show { display: flex; }
+  .edit-modal {
+    width: 100%; max-height: 88%; background: #fff;
+    border-radius: 18px 18px 0 0; overflow: hidden;
+    box-shadow: 0 -8px 28px rgba(25,25,25,.12);
+  }
+  .edit-modal-head {
+    height: 52px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: .5px solid #eef0f4;
+  }
+  .edit-modal-title { font-size: 16px; font-weight: 600; color: var(--carbon); }
+  .edit-close {
+    border: none; background: #f4f6fa; color: var(--seal);
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    font-size: 18px; line-height: 28px;
+  }
+  .edit-modal-body {
+    max-height: 620px; overflow-y: auto; padding: 12px 16px 16px;
+  }
+  .edit-modal-body::-webkit-scrollbar { display: none; }
+  .edit-grid { display: flex; flex-direction: column; gap: 12px; }
+  .edit-section {
+    border: 1px solid #edf0f6; border-radius: 12px;
+    overflow: hidden; background: #fff;
+  }
+  .edit-section-title {
+    background: #f7f9ff; color: #24407a;
+    font-size: 12px; font-weight: 700;
+    padding: 9px 11px;
+    border-bottom: .5px solid #edf0f6;
+  }
+  .edit-section-body { padding: 10px 11px 12px; display: flex; flex-direction: column; gap: 10px; }
+  .edit-item > label {
+    display: block; font-size: 12px; color: var(--seal); margin-bottom: 5px;
+  }
+  .edit-item .req { color: var(--qima-red); }
+  .edit-control {
+    width: 100%; height: 38px; border: 1px solid #e1e5ee;
+    border-radius: 9px; padding: 0 10px;
+    font-size: 13px; color: var(--carbon); outline: none;
+    background: #fff;
+  }
+  .edit-control.textarea {
+    height: auto; min-height: 72px; padding: 10px;
+    resize: none; line-height: 18px;
+  }
+  .edit-control:focus {
+    border-color: var(--pool-500);
+    box-shadow: 0 0 0 3px rgba(65,105,225,.1);
+  }
+  .edit-item-country .edit-item-label-row {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  }
+  .edit-item-country .edit-item-label-row label { margin-bottom: 0; }
+  .edit-info-icon {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--pool-100); color: var(--pool-500);
+    font-size: 10px; font-weight: 700; line-height: 14px; text-align: center;
+  }
+  .edit-country-panel {
+    border: 1px solid #e8ecf4; border-radius: 10px;
+    background: #fafbfe; padding: 8px;
+  }
+  .edit-country-checks {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .edit-item-country .edit-country-line {
+    display: flex; align-items: center; gap: 7px;
+    width: 100%; min-width: 0; height: 38px; padding: 0 12px; margin-bottom: 0;
+    border: 1px solid #e1e5ee; border-radius: 9px;
+    background: #fff;
+    font-size: 12px; color: var(--carbon);
+    cursor: pointer; user-select: none;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .edit-item-country .edit-country-line:has(input:checked) {
+    border-color: #c0d0f8; background: var(--pool-050);
+    color: var(--pool-500); font-weight: 600;
+  }
+  .edit-item-country .edit-country-line input {
+    appearance: none; -webkit-appearance: none;
+    width: 16px; height: 16px; flex: 0 0 16px;
+    border: 1.5px solid #aeb7c8; border-radius: 4px;
+    background: #fff; margin: 0; cursor: pointer;
+    display: grid; place-content: center;
+  }
+  .edit-item-country .edit-country-line input:checked {
+    border-color: var(--pool-500); background: var(--pool-500);
+  }
+  .edit-item-country .edit-country-line input:checked::after {
+    content: "";
+    width: 5px; height: 9px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg); margin-top: -1px;
+  }
+  .edit-item-country .edit-country-line span {
+    min-width: 0; line-height: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .edit-country-summary {
+    margin-top: 8px; padding: 8px 10px;
+    border-radius: 8px; background: #fff;
+    border: 1px dashed #dce4fb;
+    font-size: 11px; color: #24407a; line-height: 16px;
+  }
+  .edit-country-summary.empty { color: var(--seal); border-color: #e8ecf4; }
+  .edit-country-search { position: relative; margin-top: 10px; }
+  .edit-country-search::before {
+    content: ""; position: absolute; left: 11px; top: 50%;
+    width: 14px; height: 14px; transform: translateY(-50%);
+    background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='7' cy='7' r='4.5' stroke='%23999' stroke-width='1.4'/%3E%3Cpath d='M10.5 10.5 13 13' stroke='%23999' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .edit-country-search .edit-control { padding-left: 32px; }
+  .edit-country-results {
+    position: static; margin-top: 6px; width: 100%;
+    max-height: 140px; overflow-y: auto;
+    background: #fff; border: 1px solid #e1e5ee; border-radius: 9px;
+    box-shadow: 0 8px 18px rgba(25,25,25,.1);
+    display: none;
+  }
+  .edit-country-results.show { display: block; }
+  .edit-country-option {
+    width: 100%; border: none; background: #fff; text-align: left;
+    padding: 10px 11px; font-size: 13px; color: var(--carbon); cursor: pointer;
+  }
+  .edit-country-option:hover { background: var(--pool-050); color: var(--pool-500); }
+  .edit-lab-address {
+    margin-top: 8px; padding: 10px 12px;
+    background: #f7f9ff; border: 1px solid #e3e9fb; border-radius: 9px;
+    font-size: 12px; color: #24407a; line-height: 18px;
+  }
+  .edit-modal-actions {
+    display: flex; gap: 10px; padding: 12px 16px 16px;
+    border-top: .5px solid #eef0f4;
+  }
+  .edit-action {
+    flex: 1; height: 42px; border-radius: 12px; border: 1px solid #e1e5ee;
+    background: #fff; color: var(--seal); font-size: 14px; cursor: pointer;
+  }
+  .edit-action.primary {
+    border-color: var(--pool-500); background: var(--pool-500); color: #fff;
+    font-weight: 600;
+  }
 </style>
+<link rel="stylesheet" href="assets/phone-shell.css" />
+<link rel="stylesheet" href="assets/lang-toggle.css" />
+<link rel="stylesheet" href="assets/i18n-en.css" />
+<script>window.PAGE_TITLE_KEY = 'title.orderDetail';</script>
+<script src="assets/i18n/zh.js"></script>
+<script src="assets/i18n/en.js"></script>
+<script src="assets/i18n-runtime.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -206,8 +425,8 @@
     </div>
 
     <div class="navbar">
-      <a href="orders.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
-      <div class="title">订单详情</div>
+      <a href="orders.html"><img class="back" src="assets/vector52.svg" alt="返回" data-i18n-alt="common.back" /></a>
+      <div class="title" data-i18n="orderDetail.title">订单详情</div>
       <div class="nav-capsule">
         <img src="assets/share.svg" alt="" />
         <div class="divider"></div>
@@ -219,43 +438,41 @@
       <section class="summary-card">
         <div class="summary-top">
           <div>
-            <div class="order-title" id="orderTitle">Lab-Testing</div>
+            <div class="order-title-row">
+              <div class="order-title" id="orderTitle">实验室检测</div>
+              <div class="status blue" id="statusBadge">进行中</div>
+            </div>
             <div class="order-sub" id="orderSubtitle">订单编号: T-25617004</div>
           </div>
-          <div class="status blue" id="statusBadge">进行中</div>
-        </div>
-        <div class="summary-grid">
-          <div class="metric">
-            <div class="label">服务类型</div>
-            <div class="value" id="serviceType">实验室检测</div>
-          </div>
-          <div class="metric">
-            <div class="label">产品类别</div>
-            <div class="value" id="category">Toys</div>
+          <div class="summary-actions">
+            <button class="summary-edit-btn" type="button" onclick="openOrderEditor()">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11.2 2.8a1.1 1.1 0 0 1 1.55 1.55L5.9 11.2 2.8 12.2l1-3.1 7.4-6.3Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              <span data-i18n="orderDetail.edit">编辑</span>
+            </button>
           </div>
         </div>
       </section>
 
       <!-- 基本信息 -->
       <section class="section-card">
-        <div class="section-head">基本信息</div>
+        <div class="section-head" data-i18n="orderDetail.basicInfo">基本信息</div>
         <div class="info-list">
-          <div class="info-row"><div class="label">此测试为 *</div><div class="value" id="testType">首次测试</div></div>
-          <div class="info-row"><div class="label">测试地点</div><div class="value" id="testingLocation">Hangzhou</div></div>
+          <div class="info-row"><div class="label"><span data-i18n="orderDetail.testType">此测试为</span> <span class="req">*</span></div><div class="value" id="testType">首次测试</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.testingLocation">测试地点</div><div class="value" id="testingLocation">Hangzhou</div></div>
         </div>
       </section>
 
       <!-- 供应商信息 -->
       <section class="section-card">
-        <div class="section-head">供应商信息</div>
+        <div class="section-head" data-i18n="orderDetail.supplierInfo">供应商信息</div>
         <div class="info-list">
-          <div class="info-row"><div class="label">供应商</div><div class="value" id="supplierName">None</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.supplier">供应商</div><div class="value" id="supplierName">None</div></div>
         </div>
       </section>
 
       <!-- 产品 -->
       <section class="section-card">
-        <div class="section-head">产品</div>
+        <div class="section-head" data-i18n="orderDetail.product">产品</div>
         <div class="product-card">
           <div class="thumb" id="productThumb"></div>
           <div class="product-info">
@@ -266,74 +483,22 @@
           </div>
         </div>
         <div class="info-list">
-          <div class="info-row"><div class="label">产品名称 *</div><div class="value" id="productDisplayName">glasses</div></div>
-          <div class="info-row"><div class="label">产品参考号码</div><div class="value" id="productRefNo">None</div></div>
-          <div class="info-row"><div class="label">订购单号码</div><div class="value" id="poNumber">None</div></div>
-          <div class="info-row"><div class="label">SKU</div><div class="value" id="skuValue">None</div></div>
-          <div class="info-row"><div class="label">材料</div><div class="value" id="material">None</div></div>
-          <div class="info-row"><div class="label">适用年龄</div><div class="value" id="ageGrade">For adult use</div></div>
-          <div class="info-row"><div class="label">方案 *</div><div class="value" id="projectName">TEMU Hardware- Seller Pay（商家付款，杂货产品）</div></div>
-          <div class="info-row"><div class="label">原产地 *</div><div class="value" id="originCountry">中国</div></div>
-          <div class="info-row"><div class="label">分发国家或区域 *</div><div class="value" id="salesCountry">European Union</div></div>
-          <div class="info-row"><div class="label">测试地点 *</div><div class="value" id="testingLocation2">QIMA Hangzhou Lab (Local)</div></div>
-        </div>
-      </section>
-
-      <!-- 测试 -->
-      <section class="section-card">
-        <div class="section-head">测试</div>
-        <div class="info-list" style="padding:0;">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>类别</th>
-                <th>名称</th>
-                <th>价格</th>
-                <th>单位</th>
-              </tr>
-            </thead>
-            <tbody id="testTableBody">
-              <tr>
-                <td>Optional</td>
-                <td>ISO 12312-1:2013+A1:2015-Sunglasses-Construction (4.1)</td>
-                <td>USD 30.9 per unit</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Optional</td>
-                <td>Client-Eyewear-Declaration of Conformity (DoC)</td>
-                <td>USD 78 per unit</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Optional</td>
-                <td>Client-Report-Chinese and English Report Charge</td>
-                <td>USD 27.81 per unit</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Optional</td>
-                <td>EN ISO 12312-1:2013+A1:2015-Sunglasses-Full Requirement</td>
-                <td>USD 288.4 per unit</td>
-                <td>1</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 所需周转时间 & 报价 -->
-      <section class="section-card">
-        <div class="section-head">周转时间与报价</div>
-        <div class="info-list">
-          <div class="info-row"><div class="label">所需周转时间</div><div class="value" id="turnaroundTime">7 Day Regular</div></div>
-          <div class="info-row"><div class="label">在启迈 QIMA执行测试前，您需要一份正式报价单吗？*</div><div class="value" id="needQuotation">否</div></div>
+          <div class="info-row"><div class="label"><span data-i18n="orderDetail.productName">产品名称</span> <span class="req">*</span></div><div class="value" id="productDisplayName">glasses</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.productRef">产品参考号码</div><div class="value" id="productRefNo">None</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.poNumber">订购单号码</div><div class="value" id="poNumber">None</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.sku">SKU</div><div class="value" id="skuValue">None</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.material">材料</div><div class="value" id="material">None</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.ageGrade">适用年龄</div><div class="value" id="ageGrade">For adult use</div></div>
+          <div class="info-row"><div class="label"><span data-i18n="orderDetail.project">方案</span> <span class="req">*</span></div><div class="value" id="projectName">TEMU Hardware- Seller Pay（商家付款，杂货产品）</div></div>
+          <div class="info-row"><div class="label"><span data-i18n="orderDetail.origin">原产地</span> <span class="req">*</span></div><div class="value" id="originCountry">中国</div></div>
+          <div class="info-row"><div class="label"><span data-i18n="orderDetail.distribution">分发国家或区域</span> <span class="req">*</span></div><div class="value" id="salesCountry">European Union</div></div>
+          <div class="info-row"><div class="label"><span data-i18n="orderDetail.testingLocation">测试地点</span> <span class="req">*</span></div><div class="value" id="testingLocation2">QIMA Hangzhou Lab (Local)</div></div>
         </div>
       </section>
 
       <!-- 自定义字段 -->
       <section class="section-card">
-        <div class="section-head">自定义字段</div>
+        <div class="section-head" data-i18n="orderDetail.customFields">自定义字段</div>
         <div class="info-list">
           <div class="info-row"><div class="label">SPU ID</div><div class="value" id="spuId">N/A</div></div>
           <div class="info-row"><div class="label">SKC ID</div><div class="value" id="skcId">N/A</div></div>
@@ -351,102 +516,37 @@
 
       <!-- 样本采集 -->
       <section class="section-card">
-        <div class="section-head">样本采集</div>
+        <div class="section-head" data-i18n="orderDetail.sampleCollection">样本采集</div>
         <div class="info-list">
-          <div class="info-row full"><div class="label">方法</div><div class="value" id="collectionMethod">None</div></div>
+          <div class="info-row full"><div class="label" data-i18n="orderDetail.method">方法</div><div class="value" id="collectionMethod">None</div></div>
         </div>
       </section>
 
       <!-- 附加信息 -->
       <section class="section-card">
-        <div class="section-head">附加信息</div>
+        <div class="section-head" data-i18n="orderDetail.additionalInfo">附加信息</div>
         <div class="info-list">
-          <div class="info-row full"><div class="label">备注</div><div class="value muted" id="orderRemark">None</div></div>
-          <div class="info-row full"><div class="label">附件</div><div class="value muted" id="attachments">None</div></div>
+          <div class="info-row full"><div class="label" data-i18n="orderDetail.remark">备注</div><div class="value muted" id="orderRemark">None</div></div>
+          <div class="info-row full"><div class="label" data-i18n="orderDetail.attachments">附件</div><div class="value muted" id="attachments">None</div></div>
         </div>
       </section>
 
-      <!-- Files -->
+      <!-- 文件 -->
       <section class="section-card">
-        <div class="section-head">Files</div>
-        <div class="info-list" style="padding:0;">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>标签</th>
-                <th>文件名</th>
-                <th>描述</th>
-              </tr>
-            </thead>
-            <tbody id="fileTableBody">
-              <tr>
-                <td>Quotation report</td>
-                <td>T-25617004-11-Q1.pdf</td>
-                <td>Quotation report</td>
-              </tr>
-              <tr>
-                <td>Client report</td>
-                <td>T-25617004-11-R2 DOC.docx</td>
-                <td>Client report</td>
-              </tr>
-              <tr>
-                <td>Style Info</td>
-                <td>T-25617004-S01.jpg</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Invoice report</td>
-                <td>T-25617004-11-I1.pdf</td>
-                <td>Invoice report</td>
-              </tr>
-              <tr>
-                <td>Client report</td>
-                <td>T-25617004-11-R2.pdf</td>
-                <td>Client report</td>
-              </tr>
-              <tr>
-                <td>Client report</td>
-                <td>T-25617004-11-R1 DOC.docx</td>
-                <td>Client report</td>
-              </tr>
-              <tr>
-                <td>Style Info</td>
-                <td>T-25617004-S02.jpg</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Quotation report</td>
-                <td>T-25617004-11-Q2.pdf</td>
-                <td>Quotation report</td>
-              </tr>
-              <tr>
-                <td>Client report</td>
-                <td>T-25617004-11-R1.pdf</td>
-                <td>Client report</td>
-              </tr>
-              <tr>
-                <td>Client report</td>
-                <td>T-25617004-11-R1-RETEST1.docx</td>
-                <td>Client report</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="section-head" data-i18n="orderDetail.files">文件</div>
+        <div class="file-list" id="fileList"></div>
       </section>
 
       <!-- 附加收件人 -->
       <section class="section-card">
-        <div class="section-head">附加收件人</div>
-        <div class="sub-note" style="padding:8px 14px 0;">以下收件人将会收到与此订单相关的邮件</div>
-        <div class="info-list">
-          <div class="info-row"><div class="label">电子邮箱地址</div><div class="value" id="recipientEmail">850600530@qq.com</div></div>
-          <div class="info-row"><div class="label">收取邮件类型</div><div class="value" id="emailType">所有邮件</div></div>
-        </div>
+        <div class="section-head" data-i18n="orderDetail.recipients">附加收件人</div>
+        <div class="sub-note" style="padding:8px 14px 0;" data-i18n="orderDetail.recipientsNote">以下收件人将会收到与此订单相关的邮件</div>
+        <div class="info-list"><div class="recipient-list" id="recipientList"></div></div>
       </section>
 
       <!-- Comments -->
       <section class="section-card">
-        <div class="section-head">评论</div>
+        <div class="section-head" data-i18n="orderDetail.comments">评论</div>
         <div class="info-list">
           <div class="info-row full"><div class="value muted" id="recipientComments">在他们的QIMA账户中与可以访问此订单的同事/供应商分享有关此订单的评论。</div></div>
         </div>
@@ -456,19 +556,36 @@
             border:1px solid var(--pool-500); background:transparent;
             color:var(--pool-500); font-size:13px; font-weight:600;
             cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
-          ">Write a comment</button>
+          " data-i18n="orderDetail.writeComment">Write a comment</button>
         </div>
       </section>
 
     </main>
+
+    <!-- 字段编辑浮窗 -->
+    <div class="edit-mask" id="orderEditor" onclick="closeOrderEditor(event)">
+      <div class="edit-modal" onclick="event.stopPropagation()">
+        <div class="edit-modal-head">
+          <div class="edit-modal-title" data-i18n="orderDetail.editModalTitle">编辑订单信息</div>
+          <button class="edit-close" type="button" onclick="closeOrderEditor()" aria-label="关闭" data-i18n-title="common.close">×</button>
+        </div>
+        <div class="edit-modal-body">
+          <div class="edit-grid" id="orderEditorGrid"></div>
+        </div>
+        <div class="edit-modal-actions">
+          <button class="edit-action" type="button" onclick="closeOrderEditor()" data-i18n="common.cancel">取消</button>
+          <button class="edit-action primary" type="button" onclick="saveOrderEditor()" data-i18n="common.save">保存修改</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     const orders = {
       '08008571': {
-        title: 'Lab-Testing',
+        title: '实验室检测',
         subtitle: '订单编号: T-25617004',
-        status: '待录入数据',
+        status: '待验证',
         statusClass: 'blue',
         serviceType: '实验室检测',
         category: 'Textile',
@@ -505,7 +622,7 @@
         thumbClass: ''
       },
       '080082671': {
-        title: 'Lab-Testing',
+        title: '实验室检测',
         subtitle: '订单编号: T-26356800-11-R',
         status: '报告已完成',
         statusClass: 'green',
@@ -544,9 +661,9 @@
         thumbClass: 'denim'
       },
       '08008536': {
-        title: 'Lab-Testing',
+        title: '实验室检测',
         subtitle: '订单编号: T-25617036',
-        status: '待录入数据',
+        status: '待验证',
         statusClass: 'blue',
         serviceType: '实验室检测',
         category: 'Textile',
@@ -583,7 +700,7 @@
         thumbClass: 'grey'
       },
       'T-25617004': {
-        title: 'Lab-Testing',
+        title: '实验室检测',
         subtitle: '订单编号: T-25617004',
         status: '进行中',
         statusClass: 'blue',
@@ -605,6 +722,45 @@
         needQuotation: '否',
         manufacturerName: 'Xujiating',
         skuNo: 'RCR-001',
+        fibreContent: 'None',
+        colorValue: 'N/A',
+        productType: 'N/A',
+        sunLensCat: 'N/A',
+        eanCode: 'N/A',
+        brand: 'N/A',
+        batchNumber: 'N/A',
+        spuId: 'N/A',
+        skcId: 'N/A',
+        collectionMethod: 'None',
+        orderRemark: 'None',
+        recipientEmail: '850600530@qq.com',
+        emailType: 'All emails',
+        recipientComments: 'None',
+        thumbClass: ''
+      },
+      'T-25617005': {
+        title: '实验室检测',
+        subtitle: '订单编号: T-25617005',
+        status: '待验证',
+        statusClass: 'blue',
+        serviceType: '实验室检测',
+        category: 'Toys',
+        productName: '智能机器人玩具',
+        testType: '首次测试',
+        testingLocation: 'QIMA Hangzhou Lab (Local)',
+        supplierName: 'None',
+        productRefNo: 'None',
+        poNumber: 'None',
+        skuValue: 'None',
+        material: 'None',
+        ageGrade: '3岁以上',
+        projectName: 'TEMU Toys- Seller Pay',
+        originCountry: '中国',
+        salesCountry: 'United States',
+        turnaroundTime: '7 Day Regular',
+        needQuotation: '否',
+        manufacturerName: '深圳市智创玩具有限公司',
+        skuNo: 'RBT-2025-X9',
         fibreContent: 'None',
         colorValue: 'N/A',
         productType: 'N/A',
@@ -662,63 +818,715 @@
       }
     };
 
+    const defaultFiles = [
+      { labelKey: 'orderDetail.fileQuotation', name: 'T-25617004-11-Q1.pdf' },
+      { labelKey: 'orderDetail.fileClient', name: 'T-25617004-11-R2 DOC.docx' },
+      { labelKey: 'orderDetail.fileStyle', name: 'T-25617004-S01.jpg' },
+      { labelKey: 'orderDetail.fileInvoice', name: 'T-25617004-11-I1.pdf' },
+      { labelKey: 'orderDetail.fileClient', name: 'T-25617004-11-R2.pdf' },
+      { labelKey: 'orderDetail.fileClient', name: 'T-25617004-11-R1 DOC.docx' },
+      { labelKey: 'orderDetail.fileStyle', name: 'T-25617004-S02.jpg' },
+      { labelKey: 'orderDetail.fileQuotation', name: 'T-25617004-11-Q2.pdf' },
+      { labelKey: 'orderDetail.fileClient', name: 'T-25617004-11-R1.pdf' },
+      { labelKey: 'orderDetail.fileClient', name: 'T-25617004-11-R1-RETEST1.docx' }
+    ];
+
+    const MAIL_TYPE_KEYS = ['mailType.all', 'mailType.reportOnly', 'mailType.paymentOnly', 'mailType.quotationOnly'];
+    const TEST_TYPE_CANONICAL = {
+      '首次测试': 'orderDetail.testTypeFirst',
+      '重测': 'orderDetail.testTypeRetest',
+      '再次下单': 'orderDetail.testTypeReorder'
+    };
+    const COLLECTION_METHOD_CANONICAL = {
+      'None': 'common.none',
+      '您或者供应商会寄送样本': 'index.sampleShip',
+      '启迈 QIMA 将在执行产品服务时收集样本': 'index.sampleCollect',
+      '启迈 QIMA 已经拿到了样本': 'index.sampleReceived'
+    };
+    const PROJECT_CANONICAL = {
+      'TEMU Hardware- Seller Pay（商家付款，杂货产品）': 'orderDetail.projectTemuHardwareGrocery',
+      'TEMU Hardware - Seller Pay（商家付款）': 'index.projectTemuHardware',
+      'TEMU Toys- Seller Pay': 'orderChat.projectTemuToys',
+      '通用检测项目': 'index.projectGeneral',
+      'PSI 装运前检测项目': 'orderDetail.projectPsiProgram'
+    };
+    function getContactMailTypes() {
+      return window.I18n ? I18n.getContactMailTypes() : [];
+    }
+
+    function getTestingLabs() {
+      return window.I18n ? I18n.getTestingLabs() : [];
+    }
+
+    function getDistributionPresets() {
+      return window.I18n ? I18n.getDistributionPresets() : [];
+    }
+
+    function getDistributionSearchList() {
+      return window.I18n ? I18n.getDistributionSearchList() : [];
+    }
+
+    function translateTestType(value) {
+      const key = TEST_TYPE_CANONICAL[value];
+      return key ? t(key) : value;
+    }
+
+    function translateCollectionMethod(value) {
+      if (!value || value === 'None') return t('common.none');
+      const key = COLLECTION_METHOD_CANONICAL[value];
+      return key ? t(key) : value;
+    }
+
+    function translateProjectName(value) {
+      const key = PROJECT_CANONICAL[value];
+      return key ? t(key) : value;
+    }
+
+    function translateServiceType(value) {
+      if (value === '实验室检测') return t('common.serviceLabTest');
+      if (value === 'PSI 装运前检测') return t('orderDetail.servicePsi');
+      return value;
+    }
+
+    function translateTestingLocation(value) {
+      if (!value || value === 'None') return t('common.none');
+      const labs = getTestingLabs();
+      const direct = labs.find(function (item) { return item.key === value; });
+      if (direct) return direct.label;
+      const lab = labs.find(function (item) { return resolveLabKey(value) === item.key; });
+      return lab ? lab.label : value;
+    }
+
+    function translateFieldValue(key, value) {
+      if (!value || value === 'None' || value === 'N/A') return value === 'N/A' ? t('common.na') : t('common.none');
+      if (key === 'testType') return translateTestType(value);
+      if (key === 'collectionMethod') return translateCollectionMethod(value);
+      if (key === 'projectName') return translateProjectName(value);
+      if (key === 'originCountry') return I18n.displayCountry(value);
+      if (key === 'salesCountry') return formatDistributionDisplay(value);
+      if (key === 'testingLocation' || key === 'testingLocation2') return translateTestingLocation(value);
+      return value;
+    }
+
+    function fileIconType(name){
+      const ext = (name.split('.').pop() || '').toLowerCase();
+      if(['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'img';
+      if(['doc', 'docx'].includes(ext)) return 'doc';
+      return 'pdf';
+    }
+
+    function fileIconLabel(type){
+      if(type === 'img') return 'IMG';
+      if(type === 'doc') return 'DOC';
+      return 'PDF';
+    }
+
+    function renderFileList(files){
+      const list = document.getElementById('fileList');
+      if(!list) return;
+      list.innerHTML = files.map(function(file) {
+        const type = fileIconType(file.name);
+        const label = file.labelKey ? t(file.labelKey) : (file.label || '');
+        return '<button class="file-item" type="button" aria-label="' + escapeHtml(t('orderDetail.viewFile', { name: file.name })) + '">'+
+          '<div class="file-icon '+type+'">'+fileIconLabel(type)+'</div>'+
+          '<div class="file-body">'+
+            '<div class="file-tag">'+escapeHtml(label)+'</div>'+
+            '<div class="file-name">'+escapeHtml(file.name)+'</div>'+
+          '</div>'+
+          '<div class="file-action" aria-hidden="true">'+
+            '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2.5v7.2M8 9.7l2.4-2.4M8 9.7 5.6 7.3M3.5 11.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+          '</div>'+
+        '</button>';
+      }).join('');
+    }
+
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('order') || '08008571';
-    const order = orders[orderId] || orders['08008571'];
+    let order = orders[orderId] || orders['08008571'];
 
-    document.getElementById('orderTitle').textContent = order.title;
-    document.getElementById('orderSubtitle').textContent = order.subtitle;
-    document.getElementById('serviceType').textContent = order.serviceType;
-    document.getElementById('category').textContent = order.category;
-    document.getElementById('productName').textContent = order.productName;
-    setText('testType', order.testType);
-    setText('testingLocation', order.testingLocation);
-    setText('supplierName', order.supplierName);
-    setText('productDisplayName', order.productName);
-    setText('productRefNo', order.productRefNo);
-    setText('poNumber', order.poNumber);
-    setText('skuValue', order.skuValue);
-    setText('material', order.material);
-    setText('ageGrade', order.ageGrade);
-    setText('projectName', order.projectName);
-    setText('originCountry', order.originCountry);
-    setText('salesCountry', order.salesCountry);
-    setText('testingLocation2', order.testingLocation);
-    setText('turnaroundTime', order.turnaroundTime);
-    setText('needQuotation', order.needQuotation);
-    setText('spuId', order.spuId);
-    setText('skcId', order.skcId);
-    setText('skuNo', order.skuNo);
-    setText('manufacturerName', order.manufacturerName);
-    setText('fibreContent', order.fibreContent);
-    setText('colorValue', order.colorValue);
-    setText('productType', order.productType);
-    setText('sunLensCat', order.sunLensCat);
-    setText('eanCode', order.eanCode);
-    setText('brand', order.brand);
-    setText('batchNumber', order.batchNumber);
-    setText('collectionMethod', order.collectionMethod);
-    setText('orderRemark', order.orderRemark);
-    setText('recipientEmail', order.recipientEmail);
-    setText('emailType', order.emailType);
-    setText('recipientComments', order.recipientComments, '在他们的QIMA账户中与可以访问此订单的同事/供应商分享有关此订单的评论。');
+    const editableSections = [
+      {
+        titleKey: 'orderDetail.basicInfo',
+        fields: [
+          { key: 'testType', labelKey: 'orderDetail.testType', required: true, type: 'select', optionValues: ['首次测试', '重测', '再次下单'], optionKeys: ['orderDetail.testTypeFirst', 'orderDetail.testTypeRetest', 'orderDetail.testTypeReorder'] },
+          { key: 'testingLocation', labelKey: 'orderDetail.testingLocation', required: true, type: 'lab-select' }
+        ]
+      },
+      {
+        titleKey: 'orderDetail.supplierInfo',
+        fields: [
+          { key: 'supplierName', labelKey: 'orderDetail.supplier', type: 'text' }
+        ]
+      },
+      {
+        titleKey: 'orderDetail.product',
+        fields: [
+          { key: 'productName', labelKey: 'orderDetail.productName', required: true, type: 'text' },
+          { key: 'productRefNo', labelKey: 'orderDetail.productRef', type: 'text' },
+          { key: 'poNumber', labelKey: 'orderDetail.poNumber', type: 'text' },
+          { key: 'skuValue', labelKey: 'orderDetail.sku', type: 'text' },
+          { key: 'material', labelKey: 'orderDetail.material', type: 'text' },
+          { key: 'ageGrade', labelKey: 'orderDetail.ageGrade', type: 'text' },
+          { key: 'projectName', labelKey: 'orderDetail.project', required: true, type: 'select', optionValues: [
+            'TEMU Hardware- Seller Pay（商家付款，杂货产品）',
+            'TEMU Hardware - Seller Pay（商家付款）',
+            'TEMU Toys- Seller Pay',
+            '通用检测项目',
+            'PSI 装运前检测项目'
+          ], optionKeys: [
+            'orderDetail.projectTemuHardwareGrocery',
+            'index.projectTemuHardware',
+            'orderChat.projectTemuToys',
+            'index.projectGeneral',
+            'orderDetail.projectPsiProgram'
+          ]},
+          { key: 'originCountry', labelKey: 'orderDetail.origin', required: true, type: 'select', optionValues: ['中国', '越南', '印度', '奥兰群岛'], optionKeys: ['country.cn', 'country.vn', 'country.in', 'country.ax'] },
+          { key: 'salesCountry', labelKey: 'orderDetail.distribution', required: true, type: 'multi-country' }
+        ]
+      },
+      {
+        titleKey: 'orderDetail.customFields',
+        fields: [
+          { key: 'spuId', label: 'SPU ID', type: 'text' },
+          { key: 'skcId', label: 'SKC ID', type: 'text' },
+          { key: 'skuNo', label: 'Item #/model #', type: 'text' },
+          { key: 'manufacturerName', label: 'Manufacturer', type: 'text' },
+          { key: 'fibreContent', label: 'Fibre content', type: 'text' },
+          { key: 'colorValue', label: 'Color', type: 'text' },
+          { key: 'productType', label: 'Product Type', type: 'text' },
+          { key: 'sunLensCat', label: 'Sun lens cat. #', type: 'text' },
+          { key: 'eanCode', label: 'EAN/SKU/Code-number', type: 'text' },
+          { key: 'brand', label: 'Brand name', type: 'text' },
+          { key: 'batchNumber', label: 'Batch Number', type: 'text' }
+        ]
+      },
+      {
+        titleKey: 'orderDetail.sampleCollection',
+        fields: [
+          { key: 'collectionMethod', labelKey: 'orderDetail.method', type: 'select', optionValues: [
+            'None',
+            '您或者供应商会寄送样本',
+            '启迈 QIMA 将在执行产品服务时收集样本',
+            '启迈 QIMA 已经拿到了样本'
+          ], optionKeys: [
+            'common.none',
+            'index.sampleShip',
+            'index.sampleCollect',
+            'index.sampleReceived'
+          ]}
+        ]
+      },
+      {
+        titleKey: 'orderDetail.additionalInfo',
+        fields: [
+          { key: 'orderRemark', labelKey: 'orderDetail.remark', type: 'textarea' },
+          { key: 'recipients', labelKey: 'orderDetail.recipientsOptional', type: 'recipients' }
+        ]
+      }
+    ];
 
-    const statusBadge = document.getElementById('statusBadge');
-    statusBadge.textContent = order.status;
-    statusBadge.className = `status ${order.statusClass}`;
+    function resolveLabKey(value){
+      const text = String(value || '').toLowerCase();
+      if(text.includes('shanghai') || text.includes('上海')) return 'shanghai';
+      if(text.includes('dongguan') || text.includes('东莞')) return 'dongguan';
+      if(text.includes('hangzhou') || text.includes('杭州')) return 'hangzhou';
+      return 'hangzhou';
+    }
 
-    const productThumb = document.getElementById('productThumb');
-    productThumb.className = `thumb ${order.thumbClass || ''}`.trim();
+    function getLabByKey(key){
+      return getTestingLabs().find(function (lab) { return lab.key === key; });
+    }
+
+    function normalizeEmailType(type){
+      const map = {
+        'All emails': 'mailType.all',
+        '所有邮件': 'mailType.all',
+        'N/A': 'mailType.reportOnly',
+        '仅收取报告': 'mailType.reportOnly',
+        'Reports only': 'mailType.reportOnly'
+      };
+      return map[type] || type || 'mailType.reportOnly';
+    }
+
+    function getMailTypeLabel(typeKey) {
+      return t(typeKey || 'mailType.reportOnly');
+    }
+
+    function getOrderRecipients(){
+      if(Array.isArray(order.recipients) && order.recipients.length){
+        return order.recipients.map(function (item) {
+          return {
+            email: item.email || '',
+            typeKey: normalizeEmailType(item.typeKey || item.type)
+          };
+        });
+      }
+      if(order.recipientEmail && order.recipientEmail !== 'N/A'){
+        return [{ email: order.recipientEmail, typeKey: normalizeEmailType(order.emailType) }];
+      }
+      return [];
+    }
+
+    function escapeHtml(str){
+      return window.I18n ? I18n.escapeHtml(str) : String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function getOrderFieldValue(key){
+      const value = order[key];
+      if(value === undefined || value === null) return '';
+      if(value === 'None') return '';
+      return String(value);
+    }
+
+    function normalizeDistributionCountries(raw){
+      if(!raw) return [];
+      return raw.split(/[,，、]/).map(function (part) { return part.trim(); }).filter(Boolean).map(function (part) {
+        return I18n.resolveCountryKey(part);
+      });
+    }
+
+    function formatDistributionDisplay(raw){
+      if(!raw || raw === 'None') return t('common.none');
+      const parts = normalizeDistributionCountries(raw);
+      if(!parts.length) return raw;
+      return parts.map(function (part) { return I18n.displayCountry(part); }).join(I18n.getLang() === 'en' ? ', ' : '，');
+    }
+
+    const fieldDomMap = {
+      testType: ['testType'],
+      testingLocation: ['testingLocation', 'testingLocation2'],
+      supplierName: ['supplierName'],
+      productName: ['productName', 'productDisplayName'],
+      productRefNo: ['productRefNo'],
+      poNumber: ['poNumber'],
+      skuValue: ['skuValue'],
+      material: ['material'],
+      ageGrade: ['ageGrade'],
+      projectName: ['projectName'],
+      originCountry: ['originCountry'],
+      salesCountry: ['salesCountry'],
+      spuId: ['spuId'],
+      skcId: ['skcId'],
+      skuNo: ['skuNo'],
+      manufacturerName: ['manufacturerName'],
+      fibreContent: ['fibreContent'],
+      colorValue: ['colorValue'],
+      productType: ['productType'],
+      sunLensCat: ['sunLensCat'],
+      eanCode: ['eanCode'],
+      brand: ['brand'],
+      batchNumber: ['batchNumber'],
+      collectionMethod: ['collectionMethod'],
+      orderRemark: ['orderRemark'],
+      recipientEmail: ['recipientEmail'],
+      emailType: ['emailType']
+    };
+
+    function getEditCountryWrap(el){
+      return el ? el.closest('.edit-item-country') : null;
+    }
+
+    function getEditCountryList(wrap){
+      return wrap ? wrap.querySelector('[data-role="country-list"]') : null;
+    }
+
+    function getEditCountryHidden(wrap){
+      return wrap ? wrap.querySelector('input[type="hidden"][data-field-key]') : null;
+    }
+
+    function syncEditCountryHidden(wrap){
+      const hidden = getEditCountryHidden(wrap);
+      const list = getEditCountryList(wrap);
+      if(!hidden || !list) return;
+      const selected = Array.from(list.querySelectorAll('.edit-country-line input:checked')).map(input => input.value.trim()).filter(Boolean);
+      hidden.value = selected.join('，');
+      syncEditCountrySummary(wrap, selected);
+    }
+
+    function syncEditCountrySummary(wrap, selected){
+      const summary = wrap ? wrap.querySelector('.edit-country-summary') : null;
+      if(!summary) return;
+      const items = selected || Array.from(getEditCountryList(wrap)?.querySelectorAll('.edit-country-line input:checked') || []).map(function (input) { return input.value.trim(); }).filter(Boolean);
+      if(!items.length){
+        summary.textContent = t('common.selectAtLeastOneCountry');
+        summary.classList.add('empty');
+      } else {
+        const labels = items.map(function (item) { return I18n.displayCountry(item); });
+        summary.textContent = t('common.selectedCount', { count: items.length, list: labels.join(I18n.getLang() === 'en' ? ', ' : '、') });
+        summary.classList.remove('empty');
+      }
+    }
+
+    function editCountryCheckbox(value, checked, extra){
+      const label = I18n.displayCountry(value);
+      return '<label class="edit-country-line'+(extra ? ' extra' : '')+'">'+
+        '<input type="checkbox" value="'+escapeHtml(value)+'"'+(checked ? ' checked' : '')+' onchange="toggleEditCountry(this)">'+
+        '<span>'+escapeHtml(label)+'</span>'+
+      '</label>';
+    }
+
+    function toggleEditCountry(checkbox){
+      syncEditCountryHidden(getEditCountryWrap(checkbox));
+    }
+
+    function renderEditCountryResults(input){
+      const wrap = getEditCountryWrap(input);
+      const results = wrap ? wrap.querySelector('.edit-country-results') : null;
+      const list = getEditCountryList(wrap);
+      if(!results || !list) return;
+      const keyword = (input.value || '').trim().toLowerCase();
+      const existing = new Set(Array.from(list.querySelectorAll('.edit-country-line input')).map(function (el) { return el.value; }));
+      const matches = getDistributionSearchList()
+        .filter(function (country) { return country.toLowerCase().includes(keyword); })
+        .filter(function (country) {
+          return !Array.from(existing).some(function (value) { return I18n.displayCountry(value) === country; });
+        })
+        .slice(0, 6);
+      if(!keyword){
+        results.classList.remove('show');
+        results.innerHTML = '';
+        return;
+      }
+      if(!matches.length){
+        const raw = input.value.trim();
+        results.innerHTML = '<button class="edit-country-option" type="button" data-country="'+escapeHtml(raw)+'" onmousedown="addEditCountryOption(this)">'+escapeHtml(t('common.addCountry', { value: raw }))+'</button>';
+        results.classList.add('show');
+        return;
+      }
+      results.innerHTML = matches.map(function (country) {
+        return '<button class="edit-country-option" type="button" data-country="'+escapeHtml(country)+'" onmousedown="addEditCountryOption(this)">'+escapeHtml(country)+'</button>';
+      }).join('');
+      results.classList.add('show');
+    }
+
+    function addEditCountryOption(btn){
+      const wrap = getEditCountryWrap(btn);
+      const list = getEditCountryList(wrap);
+      const search = wrap ? wrap.querySelector('.edit-country-search input') : null;
+      const results = wrap ? wrap.querySelector('.edit-country-results') : null;
+      const displayValue = (btn.dataset.country || '').trim();
+      if(!displayValue || !list) return;
+      const value = I18n.resolveCountryKey(displayValue);
+      const exists = Array.from(list.querySelectorAll('.edit-country-line input')).find(function (input) { return input.value === value; });
+      if(exists){
+        exists.checked = true;
+      } else {
+        list.insertAdjacentHTML('beforeend', editCountryCheckbox(value, true, true));
+      }
+      if(search) search.value = '';
+      if(results){
+        results.classList.remove('show');
+        results.innerHTML = '';
+      }
+      syncEditCountryHidden(wrap);
+    }
+
+    function renderEditMultiCountryField(field){
+      const current = getOrderFieldValue(field.key);
+      const selected = new Set(normalizeDistributionCountries(current));
+      const presetKeys = ['us', 'eu', 'ca', 'za', 'au'];
+      const extras = [...selected].filter(function (country) { return !presetKeys.includes(country); });
+      const presetHtml = presetKeys.map(function (country) { return editCountryCheckbox(country, selected.has(country)); }).join('');
+      const extraHtml = extras.map(function (country) { return editCountryCheckbox(country, true, true); }).join('');
+      const hiddenValue = [...selected].join('，');
+      const summaryText = selected.size
+        ? t('common.selectedCount', { count: selected.size, list: [...selected].map(function (c) { return I18n.displayCountry(c); }).join(I18n.getLang() === 'en' ? ', ' : '、') })
+        : t('common.selectAtLeastOneCountry');
+      const req = field.required ? ' <span class="req">*</span>' : '';
+      return '<div class="edit-item edit-item-country">'+
+        '<div class="edit-item-label-row">'+
+          '<label>'+escapeHtml(getFieldLabel(field))+req+'</label>'+
+          '<span class="edit-info-icon" title="'+escapeHtml(t('orderDetail.countryInfoTip'))+'">i</span>'+
+        '</div>'+
+        '<div class="edit-country-panel">'+
+          '<div class="edit-country-checks" data-role="country-list">'+presetHtml+extraHtml+'</div>'+
+          '<div class="edit-country-summary'+(!selected.size ? ' empty' : '')+'">'+escapeHtml(summaryText)+'</div>'+
+        '</div>'+
+        '<div class="edit-country-search">'+
+          '<input class="edit-control" type="text" placeholder="'+escapeHtml(t('common.searchOtherCountry'))+'" autocomplete="off" oninput="renderEditCountryResults(this)" onfocus="renderEditCountryResults(this)">'+
+          '<div class="edit-country-results"></div>'+
+        '</div>'+
+        '<input type="hidden" data-field-key="'+field.key+'" value="'+escapeHtml(hiddenValue)+'">'+
+      '</div>';
+    }
+
+    function renderEditLabField(field){
+      const current = getOrderFieldValue(field.key);
+      const currentKey = resolveLabKey(current);
+      const selectedLab = getLabByKey(currentKey) || getTestingLabs()[0];
+      const req = field.required ? ' <span class="req">*</span>' : '';
+      const options = getTestingLabs().map(function (lab) {
+        const selected = lab.key === currentKey ? ' selected' : '';
+        return '<option value="'+lab.key+'"'+selected+'>'+escapeHtml(lab.label)+'</option>';
+      }).join('');
+      return '<div class="edit-item edit-item-lab">'+
+        '<label>'+escapeHtml(getFieldLabel(field))+req+'</label>'+
+        '<select class="edit-control" data-field-key="'+field.key+'" data-field-type="lab" onchange="updateEditLabAddress(this)">'+options+'</select>'+
+        '<div class="edit-lab-address">'+escapeHtml(selectedLab ? selectedLab.address : '')+'</div>'+
+      '</div>';
+    }
+
+    function updateEditLabAddress(select){
+      const lab = getLabByKey(select.value);
+      const box = select.closest('.edit-item-lab')?.querySelector('.edit-lab-address');
+      if(box && lab) box.textContent = lab.address;
+    }
+
+    function renderRecipientList(){
+      const list = document.getElementById('recipientList');
+      if(!list) return;
+      const recipients = getOrderRecipients().filter(function (item) { return item.email; });
+      if(!recipients.length){
+        list.innerHTML = '<div class="recipient-empty">'+escapeHtml(t('orderDetail.noRecipients'))+'</div>';
+        return;
+      }
+      list.innerHTML = recipients.map(function (item) {
+        return '<div class="recipient-card">'+
+          '<div class="recipient-email">'+escapeHtml(item.email)+'</div>'+
+          '<div class="recipient-type">'+escapeHtml(getMailTypeLabel(item.typeKey))+'</div>'+
+        '</div>';
+      }).join('');
+    }
+
+    function renderEditRecipientsField(field){
+      const recipients = getOrderRecipients();
+      if(!recipients.length) recipients.push({ email: '', typeKey: 'mailType.reportOnly' });
+      return '<div class="edit-item edit-recipient-field">'+
+        '<label>'+escapeHtml(getFieldLabel(field))+'</label>'+
+        '<div class="contact-note" style="margin-bottom:9px;">'+escapeHtml(t('orderDetail.recipientsNote'))+'</div>'+
+        '<div class="edit-recipient-list" id="editRecipientList">'+
+          recipients.map(renderEditRecipientCard).join('')+
+        '</div>'+
+        '<button class="edit-recipient-add" type="button" onclick="addEditRecipient()">'+escapeHtml(t('common.addRecipient'))+'</button>'+
+      '</div>';
+    }
+
+    function renderEditRecipientCard(contact, index){
+      const typeKey = normalizeEmailType(contact.typeKey || contact.type);
+      return '<div class="edit-recipient-card">'+
+        '<div class="edit-recipient-head">'+
+          '<input class="edit-control" data-recipient-email type="email" value="'+escapeHtml(contact.email || '')+'" placeholder="'+escapeHtml(t('index.emailPlaceholder'))+'">'+
+          (index > 0 ? '<button class="edit-recipient-remove" type="button" onclick="removeEditRecipient(this)" aria-label="'+escapeHtml(t('common.removeRecipient'))+'">-</button>' : '')+
+        '</div>'+
+        '<div class="edit-recipient-types">'+MAIL_TYPE_KEYS.map(function (mailTypeKey) {
+          const checked = typeKey === mailTypeKey ? ' checked' : '';
+          return '<label><input data-recipient-type type="radio" name="editRecipientType_'+index+'" value="'+escapeHtml(mailTypeKey)+'"'+checked+'> '+escapeHtml(t(mailTypeKey))+'</label>';
+        }).join('')+'</div>'+
+      '</div>';
+    }
+
+    function collectEditRecipients(){
+      return Array.from(document.querySelectorAll('#editRecipientList .edit-recipient-card')).map(function (card) {
+        const email = card.querySelector('[data-recipient-email]')?.value.trim() || '';
+        const typeKey = card.querySelector('[data-recipient-type]:checked')?.value || 'mailType.reportOnly';
+        return { email: email, typeKey: typeKey };
+      }).filter(function (item) { return item.email; });
+    }
+
+    function refreshEditRecipients(recipients){
+      const list = document.getElementById('editRecipientList');
+      if(!list) return;
+      const next = recipients && recipients.length ? recipients : [{ email: '', typeKey: 'mailType.reportOnly' }];
+      list.innerHTML = next.map(renderEditRecipientCard).join('');
+    }
+
+    function addEditRecipient(){
+      const recipients = collectEditRecipients();
+      recipients.push({ email: '', typeKey: 'mailType.reportOnly' });
+      refreshEditRecipients(recipients);
+    }
+
+    function removeEditRecipient(btn){
+      const card = btn.closest('.edit-recipient-card');
+      if(card) card.remove();
+      const recipients = collectEditRecipients();
+      refreshEditRecipients(recipients);
+    }
+
+    function getFieldLabel(field) {
+      const raw = field.labelKey ? t(field.labelKey) : (field.label || '');
+      return I18n.cleanFieldLabel(raw);
+    }
+
+    function renderEditField(field){
+      const current = getOrderFieldValue(field.key);
+      const req = field.required ? ' <span class="req">*</span>' : '';
+      const label = getFieldLabel(field);
+      if(field.type === 'multi-country'){
+        return renderEditMultiCountryField(field);
+      }
+      if(field.type === 'lab-select'){
+        return renderEditLabField(field);
+      }
+      if(field.type === 'recipients'){
+        return renderEditRecipientsField(field);
+      }
+      if(field.type === 'select'){
+        const optionValues = field.optionValues ? [...field.optionValues] : [...(field.options || [])];
+        if(current && !optionValues.includes(current)) optionValues.unshift(current);
+        const optionKeys = field.optionKeys || [];
+        const options = optionValues.map(function (opt, index) {
+          const selected = opt === current ? ' selected' : '';
+          const labelText = optionKeys[index] ? t(optionKeys[index]) : opt;
+          return '<option value="'+escapeHtml(opt)+'"'+selected+'>'+escapeHtml(labelText || t('common.selectPlaceholder'))+'</option>';
+        }).join('');
+        return '<div class="edit-item">'+
+          '<label>'+escapeHtml(label)+req+'</label>'+
+          '<select class="edit-control" data-field-key="'+field.key+'">'+options+'</select>'+
+        '</div>';
+      }
+      if(field.type === 'textarea'){
+        return '<div class="edit-item">'+
+          '<label>'+escapeHtml(label)+req+'</label>'+
+          '<textarea class="edit-control textarea" data-field-key="'+field.key+'" placeholder="'+escapeHtml(t('index.optionalRemarkPlaceholder'))+'">'+escapeHtml(current)+'</textarea>'+
+        '</div>';
+      }
+      return '<div class="edit-item">'+
+        '<label>'+escapeHtml(label)+req+'</label>'+
+        '<input class="edit-control" data-field-key="'+field.key+'" value="'+escapeHtml(current)+'" placeholder="'+escapeHtml(label)+'">'+
+      '</div>';
+    }
+
+    function openOrderEditor(){
+      const grid = document.getElementById('orderEditorGrid');
+      grid.innerHTML = editableSections.map(function (section) {
+        return '<div class="edit-section">'+
+          '<div class="edit-section-title">'+escapeHtml(t(section.titleKey))+'</div>'+
+          '<div class="edit-section-body">'+
+            section.fields.map(renderEditField).join('')+
+          '</div>'+
+        '</div>';
+      }).join('');
+      document.getElementById('orderEditor').classList.add('show');
+    }
+
+    function closeOrderEditor(event){
+      if(event && event.target !== event.currentTarget) return;
+      document.getElementById('orderEditor').classList.remove('show');
+    }
+
+    function applyFieldToDom(key, value){
+      const display = translateFieldValue(key, value);
+      const ids = fieldDomMap[key] || [key];
+      ids.forEach(function (id) {
+        const node = document.getElementById(id);
+        if(!node) return;
+        if(key === 'orderRemark' && (!value || value === 'None')){
+          node.textContent = t('common.none');
+          node.classList.add('muted');
+        } else {
+          node.textContent = display || t('common.none');
+          if(node.classList.contains('muted') && value && value !== 'None') node.classList.remove('muted');
+        }
+      });
+    }
+
+    function saveOrderEditor(){
+      order.recipients = collectEditRecipients();
+      order.recipientEmail = order.recipients.map(function (item) { return item.email; }).join('；') || 'N/A';
+      order.emailType = order.recipients.map(function (item) { return item.typeKey; }).join('；') || 'N/A';
+      renderRecipientList();
+      const inputs = document.querySelectorAll('#orderEditorGrid input[data-field-key], #orderEditorGrid select[data-field-key], #orderEditorGrid textarea[data-field-key]');
+      inputs.forEach(function (input) {
+        const key = input.dataset.fieldKey;
+        if(!key) return;
+        let value = input.value.trim();
+        if(input.dataset.fieldType === 'lab'){
+          const lab = getLabByKey(value);
+          value = lab ? lab.key : value;
+          order[key] = lab ? lab.key : value;
+          applyFieldToDom(key, lab ? lab.key : value);
+          return;
+        }
+        order[key] = value || 'None';
+        applyFieldToDom(key, value);
+      });
+      closeOrderEditor();
+    }
+
+    document.addEventListener('click', (event) => {
+      if(!event.target.closest('.edit-country-search')){
+        document.querySelectorAll('.edit-country-results.show').forEach(results => {
+          results.classList.remove('show');
+          results.innerHTML = '';
+        });
+      }
+    });
+
+    function renderOrderDetail(){
+      document.getElementById('orderTitle').textContent = translateServiceType(order.serviceType || order.title);
+      document.getElementById('orderSubtitle').textContent = t('orderDetail.orderNoLabel', { id: orderId });
+      document.getElementById('productName').textContent = order.productName;
+      setText('testType', translateTestType(order.testType));
+      setText('testingLocation', translateTestingLocation(order.testingLocation));
+      setText('supplierName', order.supplierName === 'None' ? t('common.none') : order.supplierName);
+      setText('productDisplayName', order.productName);
+      setText('productRefNo', order.productRefNo);
+      setText('poNumber', order.poNumber);
+      setText('skuValue', order.skuValue);
+      setText('material', order.material);
+      setText('ageGrade', order.ageGrade);
+      setText('projectName', translateProjectName(order.projectName));
+      setText('originCountry', I18n.displayCountry(order.originCountry));
+      setText('salesCountry', formatDistributionDisplay(order.salesCountry));
+      setText('testingLocation2', translateTestingLocation(order.testingLocation));
+      setText('spuId', order.spuId);
+      setText('skcId', order.skcId);
+      setText('skuNo', order.skuNo);
+      setText('manufacturerName', order.manufacturerName);
+      setText('fibreContent', order.fibreContent);
+      setText('colorValue', order.colorValue);
+      setText('productType', order.productType);
+      setText('sunLensCat', order.sunLensCat);
+      setText('eanCode', order.eanCode);
+      setText('brand', order.brand);
+      setText('batchNumber', order.batchNumber);
+      setText('collectionMethod', translateCollectionMethod(order.collectionMethod));
+      setText('orderRemark', order.orderRemark);
+      renderRecipientList();
+      setText('recipientComments', order.recipientComments, t('orderDetail.commentsPlaceholder'));
+
+      const statusBadge = document.getElementById('statusBadge');
+      statusBadge.textContent = I18n.translateStatus(order.status);
+      statusBadge.className = 'status ' + I18n.statusClass(order.status);
+
+      const productThumb = document.getElementById('productThumb');
+      productThumb.className = ('thumb ' + (order.thumbClass || '')).trim();
+
+      renderFileList(order.files || defaultFiles);
+    }
+
+    window.onLangApplied = function () {
+      renderOrderDetail();
+      if (document.getElementById('orderEditor').classList.contains('show')) {
+        openOrderEditor();
+      }
+    };
+
+    renderOrderDetail();
 
     function setText(id, value, fallback){
       const node = document.getElementById(id);
       if(node){
         if(fallback && (!value || value === 'None')){
           node.textContent = fallback;
+        } else if(value === 'N/A'){
+          node.textContent = t('common.na');
+        } else if(value === 'None'){
+          node.textContent = t('common.none');
         } else {
-          node.textContent = value || 'N/A';
+          node.textContent = value || t('common.na');
         }
       }
+    }
+
+    if (window.I18n) {
+      I18n.onLangApplied = window.onLangApplied;
+      I18n.initLangToggle();
     }
   </script>
 </body>

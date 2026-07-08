@@ -1,0 +1,201 @@
+/* English UI adaptations — scoped to html[lang="en"] */
+
+html[lang="en"] .tab .label {
+  font-size: 9px;
+  line-height: 12px;
+  white-space: normal;
+  text-align: center;
+  max-width: 72px;
+}
+
+html[lang="en"] .chip-btn {
+  font-size: 11px;
+  line-height: 16px;
+  white-space: normal;
+  min-height: 36px;
+  height: auto;
+  padding: 8px 10px;
+}
+
+html[lang="en"] .chips {
+  flex-wrap: wrap;
+}
+
+html[lang="en"] .status {
+  max-width: 120px;
+  white-space: normal;
+  line-height: 14px;
+  height: auto;
+  min-height: 24px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+html[lang="en"] .info-row {
+  flex-direction: column;
+  gap: 4px;
+}
+
+html[lang="en"] .info-row .label {
+  width: auto;
+}
+
+html[lang="en"] .contact-type-row,
+html[lang="en"] .edit-recipient-types {
+  grid-template-columns: 1fr;
+}
+
+html[lang="en"] .contact-type-row label,
+html[lang="en"] .edit-recipient-types label {
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 16px;
+  white-space: normal;
+  align-items: center;
+}
+
+html[lang="en"] .form-label,
+html[lang="en"] .fm-label,
+html[lang="en"] .edit-item label {
+  line-height: 16px;
+  white-space: normal;
+}
+
+html[lang="en"] .review-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+html[lang="en"] .review-row span:last-child {
+  text-align: left;
+}
+
+html[lang="en"] .lab-tab {
+  font-size: 11px;
+  padding: 0 10px;
+  height: auto;
+  min-height: 32px;
+  line-height: 14px;
+  white-space: normal;
+}
+
+html[lang="en"] .detail-action,
+html[lang="en"] .edit-action,
+html[lang="en"] .order-confirm-action {
+  font-size: 12px;
+  line-height: 16px;
+  white-space: normal;
+  height: auto;
+  min-height: 42px;
+  padding: 10px 8px;
+}
+
+html[lang="en"] .edit-country-line {
+  height: auto;
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+html[lang="en"] .edit-country-line span {
+  white-space: normal;
+  line-height: 16px;
+}
+
+html[lang="en"] .select-card-title,
+html[lang="en"] .select-card-desc {
+  line-height: 18px;
+  white-space: normal;
+}
+
+html[lang="en"] .chip {
+  font-size: 11px;
+  white-space: normal;
+  height: auto;
+  min-height: 36px;
+  padding: 6px 10px;
+}
+
+html[lang="en"] .filter-btn {
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+html[lang="en"] .ocard-foot span {
+  font-size: 12px;
+}
+
+html[lang="en"] .summary-edit-btn {
+  font-size: 11px;
+  padding: 0 8px;
+}
+
+html[lang="en"] .fm-radio-line {
+  font-size: 11px;
+  line-height: 16px;
+  white-space: normal;
+  align-items: flex-start;
+}
+
+html[lang="en"] .edit-section-title {
+  white-space: normal;
+  line-height: 18px;
+}
+
+html[lang="en"] .send-btn {
+  font-size: 12px;
+  padding: 0 10px;
+  min-width: 52px;
+}
+
+html[lang="en"] .navbar .nav-sub {
+  font-size: 10px;
+  line-height: 13px;
+  max-width: 200px;
+  white-space: normal;
+}
+
+html[lang="en"] .order-title-row .status {
+  max-width: none;
+  width: auto;
+  font-size: 10px;
+  white-space: nowrap;
+  height: 25px;
+  line-height: 25px;
+  min-height: 25px;
+  padding: 0 8px;
+}
+
+html[lang="en"] .success-desc,
+html[lang="en"] .reminder-text {
+  line-height: 18px;
+}
+
+html[lang="en"] .summary-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+html[lang="en"] .summary-row span:last-child {
+  text-align: left;
+}
+
+html[lang="en"] .opt .opt-desc {
+  line-height: 16px;
+}
+
+html[lang="en"] .detail-title {
+  font-size: 18px;
+}
+
+html[lang="en"] #chat .wide {
+  width: 316px;
+  max-width: 316px;
+}
+
+html[lang="en"] .extract-head .eh-title {
+  font-size: 13px;
+  letter-spacing: -0.15px;
+}

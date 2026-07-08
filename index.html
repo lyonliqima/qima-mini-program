@@ -30,14 +30,11 @@
   /* ===== 手机外壳 ===== */
   .phone {
     position: relative;
-    width: 390px;
-    min-height: 844px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
     overflow: hidden;
-    flex-shrink: 0;
   }
   /* 装饰光晕 */
   .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
@@ -65,12 +62,15 @@
 
   /* ===== 导航栏 ===== */
   .navbar {
+    position: relative;
     height: 44px; width: 100%;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: flex-end;
     padding: 0 17px;
   }
-  .navbar .back { width: 12px; height: 20px; }
-  .navbar .logo { width: 72px; height: 16px; margin-left: 40px; }
+  .navbar .logo {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 72px; height: 16px;
+  }
   .nav-capsule {
     width: 83px; height: 30px; border-radius: 15px;
     background: rgba(255,255,255,.7);
@@ -88,19 +88,6 @@
   .greeting { display: flex; align-items: center; justify-content: space-between; }
   .greeting .hello { font-size: 12px; color: rgba(99,99,99,.8); line-height: 18px; }
   .greeting .name { font-size: 17px; font-weight: 600; letter-spacing: -.34px; line-height: 25.5px; }
-  .bell {
-    position: relative;
-    width: 47px; height: 26px; border-radius: 12px;
-    background: var(--pool-100);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .bell img { width: 16px; height: 16px; }
-  .bell .badge {
-    position: absolute; top: -8px; right: -6px;
-    min-width: 16px; height: 16px; padding: 0 4px;
-    background: var(--qima-red); color: #fff;
-    border-radius: 21px; font-size: 12px; line-height: 16px; text-align: center;
-  }
 
   /* ===== 快捷卡片 ===== */
   .quick { display: flex; gap: 12px; }
@@ -116,8 +103,14 @@
   .quick-card .art-vector {
     position: absolute; left: -2.5px; top: 39.5px;
     width: 67.5px; height: 38px;
+    z-index: 1;
+    pointer-events: none;
   }
-  .quick-card .art.book { left: -36px; top: -16px; width: 120px; height: 120px; }
+  .quick-card .art.book {
+    left: -36px; top: -16px; width: 120px; height: 120px;
+    z-index: 2;
+    filter: drop-shadow(0 6px 5px rgba(25, 25, 25, 0.12));
+  }
   .quick-card .title { position: absolute; left: 90px; top: 11px; font-size: 12px; font-weight: 500; line-height: 22.5px; }
   .quick-card .sub { position: absolute; left: 90px; top: 31px; font-size: 10px; color: rgba(99,99,99,.8); line-height: 18px; }
   .quick-card .go {
@@ -159,25 +152,6 @@
   .tag.progress { background: var(--pool-050); color: var(--pool-500); }
   .tag.pending { background: #fef0ee; color: #ff5f4e; }
   .order-row .chev { width: 16px; height: 16px; }
-
-  /* 通知行 */
-  .notif-row {
-    height: 85px; display: flex; align-items: flex-start; gap: 10px;
-    padding: 14px 16px 0 16px; border-bottom: .5px solid var(--border);
-  }
-  .notif-row:last-child { border-bottom: none; }
-  .notif-icon {
-    width: 32px; height: 32px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .notif-icon.blue { background: var(--pool-100); }
-  .notif-icon.green { background: #eaf6f2; }
-  .notif-icon img { width: 16px; height: 16px; }
-  .notif-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-  .notif-body .ntitle { position: relative; font-size: 14px; color: var(--carbon); line-height: 21px; }
-  .notif-body .dot { position: absolute; right: 0; top: 8px; width: 6px; height: 6px; border-radius: 3px; background: #e5353d; }
-  .notif-body .nsub { font-size: 12px; color: var(--seal); line-height: 18px; }
-  .notif-body .ntime { font-size: 11px; color: var(--seal); line-height: 16.5px; }
 
   /* ===== 底部 Tab Bar ===== */
   .tabbar {
@@ -379,17 +353,37 @@
     font-size: 11px; color: var(--seal); line-height: 16px;
     margin-bottom: 9px;
   }
+  .contact-list { display: flex; flex-direction: column; gap: 10px; }
+  .contact-card {
+    border: 1px solid #e6e9f2; border-radius: 12px;
+    background: #fafbfe; padding: 11px;
+  }
+  .contact-card-head {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .contact-card-head .form-input { flex: 1; min-width: 0; }
+  .remove-contact-btn {
+    width: 28px; height: 28px; border: none; border-radius: 8px;
+    background: #fff0f1; color: #d9363e;
+    font-size: 18px; font-weight: 700; line-height: 28px;
+    cursor: pointer; flex-shrink: 0;
+  }
   .contact-type-row {
-    display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 9px;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px; margin-top: 10px;
   }
   .contact-type-row label {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 11px; color: var(--carbon);
+    display: flex; align-items: center; gap: 6px;
+    min-height: 32px; padding: 6px 8px;
+    border: 1px solid #e1e5ee; border-radius: 9px;
+    background: #fff; font-size: 11px; color: var(--carbon);
+    line-height: 16px;
   }
+  .contact-type-row input { accent-color: var(--pool-500); margin: 0; flex-shrink: 0; }
   .add-contact-btn {
-    height: 34px; margin-top: 10px; padding: 0 14px;
-    border: none; border-radius: 8px; background: var(--pool-100);
-    color: var(--pool-500); font-size: 12px; cursor: pointer;
+    width: 100%; height: 38px; margin-top: 10px; padding: 0 14px;
+    border: 1px solid #dce4fb; border-radius: 10px; background: var(--pool-100);
+    color: var(--pool-500); font-size: 12px; font-weight: 600; cursor: pointer;
   }
   .optional-fields { display: none; }
   .detail-body.show-optional .optional-fields { display: block; }
@@ -516,6 +510,13 @@
   .review-row span:last-child { color: var(--carbon); text-align: right; }
   .review-empty { color: #a0a6b1 !important; }
 </style>
+<link rel="stylesheet" href="assets/phone-shell.css" />
+<link rel="stylesheet" href="assets/lang-toggle.css" />
+<link rel="stylesheet" href="assets/i18n-en.css" />
+<script>window.PAGE_TITLE_KEY = 'title.index';</script>
+<script src="assets/i18n/zh.js"></script>
+<script src="assets/i18n/en.js"></script>
+<script src="assets/i18n-runtime.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -540,7 +541,6 @@
 
         <!-- 导航栏 -->
         <div class="navbar">
-          <img class="back" src="assets/vector52.svg" alt="返回" />
           <img class="logo" src="assets/frame207.svg" alt="QIMA" />
           <div class="nav-capsule">
             <img src="assets/share.svg" alt="" />
@@ -554,12 +554,8 @@
       <div class="section">
         <div class="greeting">
           <div>
-            <div class="hello">欢迎回来</div>
-            <div class="name">你好，Lyon！</div>
-          </div>
-          <div class="bell">
-            <img src="assets/icon_bell.svg" alt="通知" />
-            <div class="badge">2</div>
+            <div class="hello" data-i18n="index.greeting">欢迎回来</div>
+            <div class="name" id="greetingName">您好，Lyon！</div>
           </div>
         </div>
 
@@ -567,15 +563,15 @@
         <div class="quick">
           <div class="quick-card" onclick="openOrderSheet()" style="cursor:pointer">
             <img class="art" src="assets/image38.png" alt="" />
-            <div class="title">下单</div>
-            <div class="sub">快速创建订单</div>
+            <div class="title" data-i18n="index.quickOrder">下单</div>
+            <div class="sub" data-i18n="index.quickOrderSub">快速创建订单</div>
             <div class="go"><img src="assets/arrow_card.svg" alt="" /></div>
           </div>
           <div class="quick-card">
             <img class="art-vector" src="assets/image39-vector.svg" alt="" />
             <img class="art book" src="assets/image39.png" alt="" />
-            <div class="title">查看报告</div>
-            <div class="sub">3份报告已生成</div>
+            <div class="title" data-i18n="index.quickReport">查看报告</div>
+            <div class="sub" data-i18n="index.quickReportSub">3份报告已生成</div>
             <div class="go"><img src="assets/arrow_card.svg" alt="" /></div>
           </div>
         </div>
@@ -588,57 +584,30 @@
           <div class="card-head">
             <div class="left">
               <img src="assets/order_icon.svg" alt="" />
-              <span>我的订单</span>
+              <span data-i18n="index.myOrders">我的订单</span>
             </div>
-            <div class="more">全部 <img src="assets/chevron1.svg" alt="" /></div>
+            <div class="more"><span data-i18n="common.viewAll">全部</span> <img src="assets/chevron1.svg" alt="" /></div>
           </div>
           <a class="order-row" href="order-detail.html?order=T-25617004">
             <div>
               <div class="oid">T-25617004</div>
-              <div class="odesc">实验室检测 · 玩具</div>
+              <div class="odesc" data-i18n="common.serviceLabTestToys">实验室检测 · 玩具</div>
             </div>
             <div class="right">
-              <div class="tag progress">进行中</div>
+              <div class="tag progress" data-i18n="status.inProgress">进行中</div>
               <img class="chev" src="assets/chevron_row.svg" alt="" />
             </div>
           </a>
-          <a class="order-row" href="order-detail.html?order=Q202349103">
+          <a class="order-row" href="order-detail.html?order=T-25617005">
             <div>
-              <div class="oid">Q202349103</div>
-              <div class="odesc">装运前检验 · 玩具</div>
+              <div class="oid">T-25617005</div>
+              <div class="odesc" data-i18n="common.serviceLabTestToys">实验室检测 · 玩具</div>
             </div>
             <div class="right">
-              <div class="tag pending">待确认</div>
+              <div class="tag progress" data-i18n="status.pendingVerification">待验证</div>
               <img class="chev" src="assets/chevron_row.svg" alt="" />
             </div>
           </a>
-        </div>
-
-        <!-- 最新通知 -->
-        <div class="card">
-          <div class="card-head">
-            <div class="left">
-              <img src="assets/notif_icon.svg" alt="" />
-              <span>最新通知</span>
-            </div>
-            <div class="more">全部 <img src="assets/chevron1.svg" alt="" /></div>
-          </div>
-          <div class="notif-row">
-            <div class="notif-icon blue"><img src="assets/notif_doc.svg" alt="" /></div>
-            <div class="notif-body">
-              <div class="ntitle">下单成功提醒 <span class="dot"></span></div>
-              <div class="nsub">产品：玩具 | 装运前检验</div>
-              <div class="ntime">星期日 15:32</div>
-            </div>
-          </div>
-          <div class="notif-row">
-            <div class="notif-icon green"><img src="assets/notif_check.svg" alt="" /></div>
-            <div class="notif-body">
-              <div class="ntitle">新的报告提醒 <span class="dot"></span></div>
-              <div class="nsub">报告结果: 通过 | 报告决策: 待决定</div>
-              <div class="ntime">今天 21:26</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -647,31 +616,31 @@
     <div class="tabbar">
       <a class="tab active" href="index.html">
         <img src="assets/tab_home_active.svg" alt="" />
-        <span class="label">首页</span>
+        <span class="label" data-i18n="common.tab.home">首页</span>
       </a>
       <a class="tab" href="orders.html">
         <img src="assets/tab_order.svg" alt="" />
-        <span class="label">订单</span>
+        <span class="label" data-i18n="common.tab.orders">订单</span>
       </a>
       <div class="tab placeholder"></div>
       <a class="tab" href="#">
         <img src="assets/tab_report.svg" alt="" />
-        <span class="label">报告</span>
+        <span class="label" data-i18n="common.tab.reports">报告</span>
       </a>
       <a class="tab" href="#">
         <img src="assets/tab_me.svg" alt="" />
-        <span class="label">我的</span>
+        <span class="label" data-i18n="common.tab.me">我的</span>
       </a>
       <!-- 中间悬浮按钮 -->
-      <div class="fab" onclick="openOrderSheet()" style="cursor:pointer"><img src="assets/fab_add.svg" alt="下单" /></div>
+      <div class="fab" onclick="openOrderSheet()" style="cursor:pointer"><img src="assets/fab_add.svg" alt="" data-i18n-alt="common.fabOrder" /></div>
     </div>
 
     <!-- 下单方式选择层 -->
     <div class="sheet-mask" id="orderSheet" onclick="closeOrderSheet(event)">
       <div class="sheet" onclick="event.stopPropagation()">
         <div class="grabber"></div>
-        <div class="sheet-title">选择下单方式</div>
-        <div class="sheet-sub">请选择适合你的创建订单方式</div>
+        <div class="sheet-title" data-i18n="index.sheetTitle">选择下单方式</div>
+        <div class="sheet-sub" data-i18n="index.sheetSub">请选择适合您的创建订单方式</div>
 
         <a class="opt primary" href="order-chat.html">
           <div class="opt-ic">
@@ -680,8 +649,8 @@
             </svg>
           </div>
           <div class="opt-body">
-            <div class="opt-name">AI辅助下单 <span class="opt-badge">智能推荐</span></div>
-            <div class="opt-desc">上传资料或商品链接，智能识别并填写表单</div>
+            <div class="opt-name"><span data-i18n="index.aiOrder">AI辅助下单</span> <span class="opt-badge" data-i18n="index.aiBadge">智能推荐</span></div>
+            <div class="opt-desc" data-i18n="index.aiDesc">上传资料或商品链接，智能识别并填写表单</div>
           </div>
           <svg class="opt-arrow" width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
@@ -695,13 +664,13 @@
             </svg>
           </div>
           <div class="opt-body">
-            <div class="opt-name">详细填表</div>
-            <div class="opt-desc">手动逐项填写完整的检测订单信息</div>
+            <div class="opt-name" data-i18n="index.detailForm">详细填表</div>
+            <div class="opt-desc" data-i18n="index.detailFormDesc">手动逐项填写完整的检测订单信息</div>
           </div>
           <svg class="opt-arrow" width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
 
-        <div class="sheet-cancel" onclick="closeOrderSheet()">取消</div>
+        <div class="sheet-cancel" onclick="closeOrderSheet()" data-i18n="common.cancel">取消</div>
       </div>
     </div>
 
@@ -709,292 +678,291 @@
     <div class="detail-mask" id="detailForm" onclick="closeDetailForm(event)">
       <div class="detail-panel" onclick="event.stopPropagation()">
         <div class="detail-head">
-          <div class="detail-title">下单</div>
-          <button class="detail-close" onclick="closeDetailForm()" aria-label="关闭">×</button>
+          <div class="detail-title" id="detailTitle" data-i18n="index.formTitle">下单</div>
+          <button class="detail-close" onclick="closeDetailForm()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
 
         <div class="detail-body" id="detailEditBody">
           <div class="form-row">
-            <div class="form-label">本次测试类型 <span class="req">*</span> <span class="info">i</span></div>
+            <div class="form-label"><span data-i18n="index.testType">本次测试类型</span> <span class="req">*</span> <span class="info">i</span></div>
             <div class="radio-stack">
-              <label class="radio-line"><input type="radio" name="testType" value="first" checked onchange="toggleHistoryOrderSelection()"> 首次测试</label>
-              <label class="radio-line"><input type="radio" name="testType" value="retest" onchange="toggleHistoryOrderSelection()"> 重测</label>
-              <label class="radio-line"><input type="radio" name="testType" value="reorder" onchange="toggleHistoryOrderSelection()"> 再次下单</label>
+              <label class="radio-line"><input type="radio" name="testType" value="first" checked onchange="toggleHistoryOrderSelection()"> <span data-i18n="index.testTypeFirst">首次测试</span></label>
+              <label class="radio-line"><input type="radio" name="testType" value="copy" onchange="toggleHistoryOrderSelection()"> <span data-i18n="index.testTypeCopy">从现有订单复制</span></label>
             </div>
           </div>
 
           <div class="inline-form-row history-order-field" id="historyOrderRow" style="display: none;">
-            <div class="inline-label">过往订单 / 测试参考编号 <span class="req">*</span></div>
+            <div class="inline-label"><span data-i18n="index.copyOrderRef">复制的订单参考编号</span> <span class="req">*</span></div>
             <div class="inline-control">
-              <button class="select-ref-btn" id="historyOrderSelectBtn" type="button" onclick="selectProductReference(this)">选择</button>
+              <button class="select-ref-btn" id="historyOrderSelectBtn" type="button" onclick="selectProductReference(this)" data-i18n="common.select">选择</button>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">产品名称 <span class="req">*</span></div>
-            <input class="form-input" id="productNameInput" type="text" placeholder="请输入产品名称">
+            <div class="form-label"><span data-i18n="index.productName">产品名称</span> <span class="req">*</span></div>
+            <input class="form-input" id="productNameInput" type="text" data-i18n-placeholder="index.productNamePlaceholder" placeholder="请输入产品名称">
           </div>
 
           <div class="form-row">
-            <div class="form-label">关联项目 <span class="req">*</span></div>
+            <div class="form-label"><span data-i18n="index.project">关联项目</span> <span class="req">*</span></div>
             <select class="form-select" id="projectSelect">
-              <option value="" disabled selected>请选择关联项目</option>
-              <option>TEMU 硬件 - 商家付款</option>
-              <option>玩具实验室检测项目</option>
-              <option>通用检测项目</option>
+              <option value="" disabled selected data-i18n="index.projectPlaceholder">请选择关联项目</option>
+              <option value="temu-hardware" data-i18n="index.projectTemuHardware">TEMU 硬件 - 商家付款</option>
+              <option value="toys-lab" data-i18n="index.projectToysLab">玩具实验室检测项目</option>
+              <option value="general" data-i18n="index.projectGeneral">通用检测项目</option>
             </select>
           </div>
 
           <div class="form-row">
-            <div class="form-label">原产国家或地区 <span class="req">*</span> <span class="info">i</span></div>
+            <div class="form-label"><span data-i18n="index.originCountry">原产国家或地区</span> <span class="req">*</span> <span class="info">i</span></div>
             <select class="form-select" id="originCountrySelect">
-              <option value="" disabled selected>请选择原产国家或地区</option>
-              <option>奥兰群岛</option>
-              <option>中国</option>
-              <option>越南</option>
-              <option>印度</option>
+              <option value="" disabled selected data-i18n="index.originCountryPlaceholder">请选择原产国家或地区</option>
+              <option value="ax" data-i18n="country.ax">奥兰群岛</option>
+              <option value="cn" data-i18n="country.cn">中国</option>
+              <option value="vn" data-i18n="country.vn">越南</option>
+              <option value="in" data-i18n="country.in">印度</option>
             </select>
           </div>
 
           <div class="form-row">
-            <div class="form-label">销售国家或地区 <span class="req">*</span> <span class="info">i</span></div>
-            <div class="check-stack">
-              <label class="check-line"><input type="checkbox" value="欧盟" onchange="toggleSalesCountry(this)"> 欧盟</label>
-              <label class="check-line"><input type="checkbox" value="美国" onchange="toggleSalesCountry(this)"> 美国</label>
-              <label class="check-line"><input type="checkbox" value="澳大利亚" onchange="toggleSalesCountry(this)"> 澳大利亚</label>
-              <label class="check-line"><input type="checkbox" value="加拿大" onchange="toggleSalesCountry(this)"> 加拿大</label>
-              <label class="check-line"><input type="checkbox" value="南非" onchange="toggleSalesCountry(this)"> 南非</label>
+            <div class="form-label"><span data-i18n="index.salesCountry">销售国家或地区</span> <span class="req">*</span> <span class="info">i</span></div>
+            <div class="check-stack" id="salesCountryChecks">
+              <label class="check-line"><input type="checkbox" value="eu" onchange="toggleSalesCountry(this)"> <span data-i18n="country.eu">欧盟</span></label>
+              <label class="check-line"><input type="checkbox" value="us" onchange="toggleSalesCountry(this)"> <span data-i18n="country.us">美国</span></label>
+              <label class="check-line"><input type="checkbox" value="au" onchange="toggleSalesCountry(this)"> <span data-i18n="country.au">澳大利亚</span></label>
+              <label class="check-line"><input type="checkbox" value="ca" onchange="toggleSalesCountry(this)"> <span data-i18n="country.ca">加拿大</span></label>
+              <label class="check-line"><input type="checkbox" value="za" onchange="toggleSalesCountry(this)"> <span data-i18n="country.za">南非</span></label>
             </div>
             <div class="selected-country-list" id="selectedSalesCountries"></div>
             <div class="country-search">
-              <input class="form-input" id="salesCountrySearch" type="text" placeholder="请输入或搜索其他国家/地区" autocomplete="off" oninput="renderCountryResults()" onfocus="renderCountryResults()">
+              <input class="form-input" id="salesCountrySearch" type="text" data-i18n-placeholder="common.searchCountry" placeholder="请输入或搜索其他国家/地区" autocomplete="off" oninput="renderCountryResults()" onfocus="renderCountryResults()">
               <div class="country-results" id="countryResults"></div>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">货号 / 型号 <span class="req">*</span></div>
-            <input class="form-input" id="skuInput" type="text" placeholder="请输入货号或型号">
+            <div class="form-label"><span data-i18n="index.sku">货号 / 型号</span> <span class="req">*</span></div>
+            <input class="form-input" id="skuInput" type="text" data-i18n-placeholder="index.skuPlaceholder" placeholder="请输入货号或型号">
           </div>
 
           <div class="form-row">
-            <div class="form-label">产品是否带电 <span class="req">*</span></div>
+            <div class="form-label"><span data-i18n="index.electric">产品是否带电</span> <span class="req">*</span></div>
             <div class="radio-stack">
-              <label class="radio-line"><input type="radio" name="electricType" value="带电" onchange="toggleElectricDescription()"> 带电产品</label>
-              <label class="radio-line"><input type="radio" name="electricType" value="非电" checked onchange="toggleElectricDescription()"> 非电产品</label>
+              <label class="radio-line"><input type="radio" name="electricType" value="yes" onchange="toggleElectricDescription()"> <span data-i18n="index.electricYes">带电产品</span></label>
+              <label class="radio-line"><input type="radio" name="electricType" value="no" checked onchange="toggleElectricDescription()"> <span data-i18n="index.electricNo">非电产品</span></label>
             </div>
           </div>
 
           <div class="form-row" id="electricDescriptionRow" style="display: none;">
-            <div class="form-label">产品说明 <span class="req">*</span></div>
-            <textarea class="form-textarea" id="electricDescriptionInput" placeholder="请说明产品的带电部件、电池/电源类型、额定参数、充电方式等信息"></textarea>
+            <div class="form-label"><span data-i18n="index.productDesc">产品说明</span> <span class="req">*</span></div>
+            <textarea class="form-textarea" id="electricDescriptionInput" data-i18n-placeholder="index.productDescPlaceholder" placeholder="请说明产品的带电部件、电池/电源类型、额定参数、充电方式等信息"></textarea>
           </div>
 
           <div class="form-row">
-            <div class="form-label">制造商 <span class="req">*</span></div>
-            <input class="form-input" id="manufacturerInput" type="text" placeholder="请输入制造商完整工厂全称">
-            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;">⚠ 请务必提供完整的工厂全称，不可简写</div>
+            <div class="form-label"><span data-i18n="index.manufacturer">制造商</span> <span class="req">*</span></div>
+            <input class="form-input" id="manufacturerInput" type="text" data-i18n-placeholder="index.manufacturerPlaceholder" placeholder="请输入制造商完整工厂全称">
+            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;" data-i18n="index.manufacturerWarn">⚠ 请务必提供完整的工厂全称，不可简写</div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">制造商地址 <span class="req">*</span></div>
-            <input class="form-input" id="manufacturerAddressInput" type="text" placeholder="请输入制造商完整地址（省/市/区/街道/门牌号）">
-            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;">⚠ 请务必提供完整地址，包括省、市、区、街道和门牌号</div>
+            <div class="form-label"><span data-i18n="index.manufacturerAddress">制造商地址</span> <span class="req">*</span></div>
+            <input class="form-input" id="manufacturerAddressInput" type="text" data-i18n-placeholder="index.manufacturerAddressPlaceholder" placeholder="请输入制造商完整地址（省/市/区/街道/门牌号）">
+            <div style="font-size:11px; color:#b8860b; margin-top:4px; line-height:16px;" data-i18n="index.manufacturerAddressWarn">⚠ 请务必提供完整地址，包括省、市、区、街道和门牌号</div>
           </div>
 
-          <div class="form-section-title" style="margin-top:20px;">样品收集</div>
+          <div class="form-section-title" style="margin-top:20px;" data-i18n="index.sampleCollection">样品收集</div>
 
           <div class="inline-form-row">
-            <div class="inline-label">方法 <span class="req">*</span></div>
+            <div class="inline-label"><span data-i18n="index.sampleMethod">方法</span> <span class="req">*</span></div>
             <div class="inline-control">
               <div class="radio-stack">
-                <label class="radio-line"><input type="radio" name="sampleMethod" value="collect" checked onchange="toggleRefNumber()"> 启迈 QIMA 将在执行产品服务时收集样本</label>
-                <label class="radio-line"><input type="radio" name="sampleMethod" value="ship" onchange="toggleRefNumber()"> 您或者供应商会寄送样本</label>
-                <label class="radio-line"><input type="radio" name="sampleMethod" value="received" onchange="toggleRefNumber()"> 启迈 QIMA 已经拿到了样本</label>
+                <label class="radio-line"><input type="radio" name="sampleMethod" value="ship" onchange="toggleRefNumber()"> <span data-i18n="index.sampleShip">您或者供应商会寄送样本</span></label>
+                <label class="radio-line"><input type="radio" name="sampleMethod" value="collect" onchange="toggleRefNumber()"> <span data-i18n="index.sampleCollect">启迈 QIMA 将在执行产品服务时收集样本</span></label>
+                <label class="radio-line"><input type="radio" name="sampleMethod" value="received" onchange="toggleRefNumber()"> <span data-i18n="index.sampleReceived">启迈 QIMA 已经拿到了样本</span></label>
               </div>
             </div>
           </div>
 
-          <div class="inline-form-row" id="refNumberRow">
-            <div class="inline-label">产品检验订单参考编号</div>
+          <div class="inline-form-row" id="refNumberRow" style="display: none;">
+            <div class="inline-label" data-i18n="index.inspectionRef">产品检验订单参考编号</div>
             <div class="inline-control">
-              <button class="select-ref-btn" type="button" onclick="selectProductReference(this)">选择</button>
+              <button class="select-ref-btn" type="button" onclick="selectProductReference(this)" data-i18n="common.select">选择</button>
             </div>
           </div>
 
           <div class="form-row lab-selection-field" style="display: none;">
-            <div class="form-label">寄送实验室 <span class="req">*</span></div>
-            <div class="radio-stack">
-              <label class="radio-line"><input type="radio" name="labSelect" value="hangzhou" onchange="showLabAddress('hangzhou')"> 杭州实验室</label>
-              <label class="radio-line"><input type="radio" name="labSelect" value="shanghai" onchange="showLabAddress('shanghai')"> 上海实验室</label>
-              <label class="radio-line"><input type="radio" name="labSelect" value="dongguan" onchange="showLabAddress('dongguan')"> 东莞实验室</label>
-            </div>
+            <div class="form-label"><span data-i18n="lab.sendToLab">寄送实验室</span> <span class="req">*</span></div>
+            <div class="radio-stack" id="labSelectStack"></div>
             <div id="labAddressBox" style="display:none; margin-top:8px; padding:10px 12px; background:#f7f9ff; border:1px solid #e3e9fb; border-radius:8px; font-size:12px; color:#24407a; line-height:18px;"></div>
           </div>
 
           <div class="form-row shipping-field" style="display: none;">
-            <div class="form-label">快递公司</div>
-            <select class="form-select">
-              <option value="" disabled selected>请选择快递公司</option>
-              <option>TNT</option>
-              <option>DHL</option>
-              <option>FedEx</option>
-              <option>UPS</option>
+            <div class="form-label" data-i18n="carrier.label">快递公司</div>
+            <select class="form-select" id="carrierSelect">
+              <option value="" disabled selected data-i18n="carrier.selectPlaceholder">请选择快递公司</option>
+              <option value="sf" data-i18n="carrier.sf">顺丰速运</option>
+              <option value="zto" data-i18n="carrier.zto">中通快递</option>
+              <option value="yto" data-i18n="carrier.yto">圆通速递</option>
+              <option value="sto" data-i18n="carrier.sto">申通快递</option>
+              <option value="yunda" data-i18n="carrier.yunda">韵达快递</option>
+              <option value="jd" data-i18n="carrier.jd">京东物流</option>
+              <option value="jt" data-i18n="carrier.jt">极兔速递</option>
+              <option value="other" data-i18n="carrier.other">其他</option>
             </select>
           </div>
 
           <div class="form-row shipping-field" style="display: none;">
-            <div class="form-label">运单号</div>
-            <input class="form-input" type="text" placeholder="请输入运单号">
+            <div class="form-label" data-i18n="carrier.trackingNo">运单号</div>
+            <input class="form-input" type="text" data-i18n-placeholder="carrier.trackingPlaceholder" placeholder="请输入运单号">
           </div>
 
           <div class="form-row shipping-field" style="display: none;">
-            <div class="form-label">备注</div>
-            <textarea class="form-textarea" placeholder="请输入备注信息"></textarea>
+            <div class="form-label" data-i18n="index.shippingRemark">备注</div>
+            <textarea class="form-textarea" data-i18n-placeholder="index.shippingRemarkPlaceholder" placeholder="请输入备注信息"></textarea>
             <div class="char-count">0 / 3600</div>
           </div>
 
-          <div class="form-section-title" style="margin-top:20px;">报告字段</div>
+          <div class="form-section-title" style="margin-top:20px;" data-i18n="index.reportFields">报告字段</div>
 
           <div class="form-row">
-            <div class="form-label">是否需要增加更多字段展示在报告上？ <span class="req">*</span></div>
+            <div class="form-label"><span data-i18n="index.reportFieldsNeed">是否需要增加更多字段展示在报告上？</span> <span class="req">*</span></div>
             <div class="radio-stack">
-              <label class="radio-line"><input type="radio" name="reportFieldsNeed" value="是"> 是</label>
-              <label class="radio-line"><input type="radio" name="reportFieldsNeed" value="否" checked> 否</label>
+              <label class="radio-line"><input type="radio" name="reportFieldsNeed" value="yes" onchange="toggleReportFieldsDetail()"> <span data-i18n="common.yes">是</span></label>
+              <label class="radio-line"><input type="radio" name="reportFieldsNeed" value="no" checked onchange="toggleReportFieldsDetail()"> <span data-i18n="common.no">否</span></label>
             </div>
+          </div>
+
+          <div class="form-row" id="reportFieldsDetailRow" style="display:none;">
+            <div class="form-label"><span data-i18n="index.reportFieldsDetail">报告额外字段</span> <span class="req">*</span></div>
+            <textarea class="form-textarea" id="reportFieldsDetailInput" data-i18n-placeholder="index.reportFieldsDetailPlaceholder" placeholder="请填写需要增加展示在报告上的字段名称或说明"></textarea>
           </div>
 
           <div class="optional-fields" id="optionalFields">
-          <div class="form-section-title" id="optionalInfoSection">添加信息（可选）</div>
+          <div class="form-section-title" id="optionalInfoSection" data-i18n="index.optionalInfo">添加信息（可选）</div>
 
           <div class="form-row">
-            <div class="form-label">供应商</div>
+            <div class="form-label" data-i18n="index.supplier">供应商</div>
             <div class="optional-inline">
-              <input class="form-input" id="supplierInput" type="text" placeholder="请选择或添加供应商" readonly>
-              <button class="optional-link" type="button" onclick="openSupplierPicker()">选择或添加</button>
+              <input class="form-input" id="supplierInput" type="text" data-i18n-placeholder="index.supplierPlaceholder" placeholder="请选择或添加供应商" readonly>
+              <button class="optional-link" type="button" onclick="openSupplierPicker()" data-i18n="index.supplierSelectAdd">选择或添加</button>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">产品参考号码</div>
-            <input class="form-input" id="productRefInput" type="text" placeholder="请输入产品参考号码">
+            <div class="form-label" data-i18n="index.productRef">产品参考号码</div>
+            <input class="form-input" id="productRefInput" type="text" data-i18n-placeholder="index.productRefPlaceholder" placeholder="请输入产品参考号码">
           </div>
 
           <div class="form-row">
-            <div class="form-label">订单号码</div>
-            <input class="form-input" id="orderNumberInput" type="text" placeholder="请输入订单号码">
+            <div class="form-label" data-i18n="index.orderNumberField">订单号码</div>
+            <input class="form-input" id="orderNumberInput" type="text" data-i18n-placeholder="index.orderNumberPlaceholder" placeholder="请输入订单号码">
           </div>
 
           <div class="form-row">
-            <div class="form-label">SKU</div>
-            <input class="form-input" id="optionalSkuInput" type="text" placeholder="请输入 SKU">
+            <div class="form-label" data-i18n="index.skuField">SKU</div>
+            <input class="form-input" id="optionalSkuInput" type="text" data-i18n-placeholder="index.skuFieldPlaceholder" placeholder="请输入 SKU">
           </div>
 
           <div class="form-row">
-            <div class="form-label">适用年龄</div>
+            <div class="form-label" data-i18n="index.ageGrade">适用年龄</div>
             <select class="form-select" id="ageGradeSelect">
-              <option value="" disabled selected>请选择</option>
-              <option>0-3 岁</option>
-              <option>3-6 岁</option>
-              <option>6-14 岁</option>
-              <option>14 岁以上</option>
+              <option value="" disabled selected data-i18n="common.selectPlaceholder">请选择</option>
+              <option value="0-3" data-i18n="index.age03">0-3 岁</option>
+              <option value="3-6" data-i18n="index.age36">3-6 岁</option>
+              <option value="6-14" data-i18n="index.age614">6-14 岁</option>
+              <option value="14+" data-i18n="index.age14plus">14 岁以上</option>
             </select>
           </div>
 
           <div class="form-row">
-            <div class="form-label">Fibre content</div>
-            <input class="form-input" id="fibreContentInput" type="text" placeholder="请输入 Fibre content">
+            <div class="form-label" data-i18n="index.fibreContent">Fibre content</div>
+            <input class="form-input" id="fibreContentInput" type="text" data-i18n-placeholder="index.fibreContentPlaceholder" placeholder="请输入 Fibre content">
           </div>
 
           <div class="form-row">
-            <div class="form-label">Sun lens cat. #</div>
-            <input class="form-input" id="sunLensInput" type="text" placeholder="请输入 Sun lens cat. #">
+            <div class="form-label" data-i18n="index.sunLens">Sun lens cat. #</div>
+            <input class="form-input" id="sunLensInput" type="text" data-i18n-placeholder="index.sunLensPlaceholder" placeholder="请输入 Sun lens cat. #">
           </div>
 
           <div class="form-row">
-            <div class="form-label">EAN/SKU/Code-number</div>
-            <input class="form-input" id="codeNumberInput" type="text" placeholder="请输入 EAN/SKU/Code-number">
+            <div class="form-label" data-i18n="index.eanCode">EAN/SKU/Code-number</div>
+            <input class="form-input" id="codeNumberInput" type="text" data-i18n-placeholder="index.eanCodePlaceholder" placeholder="请输入 EAN/SKU/Code-number">
           </div>
 
           <div class="form-row">
-            <div class="form-label">UFI</div>
-            <input class="form-input" id="ufiInput" type="text" placeholder="请输入 UFI">
+            <div class="form-label" data-i18n="index.ufi">UFI</div>
+            <input class="form-input" id="ufiInput" type="text" data-i18n-placeholder="index.ufiPlaceholder" placeholder="请输入 UFI">
           </div>
 
           <div class="form-row">
-            <div class="form-label">Material for food contact Part</div>
-            <input class="form-input" id="foodContactInput" type="text" placeholder="请输入 Material for food contact Part">
+            <div class="form-label" data-i18n="index.foodContact">Material for food contact Part</div>
+            <input class="form-input" id="foodContactInput" type="text" data-i18n-placeholder="index.foodContactPlaceholder" placeholder="请输入 Material for food contact Part">
           </div>
 
           <div class="form-row">
-            <div class="form-label">备注</div>
-            <textarea class="form-textarea" id="optionalRemarkInput" placeholder="请输入备注"></textarea>
+            <div class="form-label" data-i18n="index.optionalRemark">备注</div>
+            <textarea class="form-textarea" id="optionalRemarkInput" data-i18n-placeholder="index.optionalRemarkPlaceholder" placeholder="请输入备注"></textarea>
           </div>
 
           <div class="form-row">
-            <div class="form-label">附件 <span class="info">i</span></div>
-            <button class="upload-optional-btn" type="button">附档文件至此处或点击上传文件</button>
-            <div class="contact-note" style="margin-top:8px; margin-bottom:0;">如有 BOM 表，请一并上传，便于实验室确认产品结构和材料信息。</div>
+            <div class="form-label"><span data-i18n="index.attachments">附件</span> <span class="info">i</span></div>
+            <button class="upload-optional-btn" type="button" data-i18n="index.uploadBtn">附档文件至此处或点击上传文件</button>
+            <div class="contact-note" style="margin-top:8px; margin-bottom:0;" data-i18n="index.bomHint">如有 BOM 表，请一并上传，便于实验室确认产品结构和材料信息。</div>
           </div>
 
-          <div class="form-section-title">附加联系人（可选）</div>
+          <div class="form-section-title" data-i18n="index.extraContacts">附加联系人（可选）</div>
 
           <div class="form-row">
-            <div class="contact-note">以下联系人将会收到与此订单相关的邮件</div>
-            <input class="form-input" id="extraContactEmailInput" type="email" placeholder="请输入电子邮箱地址" value="850600530@qq.com;">
-            <div class="contact-type-row">
-              <label><input type="radio" name="contactMailType" checked> 所有邮件</label>
-              <label><input type="radio" name="contactMailType"> 仅收取报告</label>
-              <label><input type="radio" name="contactMailType"> 仅收取付款通知</label>
-              <label><input type="radio" name="contactMailType"> 仅收取报价</label>
-            </div>
-            <button class="add-contact-btn" type="button">添加联系人</button>
+            <div class="contact-note" data-i18n="index.extraContactsNote">以下联系人将会收到与此订单相关的邮件</div>
+            <div class="contact-list" id="additionalContactList"></div>
+            <button class="add-contact-btn" type="button" onclick="addAdditionalContact()" data-i18n="common.addRecipient">添加收件人</button>
           </div>
 
           </div>
         </div>
 
         <div class="review-body" id="orderReviewBody">
-          <div class="review-intro">请确认以下下单信息。你也可以返回继续填写非必填项，补充样品收集、快递或备注信息。</div>
+          <div class="review-intro" data-i18n="index.reviewIntro">请确认以下下单信息。您也可以返回继续填写非必填项，补充样品收集、快递或备注信息。</div>
           <div class="review-card">
             <div class="review-section">
-              <div class="review-section-title">必填信息</div>
-              <div class="review-row"><span>本次测试类型</span><span id="reviewTestType">-</span></div>
-              <div class="review-row"><span>过往订单 / 测试参考编号</span><span id="reviewHistoryOrder">未选择</span></div>
-              <div class="review-row"><span>产品名称</span><span id="reviewProductName">-</span></div>
-              <div class="review-row"><span>关联项目</span><span id="reviewProject">-</span></div>
-              <div class="review-row"><span>原产国家或地区</span><span id="reviewOriginCountry">-</span></div>
-              <div class="review-row"><span>销售国家或地区</span><span id="reviewSalesCountries">-</span></div>
-              <div class="review-row"><span>货号 / 型号</span><span id="reviewSku">-</span></div>
-              <div class="review-row"><span>产品是否带电</span><span id="reviewElectricType">-</span></div>
-              <div class="review-row"><span>产品说明</span><span id="reviewElectricDescription">未填写</span></div>
-              <div class="review-row"><span>制造商</span><span id="reviewManufacturer">-</span></div>
-              <div class="review-row"><span>制造商地址</span><span id="reviewManufacturerAddress">-</span></div>
+              <div class="review-section-title" data-i18n="index.reviewRequired">必填信息</div>
+              <div class="review-row"><span data-i18n="index.testType">本次测试类型</span><span id="reviewTestType">-</span></div>
+              <div class="review-row history-order-review" id="reviewHistoryOrderRow" style="display:none;"><span data-i18n="index.copyOrderRef">复制的订单参考编号</span><span id="reviewHistoryOrder">未选择</span></div>
+              <div class="review-row"><span data-i18n="index.productName">产品名称</span><span id="reviewProductName">-</span></div>
+              <div class="review-row"><span data-i18n="index.project">关联项目</span><span id="reviewProject">-</span></div>
+              <div class="review-row"><span data-i18n="index.originCountry">原产国家或地区</span><span id="reviewOriginCountry">-</span></div>
+              <div class="review-row"><span data-i18n="index.salesCountry">销售国家或地区</span><span id="reviewSalesCountries">-</span></div>
+              <div class="review-row"><span data-i18n="index.sku">货号 / 型号</span><span id="reviewSku">-</span></div>
+              <div class="review-row"><span data-i18n="index.electric">产品是否带电</span><span id="reviewElectricType">-</span></div>
+              <div class="review-row"><span data-i18n="index.productDesc">产品说明</span><span id="reviewElectricDescription">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.manufacturer">制造商</span><span id="reviewManufacturer">-</span></div>
+              <div class="review-row"><span data-i18n="index.manufacturerAddress">制造商地址</span><span id="reviewManufacturerAddress">-</span></div>
             </div>
             <div class="review-section">
-              <div class="review-section-title">非必填项</div>
-              <div class="review-row"><span>供应商</span><span id="reviewSupplier">未填写</span></div>
-              <div class="review-row"><span>产品参考号码</span><span id="reviewProductRef">未填写</span></div>
-              <div class="review-row"><span>订单号码</span><span id="reviewOrderNumber">未填写</span></div>
-              <div class="review-row"><span>适用年龄</span><span id="reviewAgeGrade">未填写</span></div>
-              <div class="review-row"><span>备注</span><span id="reviewOptionalRemark">未填写</span></div>
-              <div class="review-row"><span>附加联系人</span><span id="reviewExtraContact">未填写</span></div>
-              <div class="review-row"><span>样品收集方式</span><span id="reviewSampleMethod">-</span></div>
-              <div class="review-row"><span>寄送实验室</span><span id="reviewLab">未选择</span></div>
-              <div class="review-row"><span>产品检验订单参考编号</span><span id="reviewRefNumber">待选择</span></div>
-              <div class="review-row"><span>快递信息 / 备注</span><span id="reviewShippingInfo">未填写</span></div>
-              <div class="review-row"><span>是否需要增加更多字段展示在报告上？</span><span id="reviewReportFieldsNeed">否</span></div>
+              <div class="review-section-title" data-i18n="index.reviewOptional">非必填项</div>
+              <div class="review-row"><span data-i18n="index.supplier">供应商</span><span id="reviewSupplier">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.productRef">产品参考号码</span><span id="reviewProductRef">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.orderNumberField">订单号码</span><span id="reviewOrderNumber">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.ageGrade">适用年龄</span><span id="reviewAgeGrade">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.optionalRemark">备注</span><span id="reviewOptionalRemark">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.extraContacts">附加联系人（可选）</span><span id="reviewExtraContact">未填写</span></div>
+              <div class="review-row"><span data-i18n="orderChat.fieldSampleMethod">样品收集方式</span><span id="reviewSampleMethod">-</span></div>
+              <div class="review-row"><span data-i18n="lab.sendToLab">寄送实验室</span><span id="reviewLab">未选择</span></div>
+              <div class="review-row"><span data-i18n="index.inspectionRef">产品检验订单参考编号</span><span id="reviewRefNumber">待选择</span></div>
+              <div class="review-row"><span data-i18n="index.reviewShippingInfo">快递信息 / 备注</span><span id="reviewShippingInfo">未填写</span></div>
+              <div class="review-row"><span data-i18n="index.reportFieldsNeed">是否需要增加更多字段展示在报告上？</span><span id="reviewReportFieldsNeed">否</span></div>
+              <div class="review-row" id="reviewReportFieldsDetailRow" style="display:none;"><span data-i18n="index.reportFieldsDetail">报告额外字段</span><span id="reviewReportFieldsDetail">未填写</span></div>
             </div>
           </div>
         </div>
 
         <div class="detail-actions" id="detailEditActions">
-          <button class="detail-action" onclick="closeDetailForm()">取消</button>
-          <button class="detail-action primary" onclick="submitDetailForm()">提交下单</button>
+          <button class="detail-action" onclick="closeDetailForm()" data-i18n="common.cancel">取消</button>
+          <button class="detail-action primary" onclick="submitDetailForm()" data-i18n="common.submit">提交下单</button>
         </div>
         <div class="detail-actions" id="orderReviewActions" style="display: none;">
-          <button class="detail-action" onclick="continueOptionalFields()">继续填写</button>
-          <button class="detail-action primary" onclick="confirmOrder()">确认下单</button>
+          <button class="detail-action" onclick="continueOptionalFields()" data-i18n="index.continueOptional">修改/继续填写非必填项</button>
+          <button class="detail-action primary" onclick="confirmOrder()" data-i18n="index.confirmOrder">确认下单</button>
         </div>
       </div>
     </div>
@@ -1002,8 +970,8 @@
     <div class="supplier-mask" id="referencePicker" onclick="closeReferencePicker(event)">
       <div class="supplier-modal" onclick="event.stopPropagation()">
         <div class="supplier-head">
-          <div class="supplier-title">选择过往订单 / 测试</div>
-          <button class="supplier-close" type="button" onclick="closeReferencePicker()" aria-label="关闭">×</button>
+          <div class="supplier-title" data-i18n="index.refPickerTitle">选择过往订单 / 测试</div>
+          <button class="supplier-close" type="button" onclick="closeReferencePicker()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
         <div class="supplier-body">
           <div class="reference-list" id="referenceRows"></div>
@@ -1014,30 +982,30 @@
     <div class="supplier-mask" id="supplierPicker" onclick="closeSupplierPicker(event)">
       <div class="supplier-modal" onclick="event.stopPropagation()">
         <div class="supplier-head">
-          <div class="supplier-title">选择供应商</div>
-          <button class="supplier-close" type="button" onclick="closeSupplierPicker()" aria-label="关闭">×</button>
+          <div class="supplier-title" data-i18n="index.supplierPickerTitle">选择供应商</div>
+          <button class="supplier-close" type="button" onclick="closeSupplierPicker()" aria-label="关闭" data-i18n-title="common.close">×</button>
         </div>
         <div class="supplier-body">
           <div class="supplier-search">
             <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <input id="supplierSearch" type="text" placeholder="搜索" oninput="renderSupplierRows()" />
+            <input id="supplierSearch" type="text" data-i18n-placeholder="common.search" placeholder="搜索" oninput="renderSupplierRows()" />
           </div>
           <table class="supplier-table">
             <thead>
               <tr>
-                <th>供应商名称</th>
-                <th>地址</th>
-                <th>主要联系人</th>
+                <th data-i18n="index.supplierName">供应商名称</th>
+                <th data-i18n="index.supplierAddress">地址</th>
+                <th data-i18n="index.supplierContact">主要联系人</th>
               </tr>
             </thead>
             <tbody id="supplierRows"></tbody>
           </table>
         </div>
         <div class="supplier-foot">
-          <button class="supplier-add" type="button" onclick="addSupplierFromSearch()">添加新供应商?</button>
+          <button class="supplier-add" type="button" onclick="addSupplierFromSearch()" data-i18n="index.addNewSupplier">添加新供应商?</button>
           <div class="supplier-actions">
-            <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()">取消</button>
-            <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled>选择</button>
+            <button class="supplier-cancel" type="button" onclick="closeSupplierPicker()" data-i18n="common.cancel">取消</button>
+            <button class="supplier-select" id="supplierSelectBtn" type="button" onclick="confirmSupplierSelection()" disabled data-i18n="common.select">选择</button>
           </div>
         </div>
       </div>
@@ -1045,6 +1013,77 @@
   </div>
 
   <script>
+    const MAIL_TYPE_KEYS = ['mailType.all', 'mailType.reportOnly', 'mailType.paymentOnly', 'mailType.quotationOnly'];
+    const SAMPLE_METHOD_KEYS = { ship: 'index.sampleShip', collect: 'index.sampleCollect', received: 'index.sampleReceived' };
+    const PROJECT_KEYS = { 'temu-hardware': 'index.projectTemuHardware', 'toys-lab': 'index.projectToysLab', general: 'index.projectGeneral' };
+    const AGE_GRADE_KEYS = { '0-3': 'index.age03', '3-6': 'index.age36', '6-14': 'index.age614', '14+': 'index.age14plus' };
+
+    function getContactMailTypes() {
+      return window.I18n ? I18n.getContactMailTypes() : [];
+    }
+
+    function getCheckedValue(name) {
+      const checked = document.querySelector('input[name="' + name + '"]:checked');
+      return checked ? checked.value : '';
+    }
+
+    function getTestTypeLabel() {
+      const v = getCheckedValue('testType');
+      if (v === 'first') return t('index.testTypeFirst');
+      if (v === 'copy') return t('index.testTypeCopy');
+      return '';
+    }
+
+    function getElectricTypeLabel() {
+      return getCheckedValue('electricType') === 'yes' ? t('index.electricYes') : t('index.electricNo');
+    }
+
+    function getSampleMethodLabel() {
+      const key = SAMPLE_METHOD_KEYS[getCheckedValue('sampleMethod')];
+      return key ? t(key) : '';
+    }
+
+    function getYesNoLabel(value) {
+      return value === 'yes' ? t('common.yes') : t('common.no');
+    }
+
+    function getProjectLabel() {
+      const select = document.getElementById('projectSelect');
+      if (!select || !select.value) return '';
+      const key = PROJECT_KEYS[select.value];
+      return key ? t(key) : select.options[select.selectedIndex].textContent.trim();
+    }
+
+    function getOriginCountryLabel() {
+      const select = document.getElementById('originCountrySelect');
+      if (!select || !select.value) return '';
+      return I18n.displayCountry(select.value);
+    }
+
+    function getAgeGradeLabel() {
+      const select = document.getElementById('ageGradeSelect');
+      if (!select || !select.value) return '';
+      const key = AGE_GRADE_KEYS[select.value];
+      return key ? t(key) : select.options[select.selectedIndex].textContent.trim();
+    }
+
+    function updateGreeting() {
+      const el = document.getElementById('greetingName');
+      if (el) el.textContent = t('index.hello', { name: 'Lyon' });
+    }
+
+    function renderLabOptions() {
+      const stack = document.getElementById('labSelectStack');
+      if (!stack || !window.I18n) return;
+      const current = getCheckedValue('labSelect');
+      stack.innerHTML = I18n.getTestingLabs().map(function (lab, index) {
+        const checked = current ? current === lab.key : index === 0;
+        return '<label class="radio-line"><input type="radio" name="labSelect" value="' + lab.key + '"' + (checked ? ' checked' : '') + ' onchange="showLabAddress(\'' + lab.key + '\')"> ' + escapeHtml(lab.label) + '</label>';
+      }).join('');
+      const active = getCheckedValue('labSelect') || 'hangzhou';
+      showLabAddress(active);
+    }
+
     function openOrderSheet() {
       document.getElementById('orderSheet').classList.add('show');
     }
@@ -1056,13 +1095,34 @@
       showDetailEditMode();
       document.getElementById('detailForm').classList.add('show');
       toggleHistoryOrderSelection();
+      toggleRefNumber();
     }
     function closeDetailForm() {
       document.getElementById('detailForm').classList.remove('show');
     }
+    function toggleReportFieldsDetail() {
+      const isYes = getCheckedValue('reportFieldsNeed') === 'yes';
+      const row = document.getElementById('reportFieldsDetailRow');
+      if (row) row.style.display = isYes ? 'block' : 'none';
+    }
+
     function submitDetailForm() {
+      toggleReportFieldsDetail();
+      if (getCheckedValue('testType') === 'copy' && !getSelectedReferenceText('historyOrderSelectBtn')) {
+        alert(t('index.alertSelectCopyRef'));
+        return;
+      }
+      if (!getCheckedValue('sampleMethod')) {
+        alert(t('index.alertSelectSample'));
+        return;
+      }
+      if (getCheckedValue('reportFieldsNeed') === 'yes' && !getFieldValue('reportFieldsDetailInput').trim()) {
+        alert(t('index.alertReportFields'));
+        document.getElementById('reportFieldsDetailInput').focus();
+        return;
+      }
       renderOrderReview();
-      document.querySelector('.detail-title').textContent = '确认下单';
+      document.getElementById('detailTitle').textContent = t('index.confirmTitle');
       document.getElementById('detailEditBody').style.display = 'none';
       document.getElementById('detailEditActions').style.display = 'none';
       document.getElementById('orderReviewBody').classList.add('show');
@@ -1070,7 +1130,7 @@
     }
 
     function showDetailEditMode(showOptional = false) {
-      document.querySelector('.detail-title').textContent = '下单';
+      document.getElementById('detailTitle').textContent = t('index.formTitle');
       const detailEditBody = document.getElementById('detailEditBody');
       detailEditBody.style.display = 'block';
       detailEditBody.classList.toggle('show-optional', showOptional);
@@ -1081,7 +1141,7 @@
 
     function continueOptionalFields() {
       showDetailEditMode(true);
-      requestAnimationFrame(() => {
+      requestAnimationFrame(function () {
         const detailEditBody = document.getElementById('detailEditBody');
         const optionalInfoSection = document.getElementById('optionalInfoSection');
         detailEditBody.scrollTo({
@@ -1092,10 +1152,19 @@
     }
 
     function confirmOrder() {
-      window.location.href = 'order-success.html';
+      const labChecked = document.querySelector('input[name="labSelect"]:checked');
+      const labKey = labChecked ? labChecked.value : '';
+      const params = new URLSearchParams();
+      params.set('order', 'T-25617004');
+      if (labKey) params.set('lab', labKey);
+      window.location.href = 'order-success.html?' + params.toString();
     }
 
-    const referenceOptions = [{id:'T-25617004', service:'实验室检测 · Toys', product:'智能机器人玩具'},{id:'T-25590011', service:'EN71 · Toys', product:'积木套装'},{id:'Q202349103', service:'PSI 装运前检测 · Toys', product:'毛绒玩具'}];
+    const referenceOptions = [
+      { id: 'T-25617004', serviceKey: 'common.serviceLabTestDot', productKey: 'orderChat.productRobotToy' },
+      { id: 'T-25617005', serviceKey: 'common.serviceLabTestDot', productKey: 'orderChat.productBlockToy' },
+      { id: 'T-25590011', serviceKey: 'common.serviceLabTestDot', productKey: 'orderChat.productBlockToy' }
+    ];
     let activeReferenceButton = null;
 
     function selectProductReference(button) {
@@ -1111,13 +1180,13 @@
 
     function renderReferenceRows() {
       const rows = document.getElementById('referenceRows');
-      rows.innerHTML = referenceOptions.map((item) =>
-        '<button class="reference-option" type="button" onclick="chooseProductReference(\'' + escapeJs(item.id) + '\')">' +
+      rows.innerHTML = referenceOptions.map(function (item) {
+        return '<button class="reference-option" type="button" onclick="chooseProductReference(\'' + escapeJs(item.id) + '\')">' +
           '<span class="reference-option-id">' + escapeHtml(item.id) + '</span>' +
-          '<span class="reference-option-meta">' + escapeHtml(item.service) + '</span>' +
-          '<span class="reference-option-product">' + escapeHtml(item.product) + '</span>' +
-        '</button>'
-      ).join('');
+          '<span class="reference-option-meta">' + escapeHtml(t(item.serviceKey)) + '</span>' +
+          '<span class="reference-option-product">' + escapeHtml(t(item.productKey)) + '</span>' +
+        '</button>';
+      }).join('');
     }
 
     function chooseProductReference(id) {
@@ -1134,86 +1203,136 @@
       return field.value.trim();
     }
 
-    function getSelectedText(id) {
-      const select = document.getElementById(id);
-      if (!select || !select.value) return '';
-      return select.options[select.selectedIndex].textContent.trim();
-    }
-
-    function getCheckedLabel(name) {
-      const checked = document.querySelector(`input[name="${name}"]:checked`);
-      return checked ? checked.parentElement.textContent.trim() : '';
-    }
-
     function getSelectedReferenceText(id) {
       const button = document.getElementById(id);
       if (!button) return '';
       const value = button.textContent.trim();
-      return value === 'Select' || value === '选择' ? '' : value;
+      return value === t('common.select') ? '' : value;
     }
 
     function toggleHistoryOrderSelection() {
       const selected = document.querySelector('input[name="testType"]:checked');
       const row = document.getElementById('historyOrderRow');
+      const reviewRow = document.getElementById('reviewHistoryOrderRow');
       if (!selected || !row) return;
-      const shouldShow = ['retest', 'reorder'].includes(selected.value);
+      const shouldShow = selected.value === 'copy';
       row.style.display = shouldShow ? 'flex' : 'none';
+      if (reviewRow) reviewRow.style.display = shouldShow ? 'flex' : 'none';
     }
 
-    function setReviewValue(id, value, fallback = '未填写') {
+    function setReviewValue(id, value, fallbackKey) {
       const target = document.getElementById(id);
+      const fallback = fallbackKey ? t(fallbackKey) : t('common.notFilled');
       const text = value || fallback;
       target.textContent = text;
       target.classList.toggle('review-empty', !value);
     }
 
     function renderOrderReview() {
-      setReviewValue('reviewTestType', getCheckedLabel('testType'));
-      setReviewValue('reviewHistoryOrder', getSelectedReferenceText('historyOrderSelectBtn'), '未选择');
+      setReviewValue('reviewTestType', getTestTypeLabel());
+      const isCopyOrder = getCheckedValue('testType') === 'copy';
+      const reviewHistoryOrderRow = document.getElementById('reviewHistoryOrderRow');
+      if (reviewHistoryOrderRow) reviewHistoryOrderRow.style.display = isCopyOrder ? 'flex' : 'none';
+      setReviewValue('reviewHistoryOrder', isCopyOrder ? getSelectedReferenceText('historyOrderSelectBtn') : '', 'common.notSelected');
       setReviewValue('reviewProductName', getFieldValue('productNameInput'));
-      setReviewValue('reviewProject', getSelectedText('projectSelect'));
-      setReviewValue('reviewOriginCountry', getSelectedText('originCountrySelect'));
-      setReviewValue('reviewSalesCountries', Array.from(selectedSalesCountries).join('、'));
+      setReviewValue('reviewProject', getProjectLabel());
+      setReviewValue('reviewOriginCountry', getOriginCountryLabel());
+      setReviewValue('reviewSalesCountries', Array.from(selectedSalesCountries).map(function (c) { return I18n.displayCountry(c); }).join(I18n.getLang() === 'en' ? ', ' : '、'));
       setReviewValue('reviewSku', getFieldValue('skuInput'));
-      setReviewValue('reviewElectricType', getCheckedLabel('electricType'));
-      const electricType = getCheckedLabel('electricType');
-      setReviewValue('reviewElectricDescription', electricType === '带电产品' ? getFieldValue('electricDescriptionInput') : '', electricType === '带电产品' ? '未填写' : '不适用');
+      setReviewValue('reviewElectricType', getElectricTypeLabel());
+      const isElectric = getCheckedValue('electricType') === 'yes';
+      setReviewValue('reviewElectricDescription', isElectric ? getFieldValue('electricDescriptionInput') : '', isElectric ? 'common.notFilled' : 'common.notApplicable');
       setReviewValue('reviewManufacturer', getFieldValue('manufacturerInput'));
       setReviewValue('reviewManufacturerAddress', getFieldValue('manufacturerAddressInput'));
       setReviewValue('reviewSupplier', getFieldValue('supplierInput'));
       setReviewValue('reviewProductRef', getFieldValue('productRefInput'));
       setReviewValue('reviewOrderNumber', getFieldValue('orderNumberInput'));
-      setReviewValue('reviewAgeGrade', getSelectedText('ageGradeSelect'));
+      setReviewValue('reviewAgeGrade', getAgeGradeLabel());
       setReviewValue('reviewOptionalRemark', getFieldValue('optionalRemarkInput'));
-      setReviewValue('reviewExtraContact', getFieldValue('extraContactEmailInput'));
-      setReviewValue('reviewSampleMethod', getCheckedLabel('sampleMethod'));
+      setReviewValue('reviewExtraContact', summarizeAdditionalContacts());
+      setReviewValue('reviewSampleMethod', getSampleMethodLabel());
       const labChecked = document.querySelector('input[name="labSelect"]:checked');
-      const labLabel = labChecked ? labChecked.parentElement.textContent.trim() : '';
-      setReviewValue('reviewLab', labLabel, '未选择');
-      setReviewValue('reviewRefNumber', '', '待选择');
-      setReviewValue('reviewShippingInfo', '', '未填写');
-      setReviewValue('reviewReportFieldsNeed', getCheckedLabel('reportFieldsNeed'), '否');
+      const lab = labChecked && window.I18n ? I18n.getTestingLabs().find(function (item) { return item.key === labChecked.value; }) : null;
+      setReviewValue('reviewLab', lab ? lab.label : '', 'common.notSelected');
+      setReviewValue('reviewRefNumber', '', 'common.pendingSelect');
+      setReviewValue('reviewShippingInfo', '', 'common.notFilled');
+      setReviewValue('reviewReportFieldsNeed', getYesNoLabel(getCheckedValue('reportFieldsNeed')));
+      const reportFieldsNeed = getCheckedValue('reportFieldsNeed');
+      const reportFieldsDetail = getFieldValue('reportFieldsDetailInput').trim();
+      const detailRow = document.getElementById('reviewReportFieldsDetailRow');
+      if (detailRow) detailRow.style.display = reportFieldsNeed === 'yes' ? 'flex' : 'none';
+      setReviewValue('reviewReportFieldsDetail', reportFieldsNeed === 'yes' ? reportFieldsDetail : '', 'common.notFilled');
     }
+
     const supplierOptions = [
-      { name: 'Shenzhen Zhichuang Co., Ltd.', address: '深圳市宝安区工业路 88 号', contact: 'Sally Xu' },
-      { name: 'Qiming Toy Supplier Co., Ltd.', address: '东莞市松山湖科技园', contact: 'David Chen' },
+      { name: 'Shenzhen Zhichuang Co., Ltd.', address: t('orderChat.manufacturerAddrDemo'), contact: 'Sally Xu' },
+      { name: 'Qiming Toy Supplier Co., Ltd.', address: t('orderChat.manufacturerAddrDemo2'), contact: 'David Chen' },
       { name: 'QIMA Toy Supplier', address: 'Dongguan, Guangdong, China', contact: 'Amy Li' },
-      { name: '同制造商', address: '与制造商信息一致', contact: '-' }
+      { nameKey: 'orderDetail.sameAsManufacturer', addressKey: 'orderDetail.sameAsManufacturerAddr', contact: '-' }
     ];
     let selectedSupplier = null;
 
     function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, (char) => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      }[char]));
+      return window.I18n ? I18n.escapeHtml(value) : String(value).replace(/[&<>"']/g, function (char) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+      });
     }
 
     function escapeJs(value) {
       return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    let additionalContacts = [
+      { email: 'eric.wang@qima.com', typeKey: 'mailType.reportOnly' }
+    ];
+
+    function renderAdditionalContacts() {
+      const list = document.getElementById('additionalContactList');
+      if (!list) return;
+      const types = MAIL_TYPE_KEYS;
+      list.innerHTML = additionalContacts.map(function (contact, index) {
+        return '<div class="contact-card">' +
+          '<div class="contact-card-head">' +
+            '<input class="form-input" type="email" value="' + escapeHtml(contact.email || '') + '" placeholder="' + escapeHtml(t('index.emailPlaceholder')) + '" oninput="updateAdditionalContactEmail(' + index + ', this.value)">' +
+            (additionalContacts.length > 1 ? '<button class="remove-contact-btn" type="button" onclick="removeAdditionalContact(' + index + ')" aria-label="' + escapeHtml(t('common.removeRecipient')) + '">-</button>' : '') +
+          '</div>' +
+          '<div class="contact-type-row">' + types.map(function (typeKey) {
+            const label = t(typeKey);
+            const checked = (contact.typeKey || 'mailType.reportOnly') === typeKey ? ' checked' : '';
+            return '<label><input type="radio" name="contactMailType_' + index + '" value="' + escapeHtml(typeKey) + '"' + checked + ' onchange="updateAdditionalContactType(' + index + ', this.value)"> ' + escapeHtml(label) + '</label>';
+          }).join('') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function addAdditionalContact() {
+      additionalContacts.push({ email: '', typeKey: 'mailType.reportOnly' });
+      renderAdditionalContacts();
+    }
+
+    function removeAdditionalContact(index) {
+      additionalContacts.splice(index, 1);
+      if (!additionalContacts.length) addAdditionalContact();
+      renderAdditionalContacts();
+    }
+
+    function updateAdditionalContactEmail(index, value) {
+      if (additionalContacts[index]) additionalContacts[index].email = value.trim();
+    }
+
+    function updateAdditionalContactType(index, value) {
+      if (additionalContacts[index]) additionalContacts[index].typeKey = value;
+    }
+
+    function summarizeAdditionalContacts() {
+      const valid = additionalContacts.filter(function (contact) { return contact.email; });
+      if (!valid.length) return '';
+      const wrapOpen = I18n.getLang() === 'en' ? ' (' : '（';
+      const wrapClose = I18n.getLang() === 'en' ? ')' : '）';
+      const sep = I18n.getLang() === 'en' ? '; ' : '；';
+      return valid.map(function (contact) {
+        return contact.email + wrapOpen + t(contact.typeKey || 'mailType.reportOnly') + wrapClose;
+      }).join(sep);
     }
 
     function openSupplierPicker() {
@@ -1228,36 +1347,45 @@
       document.getElementById('supplierPicker').classList.remove('show');
     }
 
+    function getSupplierDisplayName(item) {
+      return item.nameKey ? t(item.nameKey) : item.name;
+    }
+
     function renderSupplierRows() {
       const keyword = (document.getElementById('supplierSearch').value || '').trim().toLowerCase();
       const rows = document.getElementById('supplierRows');
-      const matched = supplierOptions.filter((item) =>
-        item.name.toLowerCase().includes(keyword) ||
-        item.address.toLowerCase().includes(keyword) ||
-        item.contact.toLowerCase().includes(keyword)
-      );
+      const matched = supplierOptions.filter(function (item) {
+        const name = getSupplierDisplayName(item);
+        const address = item.addressKey ? t(item.addressKey) : item.address;
+        return name.toLowerCase().includes(keyword) ||
+          String(address).toLowerCase().includes(keyword) ||
+          String(item.contact).toLowerCase().includes(keyword);
+      });
       if (!matched.length) {
-        rows.innerHTML = '<tr><td class="supplier-empty" colspan="3">无数据</td></tr>';
+        rows.innerHTML = '<tr><td class="supplier-empty" colspan="3">' + escapeHtml(t('common.noData')) + '</td></tr>';
         return;
       }
-      rows.innerHTML = matched.map((item) =>
-        '<tr class="supplier-row' + (selectedSupplier && selectedSupplier.name === item.name ? ' selected' : '') + '" onclick="selectSupplier(\'' + escapeJs(item.name) + '\')">' +
-          '<td>' + escapeHtml(item.name) + '</td>' +
-          '<td>' + escapeHtml(item.address) + '</td>' +
+      rows.innerHTML = matched.map(function (item) {
+        const name = getSupplierDisplayName(item);
+        const address = item.addressKey ? t(item.addressKey) : item.address;
+        const selected = selectedSupplier && getSupplierDisplayName(selectedSupplier) === name;
+        return '<tr class="supplier-row' + (selected ? ' selected' : '') + '" onclick="selectSupplier(\'' + escapeJs(name) + '\')">' +
+          '<td>' + escapeHtml(name) + '</td>' +
+          '<td>' + escapeHtml(address) + '</td>' +
           '<td>' + escapeHtml(item.contact) + '</td>' +
-        '</tr>'
-      ).join('');
+        '</tr>';
+      }).join('');
     }
 
     function selectSupplier(name) {
-      selectedSupplier = supplierOptions.find((item) => item.name === name) || null;
+      selectedSupplier = supplierOptions.find(function (item) { return getSupplierDisplayName(item) === name; }) || null;
       document.getElementById('supplierSelectBtn').disabled = !selectedSupplier;
       renderSupplierRows();
     }
 
     function confirmSupplierSelection() {
       if (!selectedSupplier) return;
-      document.getElementById('supplierInput').value = selectedSupplier.name;
+      document.getElementById('supplierInput').value = getSupplierDisplayName(selectedSupplier);
       closeSupplierPicker();
     }
 
@@ -1268,25 +1396,27 @@
       closeSupplierPicker();
     }
 
-    const salesCountries = ['欧盟', '美国', '澳大利亚', '加拿大', '南非', '中国', '越南', '印度', '英国', '德国', '法国', '意大利', '西班牙', '日本', '韩国', '新加坡', '马来西亚', '泰国', '墨西哥', '巴西'];
+    function getSalesCountrySearchList() {
+      return window.I18n ? I18n.getDistributionSearchList() : [];
+    }
+
     const selectedSalesCountries = new Set();
 
     function syncSalesCountryCheckbox(country, checked) {
-      document.querySelectorAll('.check-stack input[type="checkbox"]').forEach((checkbox) => {
-        if (checkbox.value === country) {
-          checkbox.checked = checked;
-        }
+      document.querySelectorAll('.check-stack input[type="checkbox"]').forEach(function (checkbox) {
+        if (checkbox.value === country) checkbox.checked = checked;
       });
     }
 
     function renderSelectedSalesCountries() {
       const container = document.getElementById('selectedSalesCountries');
-      container.innerHTML = Array.from(selectedSalesCountries).map((country) => `
-        <span class="selected-country-chip">
-          ${country}
-          <button type="button" aria-label="移除${country}" onclick="removeSalesCountry('${country}')">×</button>
-        </span>
-      `).join('');
+      container.innerHTML = Array.from(selectedSalesCountries).map(function (country) {
+        const label = I18n.displayCountry(country);
+        return '<span class="selected-country-chip">' +
+          escapeHtml(label) +
+          '<button type="button" aria-label="' + escapeHtml(t('common.removeCountry', { country: label })) + '" onclick="removeSalesCountry(\'' + escapeJs(country) + '\')">×</button>' +
+        '</span>';
+      }).join('');
     }
 
     function addSalesCountry(country) {
@@ -1306,20 +1436,22 @@
     }
 
     function toggleSalesCountry(checkbox) {
-      if (checkbox.checked) {
-        addSalesCountry(checkbox.value);
-      } else {
-        removeSalesCountry(checkbox.value);
-      }
+      if (checkbox.checked) addSalesCountry(checkbox.value);
+      else removeSalesCountry(checkbox.value);
     }
 
     function renderCountryResults() {
       const input = document.getElementById('salesCountrySearch');
       const results = document.getElementById('countryResults');
       const keyword = input.value.trim().toLowerCase();
+      const salesCountries = getSalesCountrySearchList();
       const matches = salesCountries
-        .filter((country) => country.toLowerCase().includes(keyword))
-        .filter((country) => !selectedSalesCountries.has(country))
+        .filter(function (country) { return country.toLowerCase().includes(keyword); })
+        .filter(function (country) {
+          return !Array.from(selectedSalesCountries).some(function (selected) {
+            return I18n.displayCountry(selected) === country;
+          });
+        })
         .slice(0, 6);
 
       if (!keyword || matches.length === 0) {
@@ -1328,55 +1460,103 @@
         return;
       }
 
-      results.innerHTML = matches.map((country) => (
-        `<button class="country-option" type="button" onmousedown="addSalesCountry('${country}')">${country}</button>`
-      )).join('');
+      results.innerHTML = matches.map(function (country) {
+        return '<button class="country-option" type="button" onmousedown="addSalesCountryFromSearch(\'' + escapeJs(country) + '\')">' + escapeHtml(country) + '</button>';
+      }).join('');
       results.classList.add('show');
     }
 
-    document.addEventListener('click', (event) => {
+    function findCountryKeyByDisplay(displayName) {
+      const keys = ['eu', 'us', 'au', 'ca', 'za', 'cn', 'vn', 'in', 'gb', 'de', 'fr', 'it', 'es', 'jp', 'kr', 'sg', 'my', 'th', 'mx', 'br', 'ax'];
+      for (let i = 0; i < keys.length; i++) {
+        if (I18n.displayCountry(keys[i]) === displayName) return keys[i];
+      }
+      return displayName;
+    }
+
+    function addSalesCountryFromSearch(displayName) {
+      addSalesCountry(findCountryKeyByDisplay(displayName));
+    }
+
+    document.addEventListener('click', function (event) {
       if (!event.target.closest('.country-search')) {
         document.getElementById('countryResults').classList.remove('show');
       }
     });
 
     function toggleRefNumber() {
-      const selectedValue = document.querySelector('input[name="sampleMethod"]:checked').value;
+      const selected = document.querySelector('input[name="sampleMethod"]:checked');
       const refNumberRow = document.getElementById('refNumberRow');
       const shippingFields = document.querySelectorAll('.shipping-field');
       const labField = document.querySelector('.lab-selection-field');
+      if (!selected) {
+        refNumberRow.style.display = 'none';
+        shippingFields.forEach(function (field) { field.style.display = 'none'; });
+        if (labField) labField.style.display = 'none';
+        return;
+      }
+      const selectedValue = selected.value;
       if (selectedValue === 'collect') {
         refNumberRow.style.display = 'flex';
-        shippingFields.forEach((field) => {
-          field.style.display = 'none';
-        });
-        if(labField) labField.style.display = 'none';
+        shippingFields.forEach(function (field) { field.style.display = 'none'; });
+        if (labField) labField.style.display = 'none';
+      } else if (selectedValue === 'ship') {
+        refNumberRow.style.display = 'none';
+        shippingFields.forEach(function (field) { field.style.display = 'block'; });
+        if (labField) labField.style.display = 'block';
       } else {
         refNumberRow.style.display = 'none';
-        shippingFields.forEach((field) => {
-          field.style.display = 'block';
-        });
-        if(labField) labField.style.display = 'block';
+        shippingFields.forEach(function (field) { field.style.display = 'block'; });
+        if (labField) labField.style.display = 'none';
       }
     }
 
-    const labAddresses = {
-      'hangzhou': '浙江省杭州市萧山区经济技术开发区建设三路 733 号 QIMA 启迈实验室',
-      'shanghai': '上海市浦东新区张江高科技园区科苑路 88 号 QIMA 启迈实验室',
-      'dongguan': '广东省东莞市松山湖高新技术产业开发区工业南路 8 号 QIMA 启迈实验室'
-    };
-
     function showLabAddress(labKey) {
       const box = document.getElementById('labAddressBox');
-      box.textContent = labAddresses[labKey] || '';
-      box.style.display = 'block';
+      if (!box || !window.I18n) return;
+      const lab = I18n.getTestingLabs().find(function (item) { return item.key === labKey; });
+      box.textContent = lab ? lab.address : '';
+      box.style.display = lab ? 'block' : 'none';
     }
 
     function toggleElectricDescription() {
       const selected = document.querySelector('input[name="electricType"]:checked');
       const row = document.getElementById('electricDescriptionRow');
       if (!selected || !row) return;
-      row.style.display = selected.value === '带电' ? 'block' : 'none';
+      row.style.display = selected.value === 'yes' ? 'block' : 'none';
+    }
+
+    function resetSelectButtons() {
+      document.querySelectorAll('.select-ref-btn').forEach(function (btn) {
+        if (!btn.id || btn.id === 'historyOrderSelectBtn' || btn.textContent.match(/^T-/)) return;
+        btn.textContent = t('common.select');
+      });
+      const historyBtn = document.getElementById('historyOrderSelectBtn');
+      if (historyBtn && !historyBtn.textContent.match(/^T-/)) historyBtn.textContent = t('common.select');
+    }
+
+    window.onLangApplied = function () {
+      updateGreeting();
+      renderLabOptions();
+      renderAdditionalContacts();
+      renderReferenceRows();
+      resetSelectButtons();
+      if (document.getElementById('orderReviewBody').classList.contains('show')) {
+        renderOrderReview();
+      } else {
+        const detailTitle = document.getElementById('detailTitle');
+        if (detailTitle) detailTitle.textContent = t('index.formTitle');
+      }
+      renderSelectedSalesCountries();
+      if (document.getElementById('supplierPicker').classList.contains('show')) renderSupplierRows();
+    };
+
+    renderLabOptions();
+    renderAdditionalContacts();
+
+    if (window.I18n) {
+      I18n.onLangApplied = window.onLangApplied;
+      I18n.initLangToggle();
     }
   </script>
 </body>

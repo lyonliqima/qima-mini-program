@@ -28,13 +28,10 @@
   /* ===== 手机外壳（固定高度，列表内部滚动）===== */
   .phone {
     position: relative;
-    width: 390px;
-    height: 844px;
     display: flex;
     flex-direction: column;
     background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
     overflow: hidden;
-    flex-shrink: 0;
   }
   .blob { position: absolute; border-radius: 68px; filter: blur(50px); pointer-events: none; z-index: 0; }
   .blob-1 { width: 340px; height: 314px; background: #f58f00; opacity: .07; left: 230px; top: -130px; transform: rotate(30deg); }
@@ -197,6 +194,13 @@
   }
   .fab img { width: 24px; height: 24px; }
 </style>
+<link rel="stylesheet" href="assets/phone-shell.css" />
+<link rel="stylesheet" href="assets/lang-toggle.css" />
+<link rel="stylesheet" href="assets/i18n-en.css" />
+<script>window.PAGE_TITLE_KEY = 'title.orders';</script>
+<script src="assets/i18n/zh.js"></script>
+<script src="assets/i18n/en.js"></script>
+<script src="assets/i18n-runtime.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -216,8 +220,8 @@
 
     <!-- 导航栏 -->
     <div class="navbar">
-      <a href="index.html"><img class="back" src="assets/vector52.svg" alt="返回" /></a>
-      <div class="title">订单</div>
+      <a href="index.html"><img class="back" src="assets/vector52.svg" alt="返回" data-i18n-alt="common.back" /></a>
+      <div class="title" data-i18n="orders.title">订单</div>
       <div class="nav-capsule">
         <img src="assets/share.svg" alt="" />
         <div class="divider"></div>
@@ -229,25 +233,25 @@
     <div class="filterbar">
       <div class="filter-row1">
         <div class="chip">
-          样品标称信息
+          <span data-i18n="orders.chipSampleInfo">样品标称信息</span>
           <svg class="caret" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="search">
           <svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <input type="text" placeholder="请输入搜索关键词" />
+          <input type="text" placeholder="请输入搜索关键词" data-i18n-placeholder="common.searchKeyword" />
         </div>
         <div class="filter-btn">
           <svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 3h12M4.5 8h7M6.5 13h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          筛选
+          <span data-i18n="common.filter">筛选</span>
         </div>
       </div>
       <div class="filter-row2">
         <div class="selector">
-          qimatest-Sally Xu
+          <span data-i18n="orders.defaultFilter">实验室检测</span>
           <svg class="caret" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="selector">
-          2026年度
+          <span data-i18n="common.yearFilter">2026年度</span>
           <svg class="caret" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
@@ -260,30 +264,26 @@
         <div class="ocard-head">
           <div class="left">
             <img src="assets/order_icon.svg" alt="" />
-            <span class="lbl">申请单号：</span>
+            <span class="lbl" data-i18n="common.orderNo">申请单号：</span>
             <span class="num">08008571</span>
           </div>
-          <div class="status blue">待录入数据</div>
+          <div class="status blue" data-i18n="status.pendingVerification">待验证</div>
         </div>
         <div class="ocard-dates">
           <div class="date-pill">
             <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            下单日期 2026-06-03
-          </div>
-          <div class="date-pill">
-            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            预计报告日期 2026-06-05
+            <span data-i18n="common.orderDate">下单日期</span> 2026-06-03
           </div>
         </div>
         <div class="ocard-product">
           <div class="thumb fabric-black"></div>
           <div class="pinfo">
-            <div class="pname">黑色复合面料</div>
-            <div class="psub"><span class="ptag">样品数量</span><span class="pval">10cm×80cm</span></div>
+            <div class="pname" data-i18n="orders.productBlackComposite">黑色复合面料</div>
+            <div class="psub"><span class="ptag" data-i18n="common.sampleQty">样品数量</span><span class="pval">10cm×80cm</span></div>
           </div>
           <img class="chev" src="assets/chevron_row.svg" alt="" />
         </div>
-        <div class="ocard-foot"><span>查看全部</span></div>
+        <div class="ocard-foot"><span data-i18n="common.viewAll">查看全部</span></div>
       </a>
 
       <!-- 卡片 2 -->
@@ -291,32 +291,32 @@
         <div class="ocard-head">
           <div class="left">
             <img src="assets/order_icon.svg" alt="" />
-            <span class="lbl">申请单号：</span>
+            <span class="lbl" data-i18n="common.orderNo">申请单号：</span>
             <span class="num">080082671</span>
           </div>
-          <div class="status green">报告已完成</div>
+          <div class="status green" data-i18n="status.reportCompleted">报告已完成</div>
         </div>
         <div class="ocard-dates">
           <div class="date-pill">
             <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            下单日期 2026-06-03
+            <span data-i18n="common.orderDate">下单日期</span> 2026-06-03
           </div>
           <div class="date-pill">
             <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            报告日期 2026-06-03
+            <span data-i18n="common.reportDate">报告日期</span> 2026-06-03
           </div>
         </div>
         <div class="ocard-product">
           <div class="thumb fabric-denim">
-            <span class="ribbon">合格</span>
+            <span class="ribbon" data-i18n="status.pass">合格</span>
           </div>
           <div class="pinfo">
-            <div class="pname">黑色机织面料</div>
-            <div class="psub"><span class="ptag">数号</span><span class="pval">T-26356800-11-R</span></div>
+            <div class="pname" data-i18n="orders.productBlackWoven">黑色机织面料</div>
+            <div class="psub"><span class="ptag" data-i18n="common.sampleNo">数号</span><span class="pval">T-26356800-11-R</span></div>
           </div>
           <img class="chev" src="assets/chevron_row.svg" alt="" />
         </div>
-        <div class="ocard-foot"><span>查看全部</span></div>
+        <div class="ocard-foot"><span data-i18n="common.viewAll">查看全部</span></div>
       </a>
 
       <!-- 卡片 3 -->
@@ -324,30 +324,26 @@
         <div class="ocard-head">
           <div class="left">
             <img src="assets/order_icon.svg" alt="" />
-            <span class="lbl">申请单号：</span>
+            <span class="lbl" data-i18n="common.orderNo">申请单号：</span>
             <span class="num">08008536</span>
           </div>
-          <div class="status blue">待录入数据</div>
+          <div class="status blue" data-i18n="status.pendingVerification">待验证</div>
         </div>
         <div class="ocard-dates">
           <div class="date-pill">
             <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            下单日期 2026-06-02
-          </div>
-          <div class="date-pill">
-            <svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            预计报告日期 2026-06-05
+            <span data-i18n="common.orderDate">下单日期</span> 2026-06-02
           </div>
         </div>
         <div class="ocard-product">
           <div class="thumb fabric-grey"></div>
           <div class="pinfo">
-            <div class="pname">灰色针织面料</div>
-            <div class="psub"><span class="ptag">样品数量</span><span class="pval">15cm×60cm</span></div>
+            <div class="pname" data-i18n="orders.productGreyKnit">灰色针织面料</div>
+            <div class="psub"><span class="ptag" data-i18n="common.sampleQty">样品数量</span><span class="pval">15cm×60cm</span></div>
           </div>
           <img class="chev" src="assets/chevron_row.svg" alt="" />
         </div>
-        <div class="ocard-foot"><span>查看全部</span></div>
+        <div class="ocard-foot"><span data-i18n="common.viewAll">查看全部</span></div>
       </a>
     </div>
 
@@ -355,26 +351,29 @@
     <div class="tabbar">
       <a class="tab" href="index.html">
         <img src="assets/tab_home.svg" alt="" />
-        <span class="label">首页</span>
+        <span class="label" data-i18n="common.tab.home">首页</span>
       </a>
       <a class="tab active" href="orders.html">
         <img src="assets/tab_order_active.svg" alt="" />
-        <span class="label">订单</span>
+        <span class="label" data-i18n="common.tab.orders">订单</span>
       </a>
       <a class="tab center" href="#">
         <span class="icon-spacer"></span>
       </a>
       <a class="tab" href="#">
         <img src="assets/tab_report.svg" alt="" />
-        <span class="label">报告</span>
+        <span class="label" data-i18n="common.tab.reports">报告</span>
       </a>
       <a class="tab" href="#">
         <img src="assets/tab_me.svg" alt="" />
-        <span class="label">我的</span>
+        <span class="label" data-i18n="common.tab.me">我的</span>
       </a>
       <!-- 中间悬浮按钮 -->
-      <div class="fab"><img src="assets/fab_add.svg" alt="下单" /></div>
+      <div class="fab"><img src="assets/fab_add.svg" alt="下单" data-i18n-alt="common.fabOrder" /></div>
     </div>
   </div>
+  <script>
+    if (window.I18n) I18n.initLangToggle();
+  </script>
 </body>
 </html>

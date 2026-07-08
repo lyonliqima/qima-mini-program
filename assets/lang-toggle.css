@@ -1,0 +1,38 @@
+.lang-switcher {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #d8deea;
+  box-shadow: 0 8px 24px rgba(25, 25, 25, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.lang-switcher button {
+  min-width: 52px;
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #5c6475;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lang-switcher button.active {
+  background: #4169e1;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(65, 105, 225, 0.28);
+}
+
+.lang-switcher button:not(.active):hover {
+  background: #f2f5fd;
+  color: #4169e1;
+}

@@ -1,0 +1,13 @@
+/* Unified mini-program phone mock dimensions (match index home shell). */
+:root {
+  --phone-width: 390px;
+  --phone-height: 1009px;
+}
+
+.phone {
+  width: var(--phone-width);
+  height: var(--phone-height);
+  min-height: var(--phone-height);
+  max-height: var(--phone-height);
+  flex-shrink: 0;
+}

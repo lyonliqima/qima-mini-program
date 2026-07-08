@@ -124,24 +124,61 @@
   .dropzone .up-ic { font-size: 26px; color: var(--pool-500); }
   .dropzone .up-main { font-size: 13px; color: var(--carbon); margin-top: 8px; }
   .dropzone .up-sub { font-size: 11px; color: #9aa0ad; margin-top: 5px; }
+  .input-section + .input-section { margin-top: 14px; }
+  .input-section-label {
+    font-size: 13px; font-weight: 600; color: var(--carbon); margin-bottom: 8px;
+  }
+  .input-section-label.primary { font-size: 14px; color: var(--pool-500); }
+  .voice-panel {
+    border: 1px solid #dce4fb; border-radius: 12px;
+    background: #f7f9ff; padding: 10px 12px;
+  }
+  .voice-tips-title {
+    font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 6px;
+  }
+  .voice-tips-list {
+    font-size: 11px; line-height: 17px; color: var(--seal);
+    margin: 0; padding-left: 16px;
+  }
+  .voice-tips-list li { margin-bottom: 2px; }
+  .voice-btn {
+    width: 100%; margin-top: 10px; height: 42px;
+    border: 1.5px solid var(--pool-500); border-radius: 12px;
+    background: #fff; color: var(--pool-500);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .voice-btn.recording {
+    background: var(--pool-500); color: #fff;
+    animation: voice-pulse 1.2s infinite;
+  }
+  @keyframes voice-pulse { 0%,100%{ opacity:1; } 50%{ opacity:.82; } }
+  .upload-secondary {
+    margin-top: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .upload-secondary-btn {
+    border: none; background: transparent; color: var(--seal);
+    font-size: 12px; cursor: pointer; padding: 4px 0;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
   .uploaded-files {
-    display: none; flex-direction: column; gap: 7px;
-    margin-top: 10px;
+    display: none; flex-direction: row; flex-wrap: wrap; gap: 4px;
+    margin-top: 6px;
   }
   .uploaded-files.show { display: flex; }
   .uploaded-file {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    padding: 8px 10px; border: 1px solid #edf0f6; border-radius: 10px;
-    background: #fff; font-size: 12px; color: var(--carbon);
+    display: flex; align-items: center; gap: 4px;
+    padding: 3px 6px; border: 1px solid #edf0f6; border-radius: 8px;
+    background: #fff; font-size: 10px; color: var(--carbon);
+    max-width: calc(50% - 2px);
   }
   .uploaded-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .uploaded-file-status { color: var(--seal); font-size: 11px; flex-shrink: 0; }
+  .uploaded-file-status { display: none; }
   .uploaded-file-delete {
-    width: 24px; height: 24px; border: none; border-radius: 50%;
+    width: 16px; height: 16px; border: none; border-radius: 50%;
     background: #f4f6fa; color: var(--seal); cursor: pointer;
-    font-size: 16px; line-height: 24px; padding: 0; flex-shrink: 0;
+    font-size: 12px; line-height: 16px; padding: 0; flex-shrink: 0;
   }
-  .uploaded-file-delete:active { background: #e9edf7; color: var(--carbon); }
   .tip {
     margin-top: 12px; background: #fffaf0; border: 1px solid #ffe6b8; border-radius: 10px;
     padding: 10px 12px; font-size: 12px; color: #8a6d3b; line-height: 18px;
@@ -170,7 +207,7 @@
 
   /* 链接输入 */
   .link-row {
-    margin-top: 12px; display: flex; flex-direction: column;
+    margin-top: 0; display: flex; flex-direction: column;
     align-items: stretch; gap: 8px;
   }
   .link-row input {
@@ -714,7 +751,7 @@
       <!-- 机器人欢迎 -->
       <div class="row bot">
         <img class="avatar bot" src="assets/robot.png" alt="下单助手" />
-        <div class="bubble">你好，我是下单助手 🤖<br>在开始之前，请先告诉我本次的需求类型～</div>
+        <div class="bubble">您好，我是下单助手 🤖<br>在开始之前，请先告诉我本次的需求类型～</div>
       </div>
 
       <!-- 选择类型卡片 -->
@@ -801,7 +838,7 @@
           <button class="edit-close" onclick="closeFieldEditor()" aria-label="关闭">×</button>
         </div>
         <div class="edit-modal-body">
-          <div class="edit-note">已复用历史信息作为默认值。你可以在这里补充或修改表单字段，空字段保存后仍会保持「待确认」。</div>
+          <div class="edit-note">已复用历史信息作为默认值。您可以在这里补充或修改表单字段，空字段保存后仍会保持「待确认」。</div>
           <div class="edit-grid" id="fieldEditorGrid"></div>
         </div>
         <div class="edit-modal-actions">
@@ -829,7 +866,7 @@
     <!-- 返回主页确认弹窗 -->
     <div class="back-confirm-mask" id="backConfirmModal" onclick="closeBackConfirm(event)">
       <div class="back-confirm-dialog" onclick="event.stopPropagation()">
-        <div class="back-confirm-text">你确定返回主页吗？现在的进度将不会保存</div>
+        <div class="back-confirm-text">您确定返回主页吗？现在的进度将不会保存</div>
         <div class="back-confirm-actions">
           <button class="back-confirm-action" type="button" onclick="closeBackConfirm()">取消</button>
           <button class="back-confirm-action primary" type="button" onclick="goBackHome()">确定返回</button>
@@ -946,14 +983,14 @@
         userMsg('重测');
         const t = botTyping();
         setTimeout(()=>{ t.remove();
-          botMsg('好的～已为你匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
+          botMsg('好的～已为您匹配到 <b>3</b> 条历史测试记录，请选择要复用的 Test：', false);
           botMsg(renderHistoryPanel('历史 Test', historyTests, '搜索 Test 编号、服务或产品'), true);
         }, 700);
       } else {
         userMsg('再次下单');
         const t = botTyping();
         setTimeout(()=>{ t.remove();
-          botMsg('好的～已为你匹配到历史订单，请选择要复用的 Order：', false);
+          botMsg('好的～已为您匹配到历史订单，请选择要复用的 Order：', false);
           botMsg(renderHistoryPanel('历史 Order', historyOrders, '搜索 Order 编号、服务或产品'), true);
         }, 700);
       }
@@ -1072,7 +1109,7 @@
         manualIndex = manualQuestions.length;
         Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
         Object.assign(manualAnswers, prefill.fields);
-        botMsg('已载入 <b>'+id+'</b> 的信息 ✅ 正在为你预填订单表单…', false);
+        botMsg('已载入 <b>'+id+'</b> 的信息 ✅ 正在为您预填订单表单…', false);
         const t2 = botTyping();
         setTimeout(()=>{
           t2.remove();
@@ -1109,7 +1146,7 @@
       removeActionRow(btn);
       userMsg('补充缺失项');
       if(manualAnswers['Carrier'] && manualAnswers['Tracking Number']){
-        botMsg('当前预填信息里没有明显缺失项 ✅ 你可以直接去下单，或点击「编辑字段」微调内容。', false);
+        botMsg('当前预填信息里没有明显缺失项 ✅ 您可以直接去下单，或点击「编辑字段」微调内容。', false);
         return;
       }
       botMsg('历史记录里没有完整物流信息。请在下方补充本批样品的快递信息；如果暂时没有，也可以先生成订单草稿。', false);
@@ -1131,7 +1168,7 @@
         botMsg('已补充物流信息 ✅ 请再次确认订单信息。', false);
         return;
       }
-      botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+      botMsg('已记录为稍后补充。您仍然可以先生成订单草稿，之后再完善物流信息。', false);
     }
 
     function answerReuseShippingText(value){
@@ -1140,7 +1177,7 @@
         return;
       }
       if(/暂无|稍后|没有|待补/.test(value)){
-        botMsg('已记录为稍后补充。你仍然可以先生成订单草稿，之后再完善物流信息。', false);
+        botMsg('已记录为稍后补充。您仍然可以先生成订单草稿，之后再完善物流信息。', false);
         return;
       }
       const parts = value.split(/[，,;；\s]+/).filter(Boolean);
@@ -1160,35 +1197,64 @@
     // 2) 首次测试 → 请求上传资料 / 链接
     function askUpload(){
       hasUploadedFiles = false;
-      botMsg('收到！这是一次<b>全新产品</b>的检测。<br>请上传任意产品相关资料，或粘贴商品链接，我来自动识别并填写表单 👇', false);
+      botMsg('收到！这是一次<b>全新产品</b>的检测。<br>优先粘贴商品链接，或用语音描述产品信息，我会自动识别并填写表单 👇', false);
       const card =
         '<div class="panel panel-pad">'+
-          '<div class="panel-title">上传产品资料</div>'+
-          '<div class="dropzone" onclick="doUpload()">'+
-            '<div class="up-ic">☁️</div>'+
-            '<div class="up-main">点击上传或拖拽文件到此处</div>'+
-            '<div class="up-sub">支持规格书、PO/PI/Invoice、包装/标签、产品照片、旧测试报告等</div>'+
+          '<div class="panel-title">提供产品信息</div>'+
+          '<div class="input-section">'+
+            '<div class="input-section-label primary">粘贴商品链接</div>'+
+            '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 商品链接" oninput="updateParseButtonState()"><button class="parse-btn" id="parseBtn" onclick="doParse()" disabled>开始解析</button></div>'+
           '</div>'+
-          '<div class="uploaded-files" id="uploadedFiles"></div>'+
-          '<div class="src-tabs">支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB</div>'+
-          '<div class="upload-hint">'+
-            '<div class="upload-hint-head"><span class="upload-hint-title">可上传 / 粘贴的信息</span><button class="detail-link" onclick="showUploadExamples()">查看详情</button></div>'+
-            '<div class="upload-hint-tip">资料越完整，可自动识别的字段越多。</div>'+
-            '<div class="type-grid">'+
-              '<div class="type-item">Product Spec</div>'+
-              '<div class="type-item">Product Photos</div>'+
-              '<div class="type-item">Packaging / Label</div>'+
-              '<div class="type-item">PO / PI</div>'+
-              '<div class="type-item">Invoice</div>'+
-              '<div class="type-item">旧测试报告</div>'+
-              '<div class="type-item">Amazon Link</div>'+
-              '<div class="type-item">TEMU / Shopify</div>'+
+          '<div class="input-section">'+
+            '<div class="input-section-label">语音输入</div>'+
+            '<div class="voice-panel" id="voicePanel">'+
+              '<div class="voice-tips-title">请尽量说明以下信息：</div>'+
+              '<ul class="voice-tips-list"><li>产品名称与品类</li><li>检测项目 / Program</li><li>原产国与销售地区</li><li>制造商名称与地址</li><li>样品收集方式</li></ul>'+
+              '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
             '</div>'+
           '</div>'+
-          '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 链接" oninput="updateParseButtonState()"><button class="parse-btn" id="parseBtn" onclick="doParse()" disabled>开始解析</button></div>'+
+          '<div class="upload-secondary">'+
+            '<button class="upload-secondary-btn" type="button" onclick="doUpload()">📄 上传资料（可选）</button>'+
+          '</div>'+
+          '<div class="uploaded-files" id="uploadedFiles"></div>'+
           '<button class="manual-fill" onclick="startManualFill()">暂无资料，直接填写</button>'+
         '</div>';
       botMsg(card, true);
+    }
+
+    let voiceRecording = false;
+    let voiceTimer = null;
+
+    function voiceBtnIdleHtml(){
+      return '🎤 点击开始语音';
+    }
+
+    function voiceBtnRecordingHtml(){
+      return '🎤 正在聆听，点击结束';
+    }
+
+    function toggleVoiceInput(btn){
+      if(voiceRecording){
+        stopVoiceInput(btn, true);
+        return;
+      }
+      voiceRecording = true;
+      btn.classList.add('recording');
+      btn.textContent = voiceBtnRecordingHtml();
+      voiceTimer = setTimeout(()=> stopVoiceInput(btn, true), 2200);
+    }
+
+    function stopVoiceInput(btn, completed){
+      if(voiceTimer){ clearTimeout(voiceTimer); voiceTimer = null; }
+      voiceRecording = false;
+      if(btn){
+        btn.classList.remove('recording');
+        btn.innerHTML = voiceBtnIdleHtml();
+      }
+      if(completed){
+        userMsg('🎤 我要测一款智能机器人玩具，TEMU 商家付款项目，原产国中国，销往美国和欧盟…');
+        runRecognize('语音描述');
+      }
     }
 
     function showUploadExamples(){
@@ -1218,7 +1284,6 @@
       uploadedFiles.innerHTML = uploadedFileList.map((file, index) =>
         '<div class="uploaded-file">'+
           '<span class="uploaded-file-name">'+file.icon+' '+escapeHtml(file.name)+'</span>'+
-          '<span class="uploaded-file-status">已上传</span>'+
           '<button class="uploaded-file-delete" type="button" aria-label="删除 '+escapeHtml(file.name)+'" onclick="removeUploadedFile('+index+', event)">×</button>'+
         '</div>'
       ).join('');
@@ -1278,7 +1343,7 @@
       manualIndex = 0;
       Object.keys(manualAnswers).forEach(k => delete manualAnswers[k]);
       const t = botTyping();
-      setTimeout(()=>{ t.remove(); botMsg('没问题～我会用对话方式帮你逐项填写订单信息。请直接在底部输入框中填写答案，之后也能再编辑。', false); askManualField(); }, 650);
+      setTimeout(()=>{ t.remove(); botMsg('没问题～我会用对话方式帮您逐项填写订单信息。请直接在底部输入框中填写答案，之后也能再编辑。', false); askManualField(); }, 650);
     }
 
     function askManualField(){
@@ -1441,7 +1506,7 @@
         }, 500);
         return;
       }
-      botMsg('请补充物流信息。你可以拍照识别快递面单，也可以手动填写。', false);
+      botMsg('请补充物流信息。您可以拍照识别快递面单，也可以手动填写。', false);
       botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn" onclick="chooseShippingInput(\'photo\', this, \''+flowSource+'\')">拍照识别面单</button><button class="chip-btn" onclick="chooseShippingInput(\'manual\', this, \''+flowSource+'\')">手动填写物流</button><button class="chip-btn" onclick="chooseShippingInput(\'skip\', this, \''+flowSource+'\')">稍后补充</button></div></div>', true);
     }
 
@@ -1638,7 +1703,7 @@
     function finishManualFill(){
       const t = botTyping();
       setTimeout(()=>{ t.remove();
-        botMsg('已根据你的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
+        botMsg('已根据您的回答完成主要字段填写。请确认订单信息，确认无误后即可去下单。', false);
         botMsg(manualOrderCard(), true);
         botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 编辑字段</button></div></div>', true);
       }, 650);
@@ -1692,7 +1757,7 @@
           // 字段提取卡
           botMsg(extractCard(), true);
           // 总结 + 缺失确认
-          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要你确认，请在下方一次性补充 👇', false);
+          botMsg('识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要您确认，请在下方一次性补充 👇', false);
           botMsg(missingFieldsCard(), true);
         }, 1100);
       }, 700);
@@ -2187,7 +2252,7 @@
       const t = botTyping();
       setTimeout(()=>{ t.remove();
         botMsg(orderSummaryCard(), true);
-        botMsg('请确认以上订单信息是否正确。确认后我会帮你提交检测订单。', false);
+        botMsg('请确认以上订单信息是否正确。确认后我会帮您提交检测订单。', false);
         botMsg('<div style="width:268px"><div class="chips"><button class="chip-btn primary" onclick="placeOrder(this)">'+ciIcon('cart')+' 信息正确，去下单</button><button class="chip-btn" onclick="openFieldEditor(this)">'+ciIcon('edit')+' 返回编辑字段</button></div></div>', true);
       }, 700);
     }
