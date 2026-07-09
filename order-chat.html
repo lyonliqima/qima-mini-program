@@ -201,16 +201,18 @@
     pointer-events: none; opacity: .45;
   }
   .upload-card-actions {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
   }
   .upload-card-btn {
-    height: 36px; border: 1px solid #dce4fb; border-radius: 10px;
-    background: #f7f9ff; color: var(--seal);
+    min-height: 24px; border: none; border-radius: 0;
+    background: transparent; color: var(--pool-500);
     font-size: 12px; font-weight: 600; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 0;
   }
   .upload-card-btn.primary {
-    color: var(--pool-500); background: #fff; border-color: #bfcaf5;
+    width: 100%; height: 36px; border: 1px solid #bfcaf5; border-radius: 10px;
+    color: var(--pool-500); background: #fff;
   }
   .upload-card-btn .up-ic { color: currentColor; display: flex; align-items: center; }
   .uploaded-files {

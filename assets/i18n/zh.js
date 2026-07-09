@@ -350,7 +350,7 @@ window.I18N_ZH = {
   'orderChat.uploadTitle': '提供产品信息',
   'orderChat.cameraCapture': '相机拍摄',
   'orderChat.uploadDoc': '上传文档',
-  'orderChat.uploadDocOptional': '上传资料（可选）',
+  'orderChat.uploadDocOptional': '上传资料',
   'orderChat.uploadMaterialsTitle': '照片 / 文档',
   'orderChat.linkSectionTitle': '粘贴商品链接',
   'orderChat.voiceSectionTitle': '语音输入',
