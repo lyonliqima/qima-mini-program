@@ -149,9 +149,12 @@
     box-shadow: 0 1px 4px rgba(25,25,25,.03);
   }
   .input-card-title {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
     font-size: 13px; font-weight: 700; color: var(--carbon);
     margin-bottom: 8px;
+  }
+  .input-card-title-main {
+    display: flex; align-items: center; gap: 6px; min-width: 0;
   }
   .input-card-title.primary { color: var(--carbon); }
   .input-card-icon { color: currentColor; display: inline-flex; align-items: center; }
@@ -1904,7 +1907,7 @@
           '</div>'+
           '<div class="input-card-stack">'+
             '<div class="input-card input-section">'+
-              '<div class="input-card-title"><span class="input-card-icon">🎤</span>'+t('orderChat.voiceSectionTitle')+'</div>'+
+              '<div class="input-card-title"><span class="input-card-title-main"><span class="input-card-icon">🎤</span>'+t('orderChat.voiceSectionTitle')+'</span></div>'+
               '<div class="voice-panel" id="voicePanel">'+
                 '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
               '</div>'+
@@ -1914,11 +1917,14 @@
               '</div>'+
             '</div>'+
             '<div class="input-card input-section">'+
-              '<div class="input-card-title primary"><span class="input-card-icon">🔗</span>'+t('orderChat.linkSectionTitle')+'</div>'+
+              '<div class="input-card-title primary"><span class="input-card-title-main"><span class="input-card-icon">🔗</span>'+t('orderChat.linkSectionTitle')+'</span></div>'+
               '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"></div>'+
             '</div>'+
             '<div class="input-card">'+
-              '<div class="input-card-title"><span class="input-card-icon">📎</span>'+t('orderChat.uploadMaterialsTitle')+'</div>'+
+              '<div class="input-card-title">'+
+                '<span class="input-card-title-main"><span class="input-card-icon">📎</span>'+t('orderChat.uploadMaterialsTitle')+'</span>'+
+                '<button class="detail-link" type="button" onclick="showUploadExamples()">'+t('orderChat.viewDetails')+'</button>'+
+              '</div>'+
               '<div class="upload-card-actions">'+
                 '<button class="upload-card-btn primary" type="button" onclick="doUpload(\'photo\')">'+
                   '<span class="up-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>'+

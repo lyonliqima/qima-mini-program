@@ -139,9 +139,12 @@
     box-shadow: 0 1px 4px rgba(25,25,25,.03);
   }
   .input-card-title {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
     font-size: 13px; font-weight: 700; color: var(--carbon);
     margin-bottom: 8px;
+  }
+  .input-card-title-main {
+    display: flex; align-items: center; gap: 6px; min-width: 0;
   }
   .input-card-title.primary { color: var(--carbon); }
   .input-card-icon { color: currentColor; display: inline-flex; align-items: center; }
@@ -1300,7 +1303,7 @@
           '</div>'+
           '<div class="input-card-stack">'+
             '<div class="input-card input-section">'+
-              '<div class="input-card-title"><span class="input-card-icon">🎤</span>语音输入</div>'+
+              '<div class="input-card-title"><span class="input-card-title-main"><span class="input-card-icon">🎤</span>语音输入</span></div>'+
               '<div class="voice-panel" id="voicePanel">'+
                 '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
               '</div>'+
@@ -1310,11 +1313,14 @@
               '</div>'+
             '</div>'+
             '<div class="input-card input-section">'+
-              '<div class="input-card-title primary"><span class="input-card-icon">🔗</span>粘贴商品链接</div>'+
+              '<div class="input-card-title primary"><span class="input-card-title-main"><span class="input-card-icon">🔗</span>粘贴商品链接</span></div>'+
               '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 商品链接" oninput="updateParseButtonState()"></div>'+
             '</div>'+
             '<div class="input-card">'+
-              '<div class="input-card-title"><span class="input-card-icon">📎</span>照片 / 文档</div>'+
+              '<div class="input-card-title">'+
+                '<span class="input-card-title-main"><span class="input-card-icon">📎</span>照片 / 文档</span>'+
+                '<button class="detail-link" type="button" onclick="showUploadExamples()">详情</button>'+
+              '</div>'+
               '<div class="upload-card-actions">'+
                 '<button class="upload-card-btn primary" type="button" onclick="doUpload(\'photo\')">📷 相机拍摄</button>'+
                 '<button class="upload-card-btn" type="button" onclick="doUpload()">📄 上传资料</button>'+
