@@ -167,12 +167,14 @@
     margin: 0; padding-left: 16px;
   }
   .voice-tips-list li { margin-bottom: 2px; }
-  .voice-btn {
-    width: 100%; height: 42px;
-    border: 1.5px solid var(--pool-500); border-radius: 12px;
+  .voice-btn,
+  .upload-card-btn.primary {
+    width: 100%; height: 40px;
+    border: 1.5px solid var(--pool-500); border-radius: 10px;
     background: #fff; color: var(--pool-500);
     font-size: 13px; font-weight: 600; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 0;
   }
   .voice-btn.recording {
     background: var(--pool-500); color: #fff;
@@ -209,10 +211,6 @@
     font-size: 12px; font-weight: 600; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center; gap: 5px;
     padding: 0;
-  }
-  .upload-card-btn.primary {
-    width: 100%; height: 36px; border: 1px solid #bfcaf5; border-radius: 10px;
-    color: var(--pool-500); background: #fff;
   }
   .upload-card-btn .up-ic { color: currentColor; display: flex; align-items: center; }
   .uploaded-files {
