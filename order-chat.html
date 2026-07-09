@@ -162,7 +162,28 @@
     background: var(--pool-500); color: #fff;
     animation: voice-pulse 1.2s infinite;
   }
+  .voice-btn.processing {
+    background: #edf1ff; color: var(--pool-500);
+    border-color: #c5cee8; cursor: default;
+    animation: none;
+  }
   @keyframes voice-pulse { 0%,100%{ opacity:1; } 50%{ opacity:.82; } }
+  .voice-transcript {
+    display: none; margin-top: 8px; padding: 10px 12px;
+    border: 1px solid #e3e9fb; border-radius: 10px;
+    background: #fff; font-size: 12px; line-height: 18px; color: var(--carbon);
+  }
+  .voice-transcript.show { display: block; }
+  .voice-transcript-label {
+    font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 4px;
+  }
+  .panel.voice-locked .link-row input,
+  .panel.voice-locked .upload-secondary-btn,
+  .panel.voice-locked .uploaded-file-delete,
+  .panel.voice-locked .parse-btn,
+  .panel.voice-locked .manual-fill {
+    pointer-events: none; opacity: .45;
+  }
   .upload-secondary {
     margin-top: 10px; display: flex; align-items: center; justify-content: center;
   }
@@ -226,11 +247,12 @@
     padding: 0 12px; font-size: 13px; outline: none; background: #fff;
   }
   .link-row input::placeholder { color: #aab0bc; }
-  .link-row .parse-btn {
-    width: 100%; height: 40px; padding: 0 18px; border: none; border-radius: 10px;
+  .parse-btn {
+    width: 100%; height: 40px; margin-top: 12px; padding: 0 18px;
+    border: none; border-radius: 10px;
     background: var(--pool-500); color: #fff; font-size: 13px; cursor: pointer;
   }
-  .link-row .parse-btn:disabled {
+  .parse-btn:disabled {
     background: #edf0f6; color: #aab0bc; cursor: default;
   }
   .manual-fill {
@@ -1802,13 +1824,17 @@
     // 2) 首次测试 → 请求上传资料 / 链接
     function askUpload(){
       hasUploadedFiles = false;
+      hasVoiceInput = false;
+      voiceTranscript = '';
+      voiceRecording = false;
+      voiceProcessing = false;
       botMsg(tHtml('orderChat.newProductMsg'), false);
       const card =
         '<div class="panel panel-pad">'+
           '<div class="panel-title">'+t('orderChat.uploadTitle')+'</div>'+
           '<div class="input-section">'+
             '<div class="input-section-label primary">'+t('orderChat.linkSectionTitle')+'</div>'+
-            '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"><button class="parse-btn" id="parseBtn" onclick="doParse()" disabled>'+t('orderChat.parseBtn')+'</button></div>'+
+            '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"></div>'+
           '</div>'+
           '<div class="input-section">'+
             '<div class="input-section-label">'+t('orderChat.voiceSectionTitle')+'</div>'+
@@ -1816,6 +1842,10 @@
               '<div class="voice-tips-title">'+t('orderChat.voiceTipsTitle')+'</div>'+
               '<ul class="voice-tips-list">'+t('orderChat.voiceTipsList')+'</ul>'+
               '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
+            '</div>'+
+            '<div class="voice-transcript" id="voiceTranscript">'+
+              '<div class="voice-transcript-label">'+t('orderChat.voiceTranscriptLabel')+'</div>'+
+              '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
             '</div>'+
           '</div>'+
           '<div class="upload-secondary">'+
@@ -1825,13 +1855,17 @@
             '</button>'+
           '</div>'+
           '<div class="uploaded-files" id="uploadedFiles"></div>'+
+          '<button class="parse-btn" id="parseBtn" type="button" onclick="doParse()" disabled>'+t('orderChat.parseBtn')+'</button>'+
           '<button class="manual-fill" onclick="startManualFill()">'+t('orderChat.noDataFill')+'</button>'+
         '</div>';
       botMsg(card, true);
     }
 
     let voiceRecording = false;
+    let voiceProcessing = false;
     let voiceTimer = null;
+    let hasVoiceInput = false;
+    let voiceTranscript = '';
 
     function voiceMicIcon(){
       return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
@@ -1845,28 +1879,75 @@
       return voiceMicIcon()+'<span>'+t('orderChat.voiceRecording')+'</span>';
     }
 
+    function voiceBtnProcessingHtml(){
+      return voiceMicIcon()+'<span>'+t('orderChat.voiceProcessing')+'</span>';
+    }
+
+    function getUploadPanel(btn){
+      if(btn) return btn.closest('.panel.panel-pad');
+      const voiceBtn = document.getElementById('voiceBtn');
+      return voiceBtn ? voiceBtn.closest('.panel.panel-pad') : document.querySelector('#chat .panel.panel-pad');
+    }
+
+    function setVoiceLock(locked, btn){
+      const panel = getUploadPanel(btn);
+      if(panel) panel.classList.toggle('voice-locked', !!locked);
+      const linkIn = panel ? panel.querySelector('#linkIn') : document.getElementById('linkIn');
+      const parseBtn = panel ? panel.querySelector('#parseBtn') : document.getElementById('parseBtn');
+      if(linkIn) linkIn.disabled = !!locked;
+      if(parseBtn && locked) parseBtn.disabled = true;
+      if(!locked) updateParseButtonState();
+    }
+
     function toggleVoiceInput(btn){
+      if(voiceProcessing) return;
       if(voiceRecording){
         stopVoiceInput(btn, true);
         return;
       }
       voiceRecording = true;
+      setVoiceLock(true, btn);
+      btn.classList.remove('processing');
       btn.classList.add('recording');
       btn.innerHTML = voiceBtnRecordingHtml();
-      voiceTimer = setTimeout(()=> stopVoiceInput(btn, true), 2200);
     }
 
     function stopVoiceInput(btn, completed){
       if(voiceTimer){ clearTimeout(voiceTimer); voiceTimer = null; }
       voiceRecording = false;
+      if(!completed){
+        setVoiceLock(false, btn);
+        if(btn){
+          btn.classList.remove('recording', 'processing');
+          btn.innerHTML = voiceBtnIdleHtml();
+        }
+        return;
+      }
+      voiceProcessing = true;
+      setVoiceLock(true, btn);
       if(btn){
         btn.classList.remove('recording');
-        btn.innerHTML = voiceBtnIdleHtml();
+        btn.classList.add('processing');
+        btn.innerHTML = voiceBtnProcessingHtml();
+        btn.disabled = true;
       }
-      if(completed){
-        userMsg('🎤 '+escapeHtml(t('orderChat.voiceDemoTranscript')));
-        runRecognize(t('orderChat.recognizeSourceVoice'));
-      }
+      voiceTimer = setTimeout(()=>{
+        voiceProcessing = false;
+        voiceTranscript = t('orderChat.voiceDemoTranscript');
+        hasVoiceInput = true;
+        const panel = getUploadPanel(btn);
+        const box = panel ? panel.querySelector('#voiceTranscript') : document.getElementById('voiceTranscript');
+        const text = panel ? panel.querySelector('#voiceTranscriptText') : document.getElementById('voiceTranscriptText');
+        if(text) text.textContent = voiceTranscript;
+        if(box) box.classList.add('show');
+        if(btn){
+          btn.disabled = false;
+          btn.classList.remove('processing');
+          btn.innerHTML = voiceBtnIdleHtml();
+        }
+        setVoiceLock(false, btn);
+        updateParseButtonState();
+      }, 1400);
     }
 
     function showUploadExamples(){
@@ -1929,26 +2010,25 @@
     }
 
     function doParse(){
-      const v = (document.getElementById('linkIn')||{}).value || '';
-      if(!hasUploadedFiles && !v.trim()) return;
-      if(hasUploadedFiles && v.trim()){
-        userMsg(uploadedFilesSummary()+'<div style="margin-top:6px">🔗 '+t('orderChat.productLink')+'：'+escapeHtml(v.slice(0,28))+'…</div>');
-        runRecognize(t('orderChat.recognizeSourceBoth'));
-        return;
-      }
-      if(hasUploadedFiles){
-        userMsg(uploadedFilesSummary());
-        runRecognize(t('orderChat.recognizeSourceDoc'));
-        return;
-      }
-      userMsg('🔗 '+t('orderChat.productLink')+'：'+(v.length>4 ? escapeHtml(v.slice(0,28))+'…' : 'amazon.com/dp/B0XXXXX…'));
-      runRecognize(t('orderChat.recognizeSourceLink'));
+      const v = ((document.getElementById('linkIn')||{}).value || '').trim();
+      if(!hasUploadedFiles && !v && !hasVoiceInput) return;
+      const parts = [];
+      if(hasVoiceInput) parts.push('🎤 '+escapeHtml(voiceTranscript || t('orderChat.voiceDemoTranscript')));
+      if(hasUploadedFiles) parts.push(uploadedFilesSummary());
+      if(v) parts.push('🔗 '+t('orderChat.productLink')+'：'+escapeHtml(v.length>28 ? v.slice(0,28)+'…' : v));
+      userMsg(parts.join('<div style="margin-top:6px"></div>'));
+      let src = t('orderChat.recognizeSourceLink');
+      if(hasVoiceInput && (hasUploadedFiles || v)) src = t('orderChat.recognizeSourceBoth');
+      else if(hasVoiceInput) src = t('orderChat.recognizeSourceVoice');
+      else if(hasUploadedFiles && v) src = t('orderChat.recognizeSourceBoth');
+      else if(hasUploadedFiles) src = t('orderChat.recognizeSourceDoc');
+      runRecognize(src);
     }
 
     function updateParseButtonState(){
-      const linkValue = (document.getElementById('linkIn') || {}).value || '';
+      const linkValue = ((document.getElementById('linkIn') || {}).value || '').trim();
       const parseBtn = document.getElementById('parseBtn');
-      if(parseBtn) parseBtn.disabled = !hasUploadedFiles && !linkValue.trim();
+      if(parseBtn) parseBtn.disabled = !hasUploadedFiles && !linkValue && !hasVoiceInput;
     }
 
     function getManualQuestions(){
