@@ -351,6 +351,7 @@ window.I18N_ZH = {
   'orderChat.cameraCapture': '相机拍摄',
   'orderChat.uploadDoc': '上传文档',
   'orderChat.uploadDocOptional': '上传资料（可选）',
+  'orderChat.uploadMaterialsTitle': '照片 / 文档',
   'orderChat.linkSectionTitle': '粘贴商品链接',
   'orderChat.voiceSectionTitle': '语音输入',
   'orderChat.voiceTipsTitle': '请尽量说明以下信息：',

@@ -124,14 +124,30 @@
   .dropzone .up-ic { font-size: 26px; color: var(--pool-500); }
   .dropzone .up-main { font-size: 13px; color: var(--carbon); margin-top: 8px; }
   .dropzone .up-sub { font-size: 11px; color: #9aa0ad; margin-top: 5px; }
-  .input-section + .input-section { margin-top: 14px; }
-  .input-section-label {
-    font-size: 13px; font-weight: 600; color: var(--carbon); margin-bottom: 8px;
-  }
-  .input-section-label.primary { font-size: 14px; color: var(--pool-500); }
-  .voice-panel {
+  .input-guide {
+    margin-bottom: 12px; padding: 11px 12px;
     border: 1px solid #dce4fb; border-radius: 12px;
-    background: #f7f9ff; padding: 10px 12px;
+    background: #f7f9ff;
+  }
+  .input-guide .voice-tips-title {
+    font-size: 12px; font-weight: 700; color: #24407a; margin-bottom: 6px;
+  }
+  .input-card-stack { display: flex; flex-direction: column; gap: 10px; }
+  .input-card {
+    border: 1px solid #e2e7f3; border-radius: 13px;
+    background: #fff; padding: 11px 12px;
+    box-shadow: 0 1px 4px rgba(25,25,25,.03);
+  }
+  .input-card-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 700; color: var(--carbon);
+    margin-bottom: 8px;
+  }
+  .input-card-title.primary { color: var(--pool-500); }
+  .input-card-icon { color: currentColor; display: inline-flex; align-items: center; }
+  .voice-panel {
+    border: none; border-radius: 0;
+    background: transparent; padding: 0;
   }
   .voice-tips-title {
     font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 6px;
@@ -142,7 +158,7 @@
   }
   .voice-tips-list li { margin-bottom: 2px; }
   .voice-btn {
-    width: 100%; margin-top: 10px; height: 42px;
+    width: 100%; height: 42px;
     border: 1.5px solid var(--pool-500); border-radius: 12px;
     background: #fff; color: var(--pool-500);
     font-size: 13px; font-weight: 600; cursor: pointer;
@@ -168,20 +184,25 @@
     font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 4px;
   }
   .panel.voice-locked .link-row input,
-  .panel.voice-locked .upload-secondary-btn,
+  .panel.voice-locked .upload-card-btn,
   .panel.voice-locked .uploaded-file-delete,
   .panel.voice-locked .parse-btn,
   .panel.voice-locked .manual-fill {
     pointer-events: none; opacity: .45;
   }
-  .upload-secondary {
-    margin-top: 10px; display: flex; align-items: center; justify-content: center;
+  .upload-card-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
-  .upload-secondary-btn {
-    border: none; background: transparent; color: var(--seal);
-    font-size: 12px; cursor: pointer; padding: 4px 0;
-    display: inline-flex; align-items: center; gap: 4px;
+  .upload-card-btn {
+    height: 36px; border: 1px solid #dce4fb; border-radius: 10px;
+    background: #f7f9ff; color: var(--seal);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   }
+  .upload-card-btn.primary {
+    color: var(--pool-500); background: #fff; border-color: #bfcaf5;
+  }
+  .upload-card-btn .up-ic { color: currentColor; display: flex; align-items: center; }
   .uploaded-files {
     display: none; flex-direction: row; flex-wrap: wrap; gap: 4px;
     margin-top: 6px;
@@ -1227,26 +1248,34 @@
       const card =
         '<div class="panel panel-pad">'+
           '<div class="panel-title">提供产品信息</div>'+
-          '<div class="input-section">'+
-            '<div class="input-section-label primary">粘贴商品链接</div>'+
-            '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 商品链接" oninput="updateParseButtonState()"></div>'+
+          '<div class="input-guide">'+
+            '<div class="voice-tips-title">请尽量说明以下信息：</div>'+
+            '<ul class="voice-tips-list"><li>产品名称与品类</li><li>检测项目 / Program</li><li>原产国与销售地区</li><li>制造商名称与地址</li><li>样品收集方式</li></ul>'+
           '</div>'+
-          '<div class="input-section">'+
-            '<div class="input-section-label">语音输入</div>'+
-            '<div class="voice-panel" id="voicePanel">'+
-              '<div class="voice-tips-title">请尽量说明以下信息：</div>'+
-              '<ul class="voice-tips-list"><li>产品名称与品类</li><li>检测项目 / Program</li><li>原产国与销售地区</li><li>制造商名称与地址</li><li>样品收集方式</li></ul>'+
-              '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
+          '<div class="input-card-stack">'+
+            '<div class="input-card input-section">'+
+              '<div class="input-card-title primary"><span class="input-card-icon">🔗</span>粘贴商品链接</div>'+
+              '<div class="link-row"><input id="linkIn" placeholder="粘贴 Amazon / TEMU / Shopify 商品链接" oninput="updateParseButtonState()"></div>'+
             '</div>'+
-            '<div class="voice-transcript" id="voiceTranscript">'+
-              '<div class="voice-transcript-label">识别结果</div>'+
-              '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
+            '<div class="input-card input-section">'+
+              '<div class="input-card-title"><span class="input-card-icon">🎤</span>语音输入</div>'+
+              '<div class="voice-panel" id="voicePanel">'+
+                '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
+              '</div>'+
+              '<div class="voice-transcript" id="voiceTranscript">'+
+                '<div class="voice-transcript-label">识别结果</div>'+
+                '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
+              '</div>'+
+            '</div>'+
+            '<div class="input-card">'+
+              '<div class="input-card-title"><span class="input-card-icon">📎</span>照片 / 文档</div>'+
+              '<div class="upload-card-actions">'+
+                '<button class="upload-card-btn primary" type="button" onclick="doUpload(\'photo\')">📷 相机拍摄</button>'+
+                '<button class="upload-card-btn" type="button" onclick="doUpload()">📄 上传资料（可选）</button>'+
+              '</div>'+
+              '<div class="uploaded-files" id="uploadedFiles"></div>'+
             '</div>'+
           '</div>'+
-          '<div class="upload-secondary">'+
-            '<button class="upload-secondary-btn" type="button" onclick="doUpload()">📄 上传资料（可选）</button>'+
-          '</div>'+
-          '<div class="uploaded-files" id="uploadedFiles"></div>'+
           '<button class="parse-btn" id="parseBtn" type="button" onclick="doParse()" disabled>开始解析</button>'+
           '<button class="manual-fill" onclick="startManualFill()">暂无资料，直接填写</button>'+
         '</div>';
@@ -1349,12 +1378,18 @@
     let hasUploadedFiles = false;
     let uploadedFileList = [];
 
-    function doUpload(){
-      uploadedFileList = [
-        { icon:'🧸', name:'产品照片.jpg' },
-        { icon:'📄', name:'产品规格书.pdf' },
-        { icon:'🧾', name:'采购单.pdf' }
-      ];
+    function doUpload(source){
+      if(source === 'photo'){
+        uploadedFileList = [
+          { icon:'📷', name:'产品照片.jpg' }
+        ];
+      } else {
+        uploadedFileList = [
+          { icon:'🧸', name:'产品照片.jpg' },
+          { icon:'📄', name:'产品规格书.pdf' },
+          { icon:'🧾', name:'采购单.pdf' }
+        ];
+      }
       renderUploadedFiles();
     }
 

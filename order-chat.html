@@ -134,14 +134,30 @@
   .upload-option:active { background: #edf1ff; }
   .upload-option .up-ic { color: var(--pool-500); display: flex; align-items: center; }
   .upload-option .up-title { font-size: 13px; color: var(--carbon); font-weight: 600; }
-  .input-section + .input-section { margin-top: 14px; }
-  .input-section-label {
-    font-size: 13px; font-weight: 600; color: var(--carbon); margin-bottom: 8px;
-  }
-  .input-section-label.primary { font-size: 14px; color: var(--pool-500); }
-  .voice-panel {
+  .input-guide {
+    margin-bottom: 12px; padding: 11px 12px;
     border: 1px solid #dce4fb; border-radius: 12px;
-    background: #f7f9ff; padding: 10px 12px;
+    background: #f7f9ff;
+  }
+  .input-guide .voice-tips-title {
+    font-size: 12px; font-weight: 700; color: #24407a; margin-bottom: 6px;
+  }
+  .input-card-stack { display: flex; flex-direction: column; gap: 10px; }
+  .input-card {
+    border: 1px solid #e2e7f3; border-radius: 13px;
+    background: #fff; padding: 11px 12px;
+    box-shadow: 0 1px 4px rgba(25,25,25,.03);
+  }
+  .input-card-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 700; color: var(--carbon);
+    margin-bottom: 8px;
+  }
+  .input-card-title.primary { color: var(--pool-500); }
+  .input-card-icon { color: currentColor; display: inline-flex; align-items: center; }
+  .voice-panel {
+    border: none; border-radius: 0;
+    background: transparent; padding: 0;
   }
   .voice-tips-title {
     font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 6px;
@@ -152,7 +168,7 @@
   }
   .voice-tips-list li { margin-bottom: 2px; }
   .voice-btn {
-    width: 100%; margin-top: 10px; height: 42px;
+    width: 100%; height: 42px;
     border: 1.5px solid var(--pool-500); border-radius: 12px;
     background: #fff; color: var(--pool-500);
     font-size: 13px; font-weight: 600; cursor: pointer;
@@ -178,21 +194,25 @@
     font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 4px;
   }
   .panel.voice-locked .link-row input,
-  .panel.voice-locked .upload-secondary-btn,
+  .panel.voice-locked .upload-card-btn,
   .panel.voice-locked .uploaded-file-delete,
   .panel.voice-locked .parse-btn,
   .panel.voice-locked .manual-fill {
     pointer-events: none; opacity: .45;
   }
-  .upload-secondary {
-    margin-top: 10px; display: flex; align-items: center; justify-content: center;
+  .upload-card-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
-  .upload-secondary-btn {
-    border: none; background: transparent; color: var(--seal);
-    font-size: 12px; cursor: pointer; padding: 4px 0;
-    display: inline-flex; align-items: center; gap: 4px;
+  .upload-card-btn {
+    height: 36px; border: 1px solid #dce4fb; border-radius: 10px;
+    background: #f7f9ff; color: var(--seal);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   }
-  .upload-secondary-btn .up-ic { color: var(--seal); display: flex; align-items: center; }
+  .upload-card-btn.primary {
+    color: var(--pool-500); background: #fff; border-color: #bfcaf5;
+  }
+  .upload-card-btn .up-ic { color: currentColor; display: flex; align-items: center; }
   .uploaded-files {
     display: none; flex-direction: row; flex-wrap: wrap; gap: 4px;
     margin-top: 6px;
@@ -1832,29 +1852,40 @@
       const card =
         '<div class="panel panel-pad">'+
           '<div class="panel-title">'+t('orderChat.uploadTitle')+'</div>'+
-          '<div class="input-section">'+
-            '<div class="input-section-label primary">'+t('orderChat.linkSectionTitle')+'</div>'+
-            '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"></div>'+
+          '<div class="input-guide">'+
+            '<div class="voice-tips-title">'+t('orderChat.voiceTipsTitle')+'</div>'+
+            '<ul class="voice-tips-list">'+t('orderChat.voiceTipsList')+'</ul>'+
           '</div>'+
-          '<div class="input-section">'+
-            '<div class="input-section-label">'+t('orderChat.voiceSectionTitle')+'</div>'+
-            '<div class="voice-panel" id="voicePanel">'+
-              '<div class="voice-tips-title">'+t('orderChat.voiceTipsTitle')+'</div>'+
-              '<ul class="voice-tips-list">'+t('orderChat.voiceTipsList')+'</ul>'+
-              '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
+          '<div class="input-card-stack">'+
+            '<div class="input-card input-section">'+
+              '<div class="input-card-title primary"><span class="input-card-icon">🔗</span>'+t('orderChat.linkSectionTitle')+'</div>'+
+              '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"></div>'+
             '</div>'+
-            '<div class="voice-transcript" id="voiceTranscript">'+
-              '<div class="voice-transcript-label">'+t('orderChat.voiceTranscriptLabel')+'</div>'+
-              '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
+            '<div class="input-card input-section">'+
+              '<div class="input-card-title"><span class="input-card-icon">🎤</span>'+t('orderChat.voiceSectionTitle')+'</div>'+
+              '<div class="voice-panel" id="voicePanel">'+
+                '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
+              '</div>'+
+              '<div class="voice-transcript" id="voiceTranscript">'+
+                '<div class="voice-transcript-label">'+t('orderChat.voiceTranscriptLabel')+'</div>'+
+                '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
+              '</div>'+
+            '</div>'+
+            '<div class="input-card">'+
+              '<div class="input-card-title"><span class="input-card-icon">📎</span>'+t('orderChat.uploadMaterialsTitle')+'</div>'+
+              '<div class="upload-card-actions">'+
+                '<button class="upload-card-btn primary" type="button" onclick="doUpload(\'photo\')">'+
+                  '<span class="up-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>'+
+                  t('orderChat.cameraCapture')+
+                '</button>'+
+                '<button class="upload-card-btn" type="button" onclick="openUploadSourcePicker()">'+
+                  '<span class="up-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>'+
+                  t('orderChat.uploadDocOptional')+
+                '</button>'+
+              '</div>'+
+              '<div class="uploaded-files" id="uploadedFiles"></div>'+
             '</div>'+
           '</div>'+
-          '<div class="upload-secondary">'+
-            '<button class="upload-secondary-btn" type="button" onclick="openUploadSourcePicker()">'+
-              '<span class="up-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>'+
-              t('orderChat.uploadDocOptional')+
-            '</button>'+
-          '</div>'+
-          '<div class="uploaded-files" id="uploadedFiles"></div>'+
           '<button class="parse-btn" id="parseBtn" type="button" onclick="doParse()" disabled>'+t('orderChat.parseBtn')+'</button>'+
           '<button class="manual-fill" onclick="startManualFill()">'+t('orderChat.noDataFill')+'</button>'+
         '</div>';
@@ -1976,11 +2007,17 @@
     let uploadedFileList = [];
 
     function doUpload(source){
-      uploadedFileList = [
-        { icon:'🧸', name: t('orderChat.demoFilePhoto') },
-        { icon:'📄', name: t('orderChat.demoFileSpec') },
-        { icon:'🧾', name: t('orderChat.demoFilePo') }
-      ];
+      if(source === 'photo'){
+        uploadedFileList = [
+          { icon:'📷', name: t('orderChat.demoFilePhoto') }
+        ];
+      } else {
+        uploadedFileList = [
+          { icon:'🧸', name: t('orderChat.demoFilePhoto') },
+          { icon:'📄', name: t('orderChat.demoFileSpec') },
+          { icon:'🧾', name: t('orderChat.demoFilePo') }
+        ];
+      }
       renderUploadedFiles();
     }
 

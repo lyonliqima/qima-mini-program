@@ -351,6 +351,7 @@ window.I18N_EN = {
   'orderChat.cameraCapture': 'Take photo',
   'orderChat.uploadDoc': 'Upload file',
   'orderChat.uploadDocOptional': 'Upload documents (optional)',
+  'orderChat.uploadMaterialsTitle': 'Photos / documents',
   'orderChat.linkSectionTitle': 'Paste product link',
   'orderChat.voiceSectionTitle': 'Voice input',
   'orderChat.voiceTipsTitle': 'Try to include:',
