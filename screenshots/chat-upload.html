@@ -166,16 +166,52 @@
     display: flex; align-items: center; justify-content: center; gap: 6px;
     padding: 0;
   }
-  .voice-btn.recording {
-    background: var(--pool-500); color: #fff;
-    animation: voice-pulse 1.2s infinite;
-  }
   .voice-btn.processing {
     background: #edf1ff; color: var(--pool-500);
     border-color: #c5cee8; cursor: default;
     animation: none;
   }
-  @keyframes voice-pulse { 0%,100%{ opacity:1; } 50%{ opacity:.82; } }
+  .voice-recording-bar {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; height: 40px; padding: 0 10px 0 12px;
+    border: 1px solid #e2e7f3; border-radius: 999px;
+    background: #fff; box-shadow: 0 1px 4px rgba(25,25,25,.04);
+    box-sizing: border-box;
+  }
+  .voice-waveform {
+    flex: 1; display: flex; align-items: center; gap: 2px;
+    height: 24px; overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000);
+  }
+  .voice-waveform span {
+    width: 2px; min-width: 2px; border-radius: 2px;
+    background: #9aa0ad;
+    animation: voice-wave 0.9s ease-in-out infinite;
+  }
+  .voice-waveform span:nth-child(3n) { animation-delay: .12s; }
+  .voice-waveform span:nth-child(3n+1) { animation-delay: .28s; }
+  .voice-waveform span:nth-child(3n+2) { animation-delay: .44s; }
+  @keyframes voice-wave {
+    0%, 100% { height: 6px; opacity: .45; }
+    50% { height: 18px; opacity: 1; }
+  }
+  .voice-recording-time {
+    flex-shrink: 0; min-width: 34px;
+    font-size: 13px; font-weight: 600; color: var(--carbon);
+    font-variant-numeric: tabular-nums;
+  }
+  .voice-recording-cancel,
+  .voice-recording-confirm {
+    width: 28px; height: 28px; padding: 0; flex-shrink: 0;
+    border: none; border-radius: 50%; background: transparent;
+    color: #5f6673; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 18px; line-height: 1;
+  }
+  .voice-recording-confirm { font-size: 16px; font-weight: 700; }
+  .voice-recording-cancel:active,
+  .voice-recording-confirm:active { background: #f4f6fa; }
   .voice-transcript {
     display: none; margin-top: 8px;
   }
@@ -1295,6 +1331,8 @@
     let voiceRecording = false;
     let voiceProcessing = false;
     let voiceTimer = null;
+    let voiceRecordingTick = null;
+    let voiceRecordingSeconds = 0;
     let hasVoiceInput = false;
     let voiceTranscript = '';
 
@@ -1302,18 +1340,62 @@
       return '🎤 点击开始语音';
     }
 
-    function voiceBtnRecordingHtml(){
-      return '🎤 录音中，点击结束';
-    }
-
     function voiceBtnProcessingHtml(){
       return '🎤 正在解析语音…';
     }
 
+    function voiceWaveformHtml(){
+      return '<div class="voice-waveform" aria-hidden="true">'+
+        Array.from({length: 28}, (_, i) => '<span style="height:'+(8 + (i % 5) * 3)+'px"></span>').join('')+
+      '</div>';
+    }
+
+    function formatVoiceRecordingTime(seconds){
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m + ':' + String(s).padStart(2, '0');
+    }
+
+    function renderVoiceIdleButton(panel){
+      const voicePanel = panel ? panel.querySelector('#voicePanel') : document.getElementById('voicePanel');
+      if(!voicePanel) return;
+      voicePanel.innerHTML = '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>';
+    }
+
+    function renderVoiceProcessingButton(panel){
+      const voicePanel = panel ? panel.querySelector('#voicePanel') : document.getElementById('voicePanel');
+      if(!voicePanel) return;
+      voicePanel.innerHTML = '<button class="voice-btn processing" id="voiceBtn" type="button" disabled>'+voiceBtnProcessingHtml()+'</button>';
+    }
+
+    function renderVoiceRecordingBar(panel){
+      const voicePanel = panel ? panel.querySelector('#voicePanel') : document.getElementById('voicePanel');
+      if(!voicePanel) return;
+      voicePanel.innerHTML =
+        '<div class="voice-recording-bar" id="voiceRecordingBar">'+
+          voiceWaveformHtml()+
+          '<div class="voice-recording-time" id="voiceRecordingTime">'+formatVoiceRecordingTime(voiceRecordingSeconds)+'</div>'+
+          '<button class="voice-recording-cancel" type="button" aria-label="取消录音" onclick="cancelVoiceRecording(this)">×</button>'+
+          '<button class="voice-recording-confirm" type="button" aria-label="完成录音" onclick="confirmVoiceRecording(this)">✓</button>'+
+        '</div>';
+    }
+
+    function updateVoiceRecordingTime(){
+      const timeNode = document.getElementById('voiceRecordingTime');
+      if(timeNode) timeNode.textContent = formatVoiceRecordingTime(voiceRecordingSeconds);
+    }
+
+    function clearVoiceRecordingTick(){
+      if(voiceRecordingTick){
+        clearInterval(voiceRecordingTick);
+        voiceRecordingTick = null;
+      }
+    }
+
     function getUploadPanel(btn){
       if(btn) return btn.closest('.panel.panel-pad');
-      const voiceBtn = document.getElementById('voiceBtn');
-      return voiceBtn ? voiceBtn.closest('.panel.panel-pad') : document.querySelector('#chat .panel.panel-pad');
+      const voicePanel = document.getElementById('voicePanel');
+      return voicePanel ? voicePanel.closest('.panel.panel-pad') : document.querySelector('#chat .panel.panel-pad');
     }
 
     function setVoiceLock(locked, btn){
@@ -1342,40 +1424,50 @@
     }
 
     function toggleVoiceInput(btn){
-      if(voiceProcessing) return;
-      if(voiceRecording){
-        stopVoiceInput(btn, true);
-        return;
-      }
+      if(voiceProcessing || voiceRecording) return;
+      const panel = getUploadPanel(btn);
       voiceRecording = true;
+      voiceRecordingSeconds = 0;
       setVoiceLock(true, btn);
-      btn.classList.remove('processing');
-      btn.classList.add('recording');
-      btn.innerHTML = voiceBtnRecordingHtml();
+      renderVoiceRecordingBar(panel);
+      clearVoiceRecordingTick();
+      voiceRecordingTick = setInterval(()=>{
+        voiceRecordingSeconds += 1;
+        updateVoiceRecordingTime();
+      }, 1000);
+    }
+
+    function cancelVoiceRecording(btn){
+      if(!voiceRecording) return;
+      clearVoiceRecordingTick();
+      voiceRecording = false;
+      voiceRecordingSeconds = 0;
+      const panel = getUploadPanel(btn);
+      renderVoiceIdleButton(panel);
+      setVoiceLock(false, btn);
+    }
+
+    function confirmVoiceRecording(btn){
+      if(!voiceRecording) return;
+      clearVoiceRecordingTick();
+      voiceRecording = false;
+      stopVoiceInput(btn, true);
     }
 
     function stopVoiceInput(btn, completed){
       if(voiceTimer){ clearTimeout(voiceTimer); voiceTimer = null; }
-      voiceRecording = false;
       if(!completed){
+        const panel = getUploadPanel(btn);
+        renderVoiceIdleButton(panel);
         setVoiceLock(false, btn);
-        if(btn){
-          btn.classList.remove('recording', 'processing');
-          btn.innerHTML = voiceBtnIdleHtml();
-        }
         return;
       }
       voiceProcessing = true;
+      const panel = getUploadPanel(btn);
       setVoiceLock(true, btn);
-      if(btn){
-        btn.classList.remove('recording');
-        btn.classList.add('processing');
-        btn.innerHTML = voiceBtnProcessingHtml();
-        btn.disabled = true;
-      }
+      renderVoiceProcessingButton(panel);
       voiceTimer = setTimeout(()=>{
         voiceProcessing = false;
-        const panel = getUploadPanel(btn);
         const box = panel ? panel.querySelector('#voiceTranscript') : document.getElementById('voiceTranscript');
         const text = panel ? panel.querySelector('#voiceTranscriptText') : document.getElementById('voiceTranscriptText');
         const existing = text ? text.value.trim() : (voiceTranscript || '').trim();
@@ -1388,11 +1480,7 @@
           text.setSelectionRange(text.value.length, text.value.length);
         }
         if(box) box.classList.add('show');
-        if(btn){
-          btn.disabled = false;
-          btn.classList.remove('processing');
-          btn.innerHTML = voiceBtnIdleHtml();
-        }
+        renderVoiceIdleButton(panel);
         setVoiceLock(false, btn);
         updateParseButtonState();
       }, 1400);

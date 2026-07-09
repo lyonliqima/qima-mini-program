@@ -359,6 +359,8 @@ window.I18N_EN = {
   'orderChat.voiceStart': 'Tap to start voice',
   'orderChat.voiceRecording': 'Recording — tap to finish',
   'orderChat.voiceProcessing': 'Transcribing voice…',
+  'orderChat.voiceCancel': 'Cancel recording',
+  'orderChat.voiceConfirm': 'Finish recording',
   'orderChat.voiceTranscriptLabel': 'Transcript',
   'orderChat.voiceTranscriptPlaceholder': 'Edit the transcript here. Continue recording to append more text.',
   'orderChat.voiceDemoTranscript': 'I need testing for a smart robot toy, TEMU seller-pay program, made in China, sold in the US and EU…',

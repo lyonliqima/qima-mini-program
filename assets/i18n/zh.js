@@ -359,6 +359,8 @@ window.I18N_ZH = {
   'orderChat.voiceStart': '点击开始语音',
   'orderChat.voiceRecording': '录音中，点击结束',
   'orderChat.voiceProcessing': '正在解析语音…',
+  'orderChat.voiceCancel': '取消录音',
+  'orderChat.voiceConfirm': '完成录音',
   'orderChat.voiceTranscriptLabel': '识别结果',
   'orderChat.voiceTranscriptPlaceholder': '可手动修改识别文字，继续录音会追加到下方',
   'orderChat.voiceDemoTranscript': '我要测一款智能机器人玩具，TEMU 商家付款项目，原产国中国，销往美国和欧盟…',
