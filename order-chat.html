@@ -1860,10 +1860,6 @@
           '</div>'+
           '<div class="input-card-stack">'+
             '<div class="input-card input-section">'+
-              '<div class="input-card-title primary"><span class="input-card-icon">🔗</span>'+t('orderChat.linkSectionTitle')+'</div>'+
-              '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"></div>'+
-            '</div>'+
-            '<div class="input-card input-section">'+
               '<div class="input-card-title"><span class="input-card-icon">🎤</span>'+t('orderChat.voiceSectionTitle')+'</div>'+
               '<div class="voice-panel" id="voicePanel">'+
                 '<button class="voice-btn" id="voiceBtn" type="button" onclick="toggleVoiceInput(this)">'+voiceBtnIdleHtml()+'</button>'+
@@ -1872,6 +1868,10 @@
                 '<div class="voice-transcript-label">'+t('orderChat.voiceTranscriptLabel')+'</div>'+
                 '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
               '</div>'+
+            '</div>'+
+            '<div class="input-card input-section">'+
+              '<div class="input-card-title primary"><span class="input-card-icon">🔗</span>'+t('orderChat.linkSectionTitle')+'</div>'+
+              '<div class="link-row"><input id="linkIn" placeholder="'+t('orderChat.linkPlaceholder')+'" oninput="updateParseButtonState()"></div>'+
             '</div>'+
             '<div class="input-card">'+
               '<div class="input-card-title"><span class="input-card-icon">📎</span>'+t('orderChat.uploadMaterialsTitle')+'</div>'+
