@@ -187,15 +187,25 @@
   }
   @keyframes voice-pulse { 0%,100%{ opacity:1; } 50%{ opacity:.82; } }
   .voice-transcript {
-    display: none; margin-top: 8px; padding: 10px 12px;
-    border: 1px solid #e3e9fb; border-radius: 10px;
-    background: #fff; font-size: 12px; line-height: 18px; color: var(--carbon);
+    display: none; margin-top: 8px;
   }
   .voice-transcript.show { display: block; }
   .voice-transcript-label {
     font-size: 11px; font-weight: 600; color: #24407a; margin-bottom: 4px;
   }
+  .voice-transcript-text {
+    width: 100%; min-height: 78px; resize: vertical;
+    border: 1px solid #e3e9fb; border-radius: 10px;
+    background: #fff; padding: 10px 12px;
+    font-size: 12px; line-height: 18px; color: var(--carbon);
+    outline: none; box-sizing: border-box;
+  }
+  .voice-transcript-text:focus {
+    border-color: var(--pool-500);
+    box-shadow: 0 0 0 3px rgba(65,105,225,.1);
+  }
   .panel.voice-locked .link-row input,
+  .panel.voice-locked .voice-transcript-text,
   .panel.voice-locked .upload-card-btn,
   .panel.voice-locked .uploaded-file-delete,
   .panel.voice-locked .parse-btn,
@@ -1864,7 +1874,7 @@
               '</div>'+
               '<div class="voice-transcript" id="voiceTranscript">'+
                 '<div class="voice-transcript-label">'+t('orderChat.voiceTranscriptLabel')+'</div>'+
-                '<div class="voice-transcript-text" id="voiceTranscriptText"></div>'+
+                '<textarea class="voice-transcript-text" id="voiceTranscriptText" placeholder="'+t('orderChat.voiceTranscriptPlaceholder')+'" oninput="onVoiceTranscriptInput()"></textarea>'+
               '</div>'+
             '</div>'+
             '<div class="input-card input-section">'+
@@ -1924,10 +1934,25 @@
       const panel = getUploadPanel(btn);
       if(panel) panel.classList.toggle('voice-locked', !!locked);
       const linkIn = panel ? panel.querySelector('#linkIn') : document.getElementById('linkIn');
+      const transcript = panel ? panel.querySelector('#voiceTranscriptText') : document.getElementById('voiceTranscriptText');
       const parseBtn = panel ? panel.querySelector('#parseBtn') : document.getElementById('parseBtn');
       if(linkIn) linkIn.disabled = !!locked;
+      if(transcript) transcript.disabled = !!locked;
       if(parseBtn && locked) parseBtn.disabled = true;
       if(!locked) updateParseButtonState();
+    }
+
+    function getVoiceTranscriptValue(panel){
+      const text = panel
+        ? panel.querySelector('#voiceTranscriptText')
+        : document.getElementById('voiceTranscriptText');
+      return text ? text.value.trim() : (voiceTranscript || '').trim();
+    }
+
+    function onVoiceTranscriptInput(){
+      voiceTranscript = getVoiceTranscriptValue();
+      hasVoiceInput = !!voiceTranscript;
+      updateParseButtonState();
     }
 
     function toggleVoiceInput(btn){
@@ -1964,12 +1989,18 @@
       }
       voiceTimer = setTimeout(()=>{
         voiceProcessing = false;
-        voiceTranscript = t('orderChat.voiceDemoTranscript');
-        hasVoiceInput = true;
         const panel = getUploadPanel(btn);
         const box = panel ? panel.querySelector('#voiceTranscript') : document.getElementById('voiceTranscript');
         const text = panel ? panel.querySelector('#voiceTranscriptText') : document.getElementById('voiceTranscriptText');
-        if(text) text.textContent = voiceTranscript;
+        const existing = text ? text.value.trim() : (voiceTranscript || '').trim();
+        const chunk = t('orderChat.voiceDemoTranscript');
+        voiceTranscript = existing ? (existing + '\n' + chunk) : chunk;
+        hasVoiceInput = !!voiceTranscript;
+        if(text){
+          text.value = voiceTranscript;
+          text.focus();
+          text.setSelectionRange(text.value.length, text.value.length);
+        }
         if(box) box.classList.add('show');
         if(btn){
           btn.disabled = false;
@@ -2048,9 +2079,11 @@
 
     function doParse(){
       const v = ((document.getElementById('linkIn')||{}).value || '').trim();
+      voiceTranscript = getVoiceTranscriptValue();
+      hasVoiceInput = !!voiceTranscript;
       if(!hasUploadedFiles && !v && !hasVoiceInput) return;
       const parts = [];
-      if(hasVoiceInput) parts.push('🎤 '+escapeHtml(voiceTranscript || t('orderChat.voiceDemoTranscript')));
+      if(hasVoiceInput) parts.push('🎤 '+escapeHtml(voiceTranscript));
       if(hasUploadedFiles) parts.push(uploadedFilesSummary());
       if(v) parts.push('🔗 '+t('orderChat.productLink')+'：'+escapeHtml(v.length>28 ? v.slice(0,28)+'…' : v));
       userMsg(parts.join('<div style="margin-top:6px"></div>'));
@@ -2064,6 +2097,8 @@
 
     function updateParseButtonState(){
       const linkValue = ((document.getElementById('linkIn') || {}).value || '').trim();
+      voiceTranscript = getVoiceTranscriptValue();
+      hasVoiceInput = !!voiceTranscript;
       const parseBtn = document.getElementById('parseBtn');
       if(parseBtn) parseBtn.disabled = !hasUploadedFiles && !linkValue && !hasVoiceInput;
     }

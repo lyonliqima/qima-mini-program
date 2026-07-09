@@ -360,6 +360,7 @@ window.I18N_EN = {
   'orderChat.voiceRecording': 'Recording — tap to finish',
   'orderChat.voiceProcessing': 'Transcribing voice…',
   'orderChat.voiceTranscriptLabel': 'Transcript',
+  'orderChat.voiceTranscriptPlaceholder': 'Edit the transcript here. Continue recording to append more text.',
   'orderChat.voiceDemoTranscript': 'I need testing for a smart robot toy, TEMU seller-pay program, made in China, sold in the US and EU…',
   'orderChat.fileTypes': 'JPG / PNG / PDF / Excel / Word — max 10 MB per file',
   'orderChat.uploadHintTitle': 'What you can upload or paste',

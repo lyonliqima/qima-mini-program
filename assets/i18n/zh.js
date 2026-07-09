@@ -360,6 +360,7 @@ window.I18N_ZH = {
   'orderChat.voiceRecording': '录音中，点击结束',
   'orderChat.voiceProcessing': '正在解析语音…',
   'orderChat.voiceTranscriptLabel': '识别结果',
+  'orderChat.voiceTranscriptPlaceholder': '可手动修改识别文字，继续录音会追加到下方',
   'orderChat.voiceDemoTranscript': '我要测一款智能机器人玩具，TEMU 商家付款项目，原产国中国，销往美国和欧盟…',
   'orderChat.fileTypes': '支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB',
   'orderChat.uploadHintTitle': '可上传 / 粘贴的信息',
