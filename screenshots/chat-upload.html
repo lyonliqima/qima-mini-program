@@ -1398,8 +1398,15 @@
       return voicePanel ? voicePanel.closest('.panel.panel-pad') : document.querySelector('#chat .panel.panel-pad');
     }
 
-    function setVoiceLock(locked, btn){
-      const panel = getUploadPanel(btn);
+    function setVoiceLock(locked, btnOrPanel){
+      let panel = btnOrPanel;
+      if(!panel || !panel.classList || !panel.classList.contains('panel-pad')){
+        panel = getUploadPanel(btnOrPanel);
+      }
+      if(!panel){
+        const voicePanel = document.getElementById('voicePanel');
+        panel = voicePanel ? voicePanel.closest('.panel.panel-pad') : null;
+      }
       if(panel) panel.classList.toggle('voice-locked', !!locked);
       const linkIn = panel ? panel.querySelector('#linkIn') : document.getElementById('linkIn');
       const transcript = panel ? panel.querySelector('#voiceTranscriptText') : document.getElementById('voiceTranscriptText');
@@ -1428,7 +1435,7 @@
       const panel = getUploadPanel(btn);
       voiceRecording = true;
       voiceRecordingSeconds = 0;
-      setVoiceLock(true, btn);
+      setVoiceLock(true, panel);
       renderVoiceRecordingBar(panel);
       clearVoiceRecordingTick();
       voiceRecordingTick = setInterval(()=>{
@@ -1439,32 +1446,32 @@
 
     function cancelVoiceRecording(btn){
       if(!voiceRecording) return;
+      const panel = getUploadPanel(btn);
       clearVoiceRecordingTick();
       voiceRecording = false;
       voiceRecordingSeconds = 0;
-      const panel = getUploadPanel(btn);
+      setVoiceLock(false, panel);
       renderVoiceIdleButton(panel);
-      setVoiceLock(false, btn);
     }
 
     function confirmVoiceRecording(btn){
       if(!voiceRecording) return;
+      const panel = getUploadPanel(btn);
       clearVoiceRecordingTick();
       voiceRecording = false;
-      setVoiceLock(false, btn);
-      stopVoiceInput(btn, true);
+      setVoiceLock(false, panel);
+      stopVoiceInput(btn, true, panel);
     }
 
-    function stopVoiceInput(btn, completed){
+    function stopVoiceInput(btn, completed, panelRef){
       if(voiceTimer){ clearTimeout(voiceTimer); voiceTimer = null; }
+      const panel = panelRef || getUploadPanel(btn);
       if(!completed){
-        const panel = getUploadPanel(btn);
+        setVoiceLock(false, panel);
         renderVoiceIdleButton(panel);
-        setVoiceLock(false, btn);
         return;
       }
       voiceProcessing = true;
-      const panel = getUploadPanel(btn);
       renderVoiceProcessingButton(panel);
       voiceTimer = setTimeout(()=>{
         voiceProcessing = false;
