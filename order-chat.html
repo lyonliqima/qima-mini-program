@@ -2065,6 +2065,7 @@
       if(!voiceRecording) return;
       clearVoiceRecordingTick();
       voiceRecording = false;
+      setVoiceLock(false, btn);
       stopVoiceInput(btn, true);
     }
 
@@ -2078,7 +2079,6 @@
       }
       voiceProcessing = true;
       const panel = getUploadPanel(btn);
-      setVoiceLock(true, btn);
       renderVoiceProcessingButton(panel);
       voiceTimer = setTimeout(()=>{
         voiceProcessing = false;
@@ -2095,7 +2095,6 @@
         }
         if(box) box.classList.add('show');
         renderVoiceIdleButton(panel);
-        setVoiceLock(false, btn);
         updateParseButtonState();
       }, 1400);
     }
