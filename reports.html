@@ -370,7 +370,7 @@
         return;
       }
       grid.innerHTML = list.map(r =>
-        '<a class="rcard '+r.color+'" href="#">'+
+        '<a class="rcard '+r.color+'" href="report-preview.html?sku='+encodeURIComponent(r.sku)+'">'+
           '<span class="folder-back"></span>'+
           '<span class="papers"><i></i><i></i><i></i></span>'+
           '<div class="pocket">'+

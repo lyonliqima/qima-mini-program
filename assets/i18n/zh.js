@@ -567,5 +567,14 @@ window.I18N_ZH = {
   'reports.product.electronics': '电子产品检测',
   'reports.product.hardline': '硬线检测',
   'reports.product.food': '食品接触检测',
-  'reports.emptyHint': '暂无报告'
+  'reports.emptyHint': '暂无报告',
+
+  /* ── Report PDF preview ── */
+  'title.reportPreview': 'QIMA 小程序 - 报告预览',
+  'reportPreview.title': '报告预览',
+  'reportPreview.reportNo': '报告编号',
+  'reportPreview.download': '下载报告',
+  'reportPreview.share': '分享',
+  'reportPreview.pageHint': '第 1 页 · 共 12 页',
+  'reportPreview.downloaded': '报告已开始下载'
 };

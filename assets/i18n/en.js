@@ -567,5 +567,14 @@ window.I18N_EN = {
   'reports.product.electronics': 'Electronics testing',
   'reports.product.hardline': 'Hardline testing',
   'reports.product.food': 'Food-contact testing',
-  'reports.emptyHint': 'No reports yet'
+  'reports.emptyHint': 'No reports yet',
+
+  /* ── Report PDF preview ── */
+  'title.reportPreview': 'QIMA Mini Program - Report Preview',
+  'reportPreview.title': 'Report preview',
+  'reportPreview.reportNo': 'Report No.',
+  'reportPreview.download': 'Download report',
+  'reportPreview.share': 'Share',
+  'reportPreview.pageHint': 'Page 1 of 12',
+  'reportPreview.downloaded': 'Download started'
 };
