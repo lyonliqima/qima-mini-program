@@ -569,6 +569,7 @@ window.I18N_EN = {
   'reports.statUnit': 'Reports',
   'reports.searchPlaceholder': 'Search reports / SKU',
   'reports.filterAll': 'All',
+  'reports.filterLabTesting': 'Lab testing',
   'reports.status.pass': 'PASS',
   'reports.status.fail': 'FAIL',
   'reports.status.pending': 'Pending',

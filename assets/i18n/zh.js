@@ -569,6 +569,7 @@ window.I18N_ZH = {
   'reports.statUnit': 'Reports',
   'reports.searchPlaceholder': '搜索报告 / SKU',
   'reports.filterAll': '全部',
+  'reports.filterLabTesting': '实验室检测',
   'reports.status.pass': 'PASS',
   'reports.status.fail': 'FAIL',
   'reports.status.pending': '待定',
