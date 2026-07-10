@@ -139,6 +139,16 @@
     background: #f7f9ff; border: 1px solid #e3e9fb; border-radius: 10px;
     padding: 12px;
   }
+  .lab-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .lab-meta-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; line-height: 20px;
+  }
+  .lab-meta-label {
+    flex-shrink: 0; min-width: 52px;
+    color: var(--seal); font-size: 12px;
+  }
+  .lab-meta-value { color: var(--carbon); font-weight: 600; word-break: break-all; }
   .lab-address-label { font-size: 11px; color: var(--seal); margin-bottom: 6px; }
   .lab-address {
     font-size: 13px; line-height: 20px; color: var(--carbon); word-break: break-all;
@@ -231,6 +241,16 @@
           <div class="lab-section-title" data-i18n="lab.sendToLab">寄送实验室</div>
           <div class="lab-tabs" id="labTabs"></div>
           <div class="lab-address-box">
+            <div class="lab-meta">
+              <div class="lab-meta-row">
+                <span class="lab-meta-label" data-i18n="lab.recipientLabel">收件人</span>
+                <span class="lab-meta-value" id="labRecipientText">样品组</span>
+              </div>
+              <div class="lab-meta-row">
+                <span class="lab-meta-label" data-i18n="lab.phoneLabel">电话</span>
+                <span class="lab-meta-value" id="labPhoneText">+86 571 8999 7158</span>
+              </div>
+            </div>
             <div class="lab-address-label" data-i18n="lab.addressLabel">实验室地址</div>
             <div class="lab-address" id="labAddressText"></div>
             <button class="copy-btn" type="button" onclick="copyLabAddress()" data-i18n="common.copyAddress">复制地址</button>
@@ -279,10 +299,14 @@
     }
 
     function updateLabAddress() {
-      const el = document.getElementById('labAddressText');
-      if (!el || !window.I18n) return;
+      if (!window.I18n) return;
       const lab = I18n.getTestingLabs().find(function (item) { return item.key === activeLab; });
-      el.textContent = lab ? lab.address : '';
+      const addressEl = document.getElementById('labAddressText');
+      const recipientEl = document.getElementById('labRecipientText');
+      const phoneEl = document.getElementById('labPhoneText');
+      if (addressEl) addressEl.textContent = lab ? lab.address : '';
+      if (recipientEl) recipientEl.textContent = lab ? lab.recipient : '';
+      if (phoneEl) phoneEl.textContent = lab ? lab.phone : '';
     }
 
     function selectLab(key, btn) {
@@ -300,11 +324,21 @@
       showCopyToast.timer = setTimeout(function () { toast.classList.remove('show'); }, 1600);
     }
 
+    function getLabCopyText(lab) {
+      if (!lab) return '';
+      const recipientLabel = typeof t === 'function' ? t('lab.recipientLabel') : '收件人';
+      const phoneLabel = typeof t === 'function' ? t('lab.phoneLabel') : '电话';
+      const addressLabel = typeof t === 'function' ? t('lab.addressLabel') : '实验室地址';
+      return recipientLabel + '：' + lab.recipient + '\n' +
+        phoneLabel + '：' + lab.phone + '\n' +
+        addressLabel + '：' + lab.address;
+    }
+
     function copyLabAddress() {
       const lab = window.I18n
         ? I18n.getTestingLabs().find(function (item) { return item.key === activeLab; })
         : null;
-      const text = lab ? lab.address : '';
+      const text = getLabCopyText(lab);
       if (!text) return;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(function () {

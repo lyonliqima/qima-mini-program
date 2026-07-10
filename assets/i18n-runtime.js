@@ -92,9 +92,9 @@
   ];
 
   var LAB_KEYS = [
-    { key: 'hangzhou', labelKey: 'lab.hangzhou', addressKey: 'lab.hangzhouAddress' },
-    { key: 'shanghai', labelKey: 'lab.shanghai', addressKey: 'lab.shanghaiAddress' },
-    { key: 'dongguan', labelKey: 'lab.dongguan', addressKey: 'lab.dongguanAddress' }
+    { key: 'hangzhou', labelKey: 'lab.hangzhou', addressKey: 'lab.hangzhouAddress', phoneKey: 'lab.hangzhouPhone' },
+    { key: 'shanghai', labelKey: 'lab.shanghai', addressKey: 'lab.shanghaiAddress', phoneKey: 'lab.shanghaiPhone' },
+    { key: 'dongguan', labelKey: 'lab.dongguan', addressKey: 'lab.dongguanAddress', phoneKey: 'lab.dongguanPhone' }
   ];
 
   var DISTRIBUTION_PRESET_KEYS = [
@@ -372,7 +372,9 @@
       return {
         key: lab.key,
         label: t(lab.labelKey),
-        address: t(lab.addressKey)
+        address: t(lab.addressKey),
+        recipient: t('lab.recipient'),
+        phone: t(lab.phoneKey)
       };
     });
   }
