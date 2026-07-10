@@ -41,7 +41,7 @@ window.I18N_EN = {
   'common.pendingSelect': 'Pending selection',
   'common.notApplicable': 'Not applicable',
   'common.none': 'None',
-  'common.na': 'N/A',
+  'common.na': 'Not applicable',
   'common.uploaded': 'Uploaded',
   'common.copyAddress': 'Copy address',
   'common.addressCopied': 'Address copied',

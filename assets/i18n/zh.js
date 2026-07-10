@@ -41,7 +41,7 @@ window.I18N_ZH = {
   'common.pendingSelect': '待选择',
   'common.notApplicable': '不适用',
   'common.none': 'None',
-  'common.na': 'N/A',
+  'common.na': '不适用',
   'common.uploaded': '已上传',
   'common.copyAddress': '复制地址',
   'common.addressCopied': '地址已复制',
