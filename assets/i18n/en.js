@@ -587,5 +587,7 @@ window.I18N_EN = {
   'reportPreview.download': 'Download report',
   'reportPreview.share': 'Share',
   'reportPreview.pageHint': 'Page 1 of 12',
+  'reportPreview.pageHint1': 'Page 1 of 12',
+  'reportPreview.pageHint2': 'Page 2 of 12',
   'reportPreview.downloaded': 'Download started'
 };

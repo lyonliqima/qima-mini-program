@@ -587,5 +587,7 @@ window.I18N_ZH = {
   'reportPreview.download': '下载报告',
   'reportPreview.share': '分享',
   'reportPreview.pageHint': '第 1 页 · 共 12 页',
+  'reportPreview.pageHint1': '第 1 页 · 共 12 页',
+  'reportPreview.pageHint2': '第 2 页 · 共 12 页',
   'reportPreview.downloaded': '报告已开始下载'
 };

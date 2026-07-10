@@ -99,6 +99,7 @@
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(25,25,25,.06);
   }
+  .pdf-card + .pdf-card { margin-top: 12px; }
   .pdf-page {
     display: block;
     width: 100%;
@@ -191,8 +192,12 @@
 
     <div class="preview-scroll">
       <div class="pdf-card">
-        <img class="pdf-page" src="assets/report-pdf-preview.png" alt="Test report PDF preview" id="pdfImage" />
-        <div class="page-hint" data-i18n="reportPreview.pageHint">第 1 页 · 共 12 页</div>
+        <img class="pdf-page" src="assets/report-pdf-preview.png" alt="Test report page 1" />
+        <div class="page-hint" data-i18n="reportPreview.pageHint1">第 1 页 · 共 12 页</div>
+      </div>
+      <div class="pdf-card">
+        <img class="pdf-page" src="assets/report-pdf-preview-page2.png" alt="Test report page 2" />
+        <div class="page-hint" data-i18n="reportPreview.pageHint2">第 2 页 · 共 12 页</div>
       </div>
     </div>
 
