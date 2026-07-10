@@ -5,6 +5,7 @@ window.I18N_ZH = {
   'title.orderSuccess': 'QIMA 小程序 - 下单成功',
   'title.orderDetail': 'QIMA 小程序 - 订单详情',
   'title.orderChat': 'QIMA 小程序 - 下单助手',
+  'title.reports': 'QIMA 小程序 - 报告中心',
 
   /* ── Common / shared ── */
   'common.tab.home': '首页',
@@ -543,5 +544,22 @@ window.I18N_ZH = {
   'orderChat.demoFilePo': '采购单.pdf',
   'orderChat.deleteFile': '删除 {name}',
   'orderChat.fillNow': '现在填写',
-  'orderChat.fillLaterNo': '暂无，稍后补充'
+  'orderChat.fillLaterNo': '暂无，稍后补充',
+
+  /* ── Reports center ── */
+  'reports.title': '报告中心',
+  'reports.statLabel': '全部报告',
+  'reports.statUnit': 'Reports',
+  'reports.searchPlaceholder': '搜索报告 / SKU',
+  'reports.filterAll': '全部',
+  'reports.status.pass': 'PASS',
+  'reports.status.fail': 'FAIL',
+  'reports.status.pending': '待定',
+  'reports.product.psi': '装运前检测',
+  'reports.product.textile': '纺织品检测',
+  'reports.product.toys': '玩具安全检测',
+  'reports.product.electronics': '电子产品检测',
+  'reports.product.hardline': '硬线检测',
+  'reports.product.food': '食品接触检测',
+  'reports.emptyHint': '暂无报告'
 };

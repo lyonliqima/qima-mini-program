@@ -5,6 +5,7 @@ window.I18N_EN = {
   'title.orderSuccess': 'QIMA Mini Program - Order Placed',
   'title.orderDetail': 'QIMA Mini Program - Order Details',
   'title.orderChat': 'QIMA Mini Program - Order Assistant',
+  'title.reports': 'QIMA Mini Program - Reports',
 
   /* ── Common / shared ── */
   'common.tab.home': 'Home',
@@ -543,5 +544,22 @@ window.I18N_EN = {
   'orderChat.demoFilePo': 'purchase-order.pdf',
   'orderChat.deleteFile': 'Delete {name}',
   'orderChat.fillNow': 'Fill in now',
-  'orderChat.fillLaterNo': 'Not yet, add later'
+  'orderChat.fillLaterNo': 'Not yet, add later',
+
+  /* ── Reports center ── */
+  'reports.title': 'Reports',
+  'reports.statLabel': 'All reports',
+  'reports.statUnit': 'Reports',
+  'reports.searchPlaceholder': 'Search reports / SKU',
+  'reports.filterAll': 'All',
+  'reports.status.pass': 'PASS',
+  'reports.status.fail': 'FAIL',
+  'reports.status.pending': 'Pending',
+  'reports.product.psi': 'Pre-shipment inspection',
+  'reports.product.textile': 'Textile testing',
+  'reports.product.toys': 'Toy safety testing',
+  'reports.product.electronics': 'Electronics testing',
+  'reports.product.hardline': 'Hardline testing',
+  'reports.product.food': 'Food-contact testing',
+  'reports.emptyHint': 'No reports yet'
 };
