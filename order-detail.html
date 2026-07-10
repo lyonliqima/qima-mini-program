@@ -1472,7 +1472,6 @@
       setText('collectionMethod', translateCollectionMethod(order.collectionMethod));
       setText('orderRemark', order.orderRemark);
       renderRecipientList();
-      setText('recipientComments', order.recipientComments, t('orderDetail.commentsPlaceholder'));
 
       const statusBadge = document.getElementById('statusBadge');
       statusBadge.textContent = I18n.translateStatus(order.status);
