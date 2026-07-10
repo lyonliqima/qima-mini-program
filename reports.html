@@ -124,58 +124,104 @@
   }
   .grid::-webkit-scrollbar { display: none; }
 
-  /* 文件夹式报告卡 */
+  /* 文件夹式报告卡（拟物） */
   .rcard {
     position: relative;
-    border-radius: 14px;
-    padding: 30px 14px 14px;
-    min-height: 150px;
-    color: #fff;
+    display: block;
+    min-height: 176px;
     text-decoration: none;
-    display: flex; flex-direction: column;
-    box-shadow: 0 6px 16px rgba(25,25,25,.12);
-    overflow: hidden;
+    color: #fff;
     cursor: pointer;
+    filter: drop-shadow(0 10px 18px rgba(25,25,25,.16));
+    transition: transform .12s ease;
   }
-  /* 卡顶部露出的“文件” */
-  .rcard::before {
-    content: ""; position: absolute;
-    top: 8px; left: 16px; right: 40px; height: 26px;
-    background: #f4f6fb; border-radius: 6px 6px 0 0;
-    box-shadow: 2px -2px 0 -1px #e2e6ef, -2px -2px 0 -1px #e9ecf3;
-    z-index: 0;
+  .rcard:active { transform: translateY(1px) scale(.994); }
+  .rcard.c-blue   { --c1:#7aa0ff; --c2:#4169e1; --cback:#2f4fb8; --ctab:#3a5cd0; }
+  .rcard.c-purple { --c1:#b691e6; --c2:#8455c6; --cback:#623a9d; --ctab:#7a4cbb; }
+  .rcard.c-teal   { --c1:#4fcbae; --c2:#1f9d84; --cback:#147460; --ctab:#1a8f75; }
+  .rcard.c-orange { --c1:#ffbb77; --c2:#f58f00; --cback:#c96f00; --ctab:#e88400; }
+
+  /* 文件夹后板 + 顶部标签页 */
+  .rcard .folder-back {
+    position: absolute; inset: 0; top: 12px;
+    border-radius: 10px 14px 14px 14px;
+    background: var(--cback);
   }
+  .rcard .folder-back::before {
+    content: ""; position: absolute; top: -11px; left: 0;
+    width: 96px; height: 16px;
+    background: var(--ctab);
+    border-radius: 8px 12px 0 0;
+  }
+  .rcard .folder-back::after {
+    content: ""; position: absolute; top: -11px; left: 90px;
+    width: 22px; height: 16px;
+    background: var(--ctab);
+    transform: skewX(32deg);
+    border-radius: 0 6px 0 0;
+  }
+
+  /* 露出的纸张 */
+  .rcard .papers { position: absolute; left: 12px; right: 12px; top: 20px; height: 52px; }
+  .rcard .papers i {
+    position: absolute; left: 0; right: 0; top: 0; height: 52px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.12);
+  }
+  .rcard .papers i:nth-child(1) { background: #dfe4ee; transform: rotate(-3.5deg); right: 10px; }
+  .rcard .papers i:nth-child(2) { background: #eef1f7; transform: rotate(2.5deg); left: 8px; }
+  .rcard .papers i:nth-child(3) {
+    background:
+      repeating-linear-gradient(#ffffff 0 6px, #e6eaf1 6px 7px) top/100% 100%;
+    background-color: #fff;
+  }
+
   /* 文件夹前袋 */
-  .rcard::after {
-    content: ""; position: absolute;
-    left: 0; right: 0; bottom: 0; top: 26px;
-    border-radius: 14px;
-    z-index: 1;
+  .rcard .pocket {
+    position: absolute; left: 0; right: 0; bottom: 0; top: 46px;
+    border-radius: 3px 3px 14px 14px;
+    padding: 14px 14px 14px;
+    background: linear-gradient(158deg, var(--c1) 0%, var(--c2) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.4),
+      0 -5px 10px rgba(0,0,0,.14);
+    display: flex; flex-direction: column;
+    overflow: hidden;
   }
-  .rcard.c-blue::after { background: linear-gradient(160deg, #6f9bff 0%, #4169e1 100%); }
-  .rcard.c-purple::after { background: linear-gradient(160deg, #b18ce0 0%, #8455c6 100%); }
-  .rcard.c-teal::after { background: linear-gradient(160deg, #45c2a8 0%, #1f9d84 100%); }
-  .rcard.c-orange::after { background: linear-gradient(160deg, #ffb066 0%, #f58f00 100%); }
-  .rcard > * { position: relative; z-index: 2; }
+  /* 前袋开口处高光 + 内阴影，营造纸插入袋子的感觉 */
+  .rcard .pocket::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0));
+    pointer-events: none;
+  }
+  /* 前袋右下角折角高光 */
+  .rcard .pocket::after {
+    content: ""; position: absolute; right: -30px; bottom: -30px;
+    width: 90px; height: 90px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.18), rgba(255,255,255,0) 70%);
+    pointer-events: none;
+  }
 
   .rcard .tag {
     align-self: flex-start;
-    background: rgba(255,255,255,.24);
-    border: 1px solid rgba(255,255,255,.4);
+    background: rgba(255,255,255,.26);
+    border: 1px solid rgba(255,255,255,.45);
     border-radius: 6px; padding: 2px 8px;
-    font-size: 10px; font-weight: 700; letter-spacing: .5px;
-    margin-bottom: 22px;
+    font-size: 10px; font-weight: 700; letter-spacing: .6px;
+    margin-bottom: 12px;
+    backdrop-filter: blur(2px);
   }
-  .rcard .rname { font-size: 15px; font-weight: 700; line-height: 1.3; }
-  .rcard .rsku { margin-top: 6px; font-size: 12px; color: rgba(255,255,255,.85); }
+  .rcard .rname { font-size: 15px; font-weight: 700; line-height: 1.3; text-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .rcard .rsku { margin-top: 6px; font-size: 12px; color: rgba(255,255,255,.9); }
   .rcard .rstatus {
-    margin-top: 12px; display: flex; align-items: center; gap: 5px;
+    margin-top: auto; padding-top: 12px;
+    display: flex; align-items: center; gap: 5px;
     font-size: 13px; font-weight: 700;
   }
   .rcard .rstatus .dot {
     width: 16px; height: 16px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    background: #fff;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2);
   }
   .rcard .rstatus.pass .dot { color: var(--kiwi); }
   .rcard .rstatus.fail .dot { color: var(--qima-red); }
@@ -325,10 +371,14 @@
       }
       grid.innerHTML = list.map(r =>
         '<a class="rcard '+r.color+'" href="#">'+
-          '<span class="tag">'+r.tag+'</span>'+
-          '<div class="rname">'+t(r.nameKey)+'</div>'+
-          '<div class="rsku">'+r.sku+'</div>'+
-          '<div class="rstatus '+r.status+'"><span class="dot">'+ICONS[r.status]+'</span>'+t('reports.status.'+r.status)+'</div>'+
+          '<span class="folder-back"></span>'+
+          '<span class="papers"><i></i><i></i><i></i></span>'+
+          '<div class="pocket">'+
+            '<span class="tag">'+r.tag+'</span>'+
+            '<div class="rname">'+t(r.nameKey)+'</div>'+
+            '<div class="rsku">'+r.sku+'</div>'+
+            '<div class="rstatus '+r.status+'"><span class="dot">'+ICONS[r.status]+'</span>'+t('reports.status.'+r.status)+'</div>'+
+          '</div>'+
         '</a>'
       ).join('');
     }
