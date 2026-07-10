@@ -303,11 +303,11 @@
 
     <!-- 筛选标签 -->
     <div class="cat-tabs" id="catTabs">
-      <div class="cat active" data-cat="all" data-i18n="reports.filterAll">全部</div>
+      <div class="cat" data-cat="all" data-i18n="reports.filterAll">全部</div>
       <div class="cat" data-cat="psi">PSI</div>
       <div class="cat" data-cat="dupro">DUPRO</div>
       <div class="cat" data-cat="fri">FRI</div>
-      <div class="cat" data-cat="lab">LAB</div>
+      <div class="cat active" data-cat="lab">LAB</div>
       <div class="cat" data-cat="csr">CSR</div>
       <div class="cat-filter">
         <svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 3h12M4.5 8h7M6.5 13h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -358,7 +358,7 @@
       pending: '<svg viewBox="0 0 16 16" fill="none"><path d="M8 4v4l2.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
     };
 
-    let currentCat = 'all';
+    let currentCat = 'lab';
 
     function t(key){ return (window.I18n && I18n.t) ? I18n.t(key) : key; }
 
@@ -391,6 +391,7 @@
       renderReports();
     });
 
+    document.querySelectorAll('.cat').forEach(c => c.classList.toggle('active', c.getAttribute('data-cat') === currentCat));
     renderReports();
 
     if (window.I18n) {
