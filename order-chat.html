@@ -1666,9 +1666,15 @@
     renderCopyOrderList();
 
     // 1) 选择需求类型
+    let currentTestType = 'first';
+    let currentOrderSource = 'chat';
+    let orderSubmitInFlight = false;
+
     function pickType(type){
       document.getElementById('typeCard').style.display = 'none';
-      if(type === 'first'){
+      currentTestType = (type === 'retest' || type === 'reorder') ? type : 'first';
+      currentOrderSource = 'chat';
+      if(type === 'first' || type === 'retest' || type === 'reorder'){
         userMsg(t('orderChat.firstTest'));
         const typingRow = botTyping();
         setTimeout(()=>{ typingRow.remove(); askUpload(); }, 700);
@@ -1808,6 +1814,8 @@
 
     function startReuseOrder(id, actionLabel){
       const label = actionLabel || t('orderChat.reuse');
+      currentTestType = 'reorder';
+      currentOrderSource = 'reorder';
       userMsg(label + ' ' + id);
       const typingRow = botTyping();
       setTimeout(()=>{
@@ -3954,16 +3962,133 @@
       return '';
     }
 
-    function buildSuccessPageUrl(){
+    function splitSalesCountries(raw){
+      if(Array.isArray(raw)) return raw.map(function(s){ return String(s).trim(); }).filter(Boolean);
+      if(!raw) return [];
+      return String(raw).split(/[,，、;/|]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+
+    function isElectricYes(value){
+      if(!value) return false;
+      const s = String(value).trim();
+      if(s === t('common.no') || s === t('index.electricNo')) return false;
+      return s === t('common.yes') || s === t('index.electricYes') || /带电|electric|yes/i.test(s);
+    }
+
+    function isReportFieldsYes(value){
+      if(!value) return false;
+      const s = String(value).trim();
+      return s === t('common.yes') || /^yes$/i.test(s) || s === '是';
+    }
+
+    function buildFullOrderPayload(){
+      const productName = manualAnswers['Product Name'] || getFieldValue('Product Name') || '';
+      const program = manualAnswers['Program'] || getFieldValue('Program') || '';
+      const origin = manualAnswers['Country of Origin'] || getFieldValue('Country of Origin') || '';
+      const distribution = manualAnswers['Countries/Regions of Distribution'] || getFieldValue('Countries/Regions of Distribution') || '';
+      const itemModel = manualAnswers['Item#/model#'] || getFieldValue('Item#/model#') || '';
+      const manufacturer = manualAnswers['Manufacturer'] || getFieldValue('Manufacturer') || '';
+      const manufacturerAddress = manualAnswers['Manufacturer Address'] || getFieldValue('Manufacturer Address') || '';
+      const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || '';
+      const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || '';
+      const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || '';
+      const shippingRemark = manualAnswers['Shipping Remark'] || getFieldValue('Shipping Remark') || '';
+      const electricLabel = manualAnswer(FIELD_ELECTRIC, '产品是否带电');
+      const electricDescription = manualAnswer(FIELD_ELECTRIC_DESC, '产品说明');
+      const reportNeed = manualAnswer(FIELD_REPORT_NEED, '是否需要增加更多字段展示在报告上') || t('common.no');
+      const reportDetail = manualAnswer(FIELD_REPORT_DETAIL, '报告额外字段') || '';
+      const labLabel = manualAnswer(FIELD_TESTING_LAB, '寄送实验室') || '';
+      const labAddress = manualAnswer(FIELD_LAB_ADDRESS, '实验室地址') || '';
+      const inspectionRef = manualAnswer(FIELD_INSPECTION_REF, '产品检验订单参考编号') || manualAnswers[FIELD_INSPECTION_REF] || '';
+      const labKey = resolveLabKey(labLabel || labAddress);
+      const pending = t('orderChat.fieldPending');
+
+      function clean(v){
+        if(v == null) return '';
+        const s = String(v).trim();
+        if(!s || s === pending) return '';
+        return s;
+      }
+
+      const files = (uploadedFileList || []).map(function(f){
+        return {
+          file_name: f.name || 'file',
+          file_type: (f.file && f.file.type) || '',
+          storage_path: null,
+          label_key: 'chat_upload'
+        };
+      });
+
+      return {
+        order: {
+          product_name: clean(productName) || '未命名产品',
+          project_name: clean(program) || null,
+          origin_country: clean(origin) || null,
+          sales_countries: splitSalesCountries(distribution),
+          item_model: clean(itemModel) || null,
+          manufacturer_name: clean(manufacturer) || null,
+          manufacturer_address: clean(manufacturerAddress) || null,
+          collection_method: clean(collectionMethod) || null,
+          carrier: clean(carrier) || null,
+          tracking_number: clean(tracking) || null,
+          shipping_remark: clean(shippingRemark) || null,
+          is_electric: isElectricYes(electricLabel),
+          electric_description: clean(electricDescription) || null,
+          need_report_fields: isReportFieldsYes(reportNeed),
+          report_fields_detail: isReportFieldsYes(reportNeed) ? (clean(reportDetail) || null) : null,
+          testing_location: labKey || null,
+          testing_lab_address: clean(labAddress) || clean(labLabel) || null,
+          inspection_order_ref: clean(inspectionRef) || null,
+          test_type: currentTestType || 'first',
+          source: currentOrderSource || 'chat',
+          service_type: '实验室检测',
+          status: 'pending_verification',
+          form_answers: Object.assign({}, manualAnswers)
+        },
+        recipients: [],
+        files: files
+      };
+    }
+
+    function buildSuccessPageUrl(orderRef){
       const params = new URLSearchParams();
-      params.set('order', 'T-25617004');
+      params.set('order', orderRef || 'T-25617004');
       const labKey = resolveLabKey(manualAnswer(FIELD_TESTING_LAB, '寄送实验室') || manualAnswer(FIELD_LAB_ADDRESS, '实验室地址') || '');
       if(labKey) params.set('lab', labKey);
       return 'order-success.html?' + params.toString();
     }
 
+    function setOrderSubmitBusy(busy){
+      orderSubmitInFlight = !!busy;
+      const btn = document.querySelector('#orderConfirmModal .order-confirm-action.primary');
+      if(!btn) return;
+      btn.disabled = !!busy;
+      btn.textContent = busy ? t('orderChat.savingOrder') : t('common.submit');
+    }
+
     function submitOrderSuccess(){
-      window.location.href = buildSuccessPageUrl();
+      if(orderSubmitInFlight) return;
+      const payload = buildFullOrderPayload();
+      const api = window.QimaSupabase;
+
+      function go(orderRef){
+        window.location.href = buildSuccessPageUrl(orderRef);
+      }
+
+      if(!api || typeof api.saveFullOrder !== 'function' || !api.ready()){
+        go(null);
+        return;
+      }
+
+      setOrderSubmitBusy(true);
+      api.saveFullOrder(payload).then(function(row){
+        const ref = row && (row.order_ref || row.application_no);
+        go(ref || null);
+      }).catch(function(err){
+        console.error('saveFullOrder failed', err);
+        setOrderSubmitBusy(false);
+        alert(t('orderChat.saveOrderFailed'));
+      });
     }
 
     function readonlyOrderConfirmCard(){
