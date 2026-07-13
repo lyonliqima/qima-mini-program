@@ -134,6 +134,45 @@
       });
     },
     /**
+     * Multimodal parse: voice text + product link + uploaded files → order fields.
+     * @param {{voiceText?: string, link?: string, files?: File[]|Blob[]}} input
+     * @returns {Promise<object>}
+     */
+    parseOrder: function (input) {
+      var endpoint = (cfg.parseEndpoint || '').replace(/\/$/, '');
+      if (!endpoint) {
+        return Promise.reject(new Error('missing_parse_endpoint'));
+      }
+      input = input || {};
+      var fd = new FormData();
+      if (input.voiceText) fd.append('voice_text', String(input.voiceText));
+      if (input.link) fd.append('link', String(input.link));
+      var files = input.files || [];
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (!f || !f.size) continue;
+        var name = f.name || ('upload-' + i);
+        fd.append('files', f, name);
+      }
+      return fetch(endpoint, { method: 'POST', body: fd }).then(function (res) {
+        return res.text().then(function (text) {
+          var data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch (_) {
+            data = { error: 'bad_response', raw: text };
+          }
+          if (!res.ok) {
+            var err = new Error((data && data.error) || ('http_' + res.status));
+            err.code = (data && data.error) || ('http_' + res.status);
+            err.status = res.status;
+            throw err;
+          }
+          return data;
+        });
+      });
+    },
+    /**
      * Upload audio blob → NVIDIA Whisper zh-CN ASR (Vercel /api/transcribe).
      * Falls back to Supabase Edge Function if asrEndpoint is unset.
      * @param {Blob} blob WAV (preferred) or other audio

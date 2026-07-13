@@ -2396,6 +2396,7 @@
 
     let hasUploadedFiles = false;
     let uploadedFileList = [];
+    let parseInFlight = false;
 
     function fileIconFor(file){
       const type = (file && file.type) || '';
@@ -2492,22 +2493,143 @@
       return '<div class="thumbs">'+icons+'<span style="margin-left:4px">'+t('orderChat.uploadedCount', {count: uploadedFileList.length})+'</span></div>';
     }
 
+    function setParseButtonBusy(busy){
+      parseInFlight = !!busy;
+      const parseBtn = document.getElementById('parseBtn');
+      if(!parseBtn) return;
+      parseBtn.disabled = !!busy;
+      if(busy){
+        parseBtn.dataset.prevText = parseBtn.textContent;
+        parseBtn.textContent = t('orderChat.parsingOrder');
+      } else if(parseBtn.dataset.prevText){
+        parseBtn.textContent = parseBtn.dataset.prevText;
+        delete parseBtn.dataset.prevText;
+        updateParseButtonState();
+      }
+    }
+
+    function compressImageFileForParse(file){
+      return new Promise(function(resolve){
+        if(!file || !file.type || file.type.indexOf('image/') !== 0){
+          resolve(file);
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = function(){
+          const maxSide = 1280;
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+          if(!w || !h){
+            URL.revokeObjectURL(url);
+            resolve(file);
+            return;
+          }
+          if(w <= maxSide && h <= maxSide && file.size <= 2 * 1024 * 1024){
+            URL.revokeObjectURL(url);
+            resolve(file);
+            return;
+          }
+          const scale = Math.min(1, maxSide / Math.max(w, h));
+          const cw = Math.max(1, Math.round(w * scale));
+          const ch = Math.max(1, Math.round(h * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = cw;
+          canvas.height = ch;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, cw, ch);
+          canvas.toBlob(function(blob){
+            URL.revokeObjectURL(url);
+            if(!blob){
+              resolve(file);
+              return;
+            }
+            resolve(new File([blob], file.name || 'photo.jpg', { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.85);
+        };
+        img.onerror = function(){
+          URL.revokeObjectURL(url);
+          resolve(file);
+        };
+        img.src = url;
+      });
+    }
+
+    function collectParseFiles(){
+      const items = uploadedFileList.filter(function(item){ return item.file && item.file.size; });
+      return Promise.all(items.slice(0, 5).map(function(item){
+        return compressImageFileForParse(item.file);
+      }));
+    }
+
+    function applyParsedFields(fields){
+      if(!fields || typeof fields !== 'object') return;
+      Object.keys(fields).forEach(function(key){
+        const val = fields[key];
+        if(val != null && String(val).trim()) manualAnswers[key] = String(val).trim();
+      });
+    }
+
+    function countFilledExtractFields(fields){
+      const keys = [
+        'Product Name','Program','Country of Origin','Countries/Regions of Distribution',
+        'Item#/model#','Manufacturer','Manufacturer Address','Sample Collection Method',
+        'Carrier','Tracking Number','Shipping Remark'
+      ];
+      let filled = 0;
+      keys.forEach(function(k){
+        if(fields && fields[k] && String(fields[k]).trim()) filled++;
+      });
+      return { filled: filled, total: keys.length };
+    }
+
+    function countFilledRequiredFields(fields){
+      let filled = 0;
+      REQUIRED_ORDER_FIELDS.forEach(function(k){
+        if(fields && fields[k] && String(fields[k]).trim()) filled++;
+      });
+      return { filled: filled, total: REQUIRED_ORDER_FIELDS.length };
+    }
+
     function doParse(){
       const v = ((document.getElementById('linkIn')||{}).value || '').trim();
       voiceTranscript = getVoiceTranscriptValue();
       hasVoiceInput = !!voiceTranscript;
-      if(!hasUploadedFiles && !v && !hasVoiceInput) return;
+      if(parseInFlight || (!hasUploadedFiles && !v && !hasVoiceInput)) return;
+
       const parts = [];
       if(hasVoiceInput) parts.push('🎤 '+escapeHtml(voiceTranscript));
       if(hasUploadedFiles) parts.push(uploadedFilesSummary());
       if(v) parts.push('🔗 '+t('orderChat.productLink')+'：'+escapeHtml(v.length>28 ? v.slice(0,28)+'…' : v));
       userMsg(parts.join('<div style="margin-top:6px"></div>'));
+
       let src = t('orderChat.recognizeSourceLink');
       if(hasVoiceInput && (hasUploadedFiles || v)) src = t('orderChat.recognizeSourceBoth');
       else if(hasVoiceInput) src = t('orderChat.recognizeSourceVoice');
       else if(hasUploadedFiles && v) src = t('orderChat.recognizeSourceBoth');
       else if(hasUploadedFiles) src = t('orderChat.recognizeSourceDoc');
-      runRecognize(src);
+
+      const api = window.QimaSupabase;
+      if(!api || typeof api.parseOrder !== 'function'){
+        alert(t('orderChat.parseFailed'));
+        return;
+      }
+
+      setParseButtonBusy(true);
+      const typingRow = botTyping();
+
+      collectParseFiles().then(function(files){
+        return api.parseOrder({ voiceText: voiceTranscript, link: v, files: files });
+      }).then(function(result){
+        typingRow.remove();
+        setParseButtonBusy(false);
+        runRecognize(src, result);
+      }).catch(function(err){
+        console.error('parseOrder failed', err);
+        typingRow.remove();
+        setParseButtonBusy(false);
+        alert(t('orderChat.parseFailed'));
+      });
     }
 
     function updateParseButtonState(){
@@ -3114,23 +3236,46 @@
     }
 
     // 3) AI 识别 → 字段提取卡 + 进度 + 缺失确认
-    function runRecognize(src){
+    function productSummaryCard(summary, fields){
+      const name = (summary && summary.name) || (fields && fields['Product Name']) || t('orderChat.productRobotToy');
+      const brand = (summary && summary.brand) || '';
+      const hint = (summary && summary.hint) || '';
+      const meta = brand ? (brand + (hint ? ' ｜ ' + hint : '')) : (hint || t('orderChat.brandUnknown'));
+      return '<div class="panel panel-pad"><div class="prod"><div class="pimg">🤖</div>'+
+        '<div><div class="ptag">'+t('orderChat.suspectedProduct')+'</div><div class="pname">'+escapeHtml(name)+'</div>'+
+        '<div class="pmeta">'+escapeHtml(meta)+'</div></div></div></div>';
+    }
+
+    function runRecognize(src, result){
+      const fields = (result && result.fields) ? result.fields : {};
+      const summary = (result && result.product_summary) ? result.product_summary : {};
+      applyParsedFields(fields);
+
+      const allStats = countFilledExtractFields(fields);
+      const reqStats = countFilledRequiredFields(fields);
+      const percent = Math.round((allStats.filled / allStats.total) * 100);
+      const missingRequired = REQUIRED_ORDER_FIELDS.filter(function(name){
+        return !(fields[name] && String(fields[name]).trim());
+      }).length;
+
       const typingRow = botTyping();
-      setTimeout(()=>{ typingRow.remove();
+      setTimeout(function(){
+        typingRow.remove();
         botMsg(tHtml('orderChat.uploadSuccess', {src: src}), false);
         const typingRow2 = botTyping();
-        setTimeout(()=>{ typingRow2.remove();
-          // 疑似商品
-          botMsg('<div class="panel panel-pad"><div class="prod"><div class="pimg">🤖</div>'+
-            '<div><div class="ptag">'+t('orderChat.suspectedProduct')+'</div><div class="pname">'+t('orderChat.productRobotToy')+'</div>'+
-            '<div class="pmeta">'+t('orderChat.brandUnknown')+'</div></div></div></div>', true);
-          // 字段提取卡
-          botMsg(extractCard(), true);
-          // 总结 + 缺失确认
-          botMsg(tHtml('orderChat.recognizeDone'), false);
+        setTimeout(function(){
+          typingRow2.remove();
+          botMsg(productSummaryCard(summary, fields), true);
+          botMsg(extractCard(fields, percent), true);
+          botMsg(tHtml('orderChat.recognizeDoneDynamic', {
+            filled: reqStats.filled,
+            total: reqStats.total,
+            percent: Math.round((reqStats.filled / reqStats.total) * 100),
+            missing: missingRequired
+          }), false);
           botMsg(missingFieldsCard(), true);
-        }, 1100);
-      }, 700);
+        }, 600);
+      }, 500);
     }
 
     function field(k, v, ok, optional){
@@ -3142,21 +3287,26 @@
       if(optional) return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv">—</div></div>';
       return '<div class="field" data-field="'+k+'"'+opt+'><div class="fk">'+label+'</div><div class="fv miss">'+pending+'</div><div class="badge-miss">'+missing+'</div></div>';
     }
-    function extractCard(){
+    function extractCard(fields, percent){
+      fields = fields || {};
+      const pct = (percent != null) ? percent : Math.round((countFilledExtractFields(fields).filled / 10) * 100);
+      const progressLabel = t('orderChat.progressPercent', { percent: pct });
+      function val(k){ return fields[k] ? String(fields[k]).trim() : ''; }
+      function ok(k){ return !!val(k); }
       return '<div class="panel">'+
-        '<div class="extract-head"><div class="eh-title">'+t('orderChat.extractTitle')+'</div><div class="progress-pill">'+t('orderChat.progress70')+'</div></div>'+
+        '<div class="extract-head"><div class="eh-title">'+t('orderChat.extractTitle')+'</div><div class="progress-pill">'+progressLabel+'</div></div>'+
         '<div class="fields">'+
-          field('Product Name', t('orderChat.productRobotToy'), true)+
-          field('Program', t('orderChat.projectTemuHardwareRefund'), true)+
-          field('Country of Origin', t('orderChat.originAland'), true)+
-          field('Countries/Regions of Distribution', t('orderChat.distributionPresetEn'), true)+
-          field('Item#/model#', 'RBT-2025-X9', true)+
-          field('Manufacturer', t('orderChat.manufacturerDemo'), true)+
-          field('Manufacturer Address', t('orderChat.manufacturerAddrDemo'), true)+
-          field('Sample Collection Method','', false)+
-          field('Carrier','', false)+
-          field('Tracking Number','', false)+
-          field('Shipping Remark','', false, true)+
+          field('Product Name', val('Product Name'), ok('Product Name'))+
+          field('Program', val('Program'), ok('Program'))+
+          field('Country of Origin', val('Country of Origin'), ok('Country of Origin'))+
+          field('Countries/Regions of Distribution', val('Countries/Regions of Distribution'), ok('Countries/Regions of Distribution'))+
+          field('Item#/model#', val('Item#/model#'), ok('Item#/model#'))+
+          field('Manufacturer', val('Manufacturer'), ok('Manufacturer'))+
+          field('Manufacturer Address', val('Manufacturer Address'), ok('Manufacturer Address'))+
+          field('Sample Collection Method', val('Sample Collection Method'), ok('Sample Collection Method'))+
+          field('Carrier', val('Carrier'), ok('Carrier'))+
+          field('Tracking Number', val('Tracking Number'), ok('Tracking Number'))+
+          field('Shipping Remark', val('Shipping Remark'), ok('Shipping Remark'), true)+
         '</div>'+
         '<button class="edit-fields" onclick="openFieldEditor()"><span>'+t('orderChat.hasError')+'</span>'+t('orderChat.goEdit')+'</button>'+
       '</div>';
