@@ -1,0 +1,2 @@
+# Vercel Python serverless — NVIDIA Riva gRPC client for Whisper ASR
+nvidia-riva-client>=2.19.0

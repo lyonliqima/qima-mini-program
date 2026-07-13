@@ -3,9 +3,47 @@
 ## What this includes
 
 - Postgres schema for labs, orders, recipients, files, reports
+- **Complete order storage**: `orders` extended fields + view `order_full` + RPC `save_order_full`
 - RLS policies (demo-friendly anon read/write; tighten for production auth)
 - Seed data matching current prototype orders/reports
 - Frontend helper: `assets/supabase-client.js`
+
+### Complete order API
+
+| Piece | Purpose |
+|---|---|
+| `orders` | Order master row (product, lab, shipping, electric, report extras, `form_answers` JSON snapshot) |
+| `order_recipients` / `order_files` | Related contacts & uploads |
+| `order_full` | Read view: order + lab + recipients[] + files[] |
+| `save_order_full(payload)` | Atomic write of order + recipients + files |
+
+Frontend:
+
+```js
+// Write
+await QimaSupabase.saveFullOrder({
+  order: {
+    product_name: '黑色复合面料',
+    project_name: 'TEMU Hardware - Seller Pay',
+    origin_country: '中国',
+    sales_countries: ['欧盟', '美国'],
+    manufacturer_name: '…',
+    manufacturer_address: '…',
+    collection_method: '自行寄样',
+    carrier: '顺丰',
+    tracking_number: 'SF…',
+    testing_location: 'hangzhou',
+    source: 'chat',
+    form_answers: { /* full chat answers */ }
+  },
+  recipients: [{ email: 'a@example.com', mail_type: 'all' }],
+  files: [{ file_name: 'style.jpg', label_key: 'orderDetail.fileStyle' }]
+});
+
+// Read
+await QimaSupabase.getFullOrderByRef('T-25617004');
+await QimaSupabase.getFullOrders();
+```
 
 ## Deploy to Supabase Cloud
 
@@ -55,18 +93,18 @@ npx supabase start
 npx supabase db reset   # applies migrations + seed
 ```
 
-## Voice ASR (NVIDIA Parakeet zh-CN)
+## Voice ASR (NVIDIA Whisper zh-CN)
 
-Edge Function: `supabase/functions/transcribe-voice`
+Primary endpoint: Vercel Python serverless [`api/transcribe.py`](../api/transcribe.py)
 
-Proxies browser WAV audio to NVIDIA hosted Mandarin ASR.
+NVIDIA hosted Parakeet zh-CN is **streaming-only gRPC**; offline Chinese ASR uses **Whisper Large v3** via Riva gRPC (`grpc.nvcf.nvidia.com`).
 
 ```bash
-# Set secret (nvapi-... from https://build.nvidia.com/settings)
-npx supabase secrets set NVIDIA_API_KEY=nvapi-... --project-ref dewcjtkqykkclxwcmusg
+# Vercel secret
+vercel env add NVIDIA_API_KEY production
 
-# Deploy
+# Optional: Supabase Edge proxy → Vercel
 npx supabase functions deploy transcribe-voice --project-ref dewcjtkqykkclxwcmusg
 ```
 
-Frontend calls `QimaSupabase.transcribeVoice(wavBlob)` from `order-chat.html`.
+Frontend: `QimaSupabase.transcribeVoice(wavBlob)` → `SUPABASE_CONFIG.asrEndpoint`.

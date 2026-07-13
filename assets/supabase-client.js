@@ -56,11 +56,29 @@
     getOrders: function () {
       return request('GET', 'orders?select=*,order_recipients(*)&order=ordered_at.desc.nullslast');
     },
+    /** 完整订单列表（含实验室、收件人、附件） */
+    getFullOrders: function () {
+      return request('GET', 'order_full?select=*&order=ordered_at.desc.nullslast');
+    },
     getOrderByApplicationNo: function (applicationNo) {
       return request(
         'GET',
         'orders?application_no=eq.' + encodeURIComponent(applicationNo) +
           '&select=*,order_recipients(*),order_files(*)&limit=1'
+      ).then(function (rows) { return rows && rows[0] ? rows[0] : null; });
+    },
+    /** 按申请号读取完整订单视图 */
+    getFullOrderByApplicationNo: function (applicationNo) {
+      return request(
+        'GET',
+        'order_full?application_no=eq.' + encodeURIComponent(applicationNo) + '&limit=1'
+      ).then(function (rows) { return rows && rows[0] ? rows[0] : null; });
+    },
+    /** 按订单号 / order_ref 读取完整订单视图 */
+    getFullOrderByRef: function (orderRef) {
+      return request(
+        'GET',
+        'order_full?order_ref=eq.' + encodeURIComponent(orderRef) + '&limit=1'
       ).then(function (rows) { return rows && rows[0] ? rows[0] : null; });
     },
     getReports: function (category) {
@@ -81,6 +99,30 @@
         return rows && rows[0] ? rows[0] : rows;
       });
     },
+    /**
+     * 原子写入完整订单（主表 + 收件人 + 附件）。
+     * @param {object} payload
+     * @param {object} payload.order 订单字段（可含 form_answers）
+     * @param {Array<{email:string,mail_type?:string}>} [payload.recipients]
+     * @param {Array<{file_name:string,file_type?:string,storage_path?:string,label_key?:string}>} [payload.files]
+     */
+    saveFullOrder: function (payload) {
+      if (!ready()) {
+        return Promise.reject(new Error('Supabase is not configured. Set SUPABASE_CONFIG in assets/supabase-config.js'));
+      }
+      return fetch(url.replace(/\/$/, '') + '/rest/v1/rpc/save_order_full', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ payload: payload || {} })
+      }).then(function (res) {
+        if (!res.ok) {
+          return res.text().then(function (text) {
+            throw new Error('Supabase ' + res.status + ': ' + text);
+          });
+        }
+        return res.json();
+      });
+    },
     updateOrder: function (id, patch) {
       return request(
         'PATCH',
@@ -92,26 +134,31 @@
       });
     },
     /**
-     * Upload audio blob to Edge Function → NVIDIA Parakeet zh-CN ASR.
+     * Upload audio blob → NVIDIA Whisper zh-CN ASR (Vercel /api/transcribe).
+     * Falls back to Supabase Edge Function if asrEndpoint is unset.
      * @param {Blob} blob WAV (preferred) or other audio
      * @param {string} [filename]
      * @returns {Promise<{text: string}>}
      */
     transcribeVoice: function (blob, filename) {
-      if (!ready()) {
-        return Promise.reject(new Error('missing_config'));
-      }
       if (!blob || !blob.size) {
         return Promise.reject(new Error('empty_audio'));
       }
+      var endpoint = (cfg.asrEndpoint || '').replace(/\/$/, '');
+      if (!endpoint) {
+        if (!ready()) return Promise.reject(new Error('missing_config'));
+        endpoint = url.replace(/\/$/, '') + '/functions/v1/transcribe-voice';
+      }
       var fd = new FormData();
       fd.append('file', blob, filename || 'recording.wav');
-      return fetch(url.replace(/\/$/, '') + '/functions/v1/transcribe-voice', {
+      var headers = {};
+      if (endpoint.indexOf('/functions/v1/') !== -1 && anonKey) {
+        headers.apikey = anonKey;
+        headers.Authorization = 'Bearer ' + anonKey;
+      }
+      return fetch(endpoint, {
         method: 'POST',
-        headers: {
-          apikey: anonKey,
-          Authorization: 'Bearer ' + anonKey
-        },
+        headers: headers,
         body: fd
       }).then(function (res) {
         return res.text().then(function (text) {

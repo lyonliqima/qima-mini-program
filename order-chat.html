@@ -2298,7 +2298,7 @@
           return;
         }
         const api = window.QimaSupabase;
-        if(!api || !api.ready()){
+        if(!api || typeof api.transcribeVoice !== 'function'){
           voiceProcessing = false;
           setVoiceLock(false, panel);
           renderVoiceIdleButton(panel);
