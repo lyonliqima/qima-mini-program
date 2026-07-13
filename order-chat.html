@@ -273,6 +273,15 @@
     background: #fff; font-size: 10px; color: var(--carbon);
     max-width: calc(50% - 2px);
   }
+  .uploaded-file-thumb {
+    width: 22px; height: 22px; border-radius: 4px; object-fit: cover;
+    background: #e8ebf3; flex-shrink: 0;
+  }
+  .uploaded-file-icon {
+    width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #eef1fb; font-size: 12px;
+  }
   .uploaded-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .uploaded-file-status { display: none; }
   .uploaded-file-delete {
@@ -1243,6 +1252,8 @@
     </div>
 
     <input id="waybillCamera" type="file" accept="image/*" capture="environment" hidden onchange="processWaybillPhoto()" />
+    <input id="productCamera" type="file" accept="image/*" capture="environment" hidden onchange="onProductCameraChange(this)" />
+    <input id="productFiles" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,application/pdf" multiple hidden onchange="onProductFilesChange(this)" />
 
     <!-- 供应商选择弹窗 -->
     <div class="supplier-mask" id="supplierPicker" onclick="closeSupplierPicker(event)">
@@ -2377,38 +2388,93 @@
     let hasUploadedFiles = false;
     let uploadedFileList = [];
 
+    function fileIconFor(file){
+      const type = (file && file.type) || '';
+      const name = ((file && file.name) || '').toLowerCase();
+      if(type.indexOf('image/') === 0 || /\.(jpe?g|png|gif|webp|heic|bmp)$/.test(name)) return '📷';
+      if(type.indexOf('pdf') !== -1 || name.endsWith('.pdf')) return '📄';
+      if(/\.xlsx?$|\.csv$/.test(name) || type.indexOf('sheet') !== -1) return '📊';
+      if(/\.docx?$/.test(name) || type.indexOf('word') !== -1) return '📝';
+      return '📎';
+    }
+
+    function appendUploadedFiles(fileList){
+      const files = Array.prototype.slice.call(fileList || []);
+      if(!files.length) return;
+      files.forEach(function(file){
+        const entry = {
+          icon: fileIconFor(file),
+          name: file.name || t('orderChat.demoFilePhoto'),
+          file: file,
+          size: file.size || 0
+        };
+        if(file.type && file.type.indexOf('image/') === 0){
+          try { entry.previewUrl = URL.createObjectURL(file); } catch (_) {}
+        }
+        uploadedFileList.push(entry);
+      });
+      renderUploadedFiles();
+    }
+
+    function onProductCameraChange(input){
+      if(!input || !input.files || !input.files.length) return;
+      appendUploadedFiles(input.files);
+      input.value = '';
+    }
+
+    function onProductFilesChange(input){
+      if(!input || !input.files || !input.files.length) return;
+      appendUploadedFiles(input.files);
+      input.value = '';
+    }
+
+    function openProductCamera(){
+      const input = document.getElementById('productCamera');
+      if(!input) return;
+      input.value = '';
+      input.click();
+    }
+
+    function openProductFilePicker(){
+      const input = document.getElementById('productFiles');
+      if(!input) return;
+      input.value = '';
+      input.click();
+    }
+
     function doUpload(source){
       if(source === 'photo'){
-        uploadedFileList = [
-          { icon:'📷', name: t('orderChat.demoFilePhoto') }
-        ];
-      } else {
-        uploadedFileList = [
-          { icon:'🧸', name: t('orderChat.demoFilePhoto') },
-          { icon:'📄', name: t('orderChat.demoFileSpec') },
-          { icon:'🧾', name: t('orderChat.demoFilePo') }
-        ];
+        openProductCamera();
+        return;
       }
-      renderUploadedFiles();
+      // wechat / phone / doc: open system file picker
+      openProductFilePicker();
     }
 
     function renderUploadedFiles(){
       const uploadedFiles = document.getElementById('uploadedFiles');
       if(!uploadedFiles) return;
       hasUploadedFiles = uploadedFileList.length > 0;
-      uploadedFiles.innerHTML = uploadedFileList.map((file, index) =>
-        '<div class="uploaded-file">'+
-          '<span class="uploaded-file-name">'+file.icon+' '+escapeHtml(file.name)+'</span>'+
+      uploadedFiles.innerHTML = uploadedFileList.map((file, index) => {
+        const thumb = file.previewUrl
+          ? '<img class="uploaded-file-thumb" src="'+escapeHtml(file.previewUrl)+'" alt="" />'
+          : '<span class="uploaded-file-icon">'+file.icon+'</span>';
+        return '<div class="uploaded-file">'+
+          thumb+
+          '<span class="uploaded-file-name">'+escapeHtml(file.name)+'</span>'+
           '<button class="uploaded-file-delete" type="button" aria-label="'+escapeHtml(t('orderChat.deleteFile', {name: file.name}))+'" onclick="removeUploadedFile('+index+', event)">×</button>'+
-        '</div>'
-      ).join('');
+        '</div>';
+      }).join('');
       uploadedFiles.classList.toggle('show', hasUploadedFiles);
       updateParseButtonState();
     }
 
     function removeUploadedFile(index, event){
       if(event) event.stopPropagation();
-      uploadedFileList.splice(index, 1);
+      const removed = uploadedFileList.splice(index, 1)[0];
+      if(removed && removed.previewUrl){
+        try { URL.revokeObjectURL(removed.previewUrl); } catch (_) {}
+      }
       renderUploadedFiles();
     }
 
