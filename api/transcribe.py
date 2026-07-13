@@ -128,7 +128,12 @@ def _transcribe(wav_bytes: bytes) -> str:
         for alt in result.alternatives:
             if alt.transcript:
                 parts.append(alt.transcript.strip())
-    return " ".join(parts).strip()
+    text = " ".join(parts).strip()
+    if not text:
+        return ""
+    # Whisper may emit Traditional Chinese; force Simplified for the mini program UI.
+    import zhconv
+    return zhconv.convert(text, "zh-cn")
 
 
 class handler(BaseHTTPRequestHandler):
