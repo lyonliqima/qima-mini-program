@@ -40,29 +40,43 @@ insert into public.orders (
   application_no, order_ref, status, service_type, category, product_name,
   test_type, testing_location, supplier_name, po_number, material, project_name,
   origin_country, sales_countries, turnaround_time, need_quotation,
-  manufacturer_name, item_model, ean_code, brand, collection_method,
-  ordered_at, report_date
+  manufacturer_name, manufacturer_address, item_model, ean_code, brand, collection_method,
+  carrier, tracking_number, shipping_remark, is_electric, electric_description,
+  need_report_fields, report_fields_detail, testing_lab_address, inspection_order_ref,
+  source, form_answers, ordered_at, report_date
 ) values
   (
     '08008571', 'T-25617004', 'pending_verification', '实验室检测', 'Textile', '黑色复合面料',
     'first', 'hangzhou', 'Shenzhen Zhichuang Co., Ltd.', 'PO-7845120', 'Polyester / Spandex',
     'TEMU Hardware - Seller Pay（商家付款）', '中国', array['欧盟','美国'], '7 Day Regular', false,
-    'QIMA Sample Manufacturer', 'T-25617004', '6 901234 567890', 'QIMA Sample',
-    '启迈 QIMA 将在执行产品服务时收集样本', '2026-06-03', null
+    'QIMA Sample Manufacturer', '浙江省杭州市萧山区建设三路 733 号', 'T-25617004', '6 901234 567890', 'QIMA Sample',
+    '启迈 QIMA 将在执行产品服务时收集样本',
+    null, null, null, false, null,
+    false, null, '浙江省杭州市萧山区经济技术开发区建设三路 733 号 QIMA 启迈实验室', null,
+    'seed', '{"Product Name":"黑色复合面料","Program":"TEMU Hardware - Seller Pay（商家付款）"}'::jsonb,
+    '2026-06-03', null
   ),
   (
     '080082671', 'T-26356800-11-R', 'report_completed', '实验室检测', 'Textile', '黑色机织面料',
     'retest', 'hangzhou', 'Shenzhen Textile Supplier Co., Ltd.', 'PO-26356800', '100% Polyester',
     'TEMU Hardware - Seller Pay（商家付款）', '中国', array['欧盟'], '7 Day Regular', false,
-    'QIMA Textile Factory', 'T-26356800-11-R', null, 'QIMA Sample',
-    null, '2026-06-03', '2026-06-03'
+    'QIMA Textile Factory', null, 'T-26356800-11-R', null, 'QIMA Sample',
+    null,
+    null, null, null, false, null,
+    false, null, null, null,
+    'seed', '{}'::jsonb,
+    '2026-06-03', '2026-06-03'
   ),
   (
     '08008536', 'T-25617036', 'pending_verification', '实验室检测', 'Textile', '灰色针织面料',
     'first', 'hangzhou', 'Vietnam Fabric Supplier Ltd.', 'PI-2026-036', 'Cotton / Spandex',
     '通用检测项目', '越南', array['美国','加拿大'], '7 Day Regular', false,
-    'QIMA Knitwear Factory', 'T-25617036', null, 'QIMA Sample',
-    null, '2026-06-02', null
+    'QIMA Knitwear Factory', null, 'T-25617036', null, 'QIMA Sample',
+    null,
+    '顺丰速运', 'SF1234567890123', '请工作日签收', false, null,
+    false, null, null, null,
+    'seed', '{}'::jsonb,
+    '2026-06-02', null
   )
 on conflict (application_no) do nothing;
 
