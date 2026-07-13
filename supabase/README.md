@@ -54,3 +54,19 @@ Copy Project URL + anon key into `assets/supabase-config.js`.
 npx supabase start
 npx supabase db reset   # applies migrations + seed
 ```
+
+## Voice ASR (NVIDIA Parakeet zh-CN)
+
+Edge Function: `supabase/functions/transcribe-voice`
+
+Proxies browser WAV audio to NVIDIA hosted Mandarin ASR.
+
+```bash
+# Set secret (nvapi-... from https://build.nvidia.com/settings)
+npx supabase secrets set NVIDIA_API_KEY=nvapi-... --project-ref dewcjtkqykkclxwcmusg
+
+# Deploy
+npx supabase functions deploy transcribe-voice --project-ref dewcjtkqykkclxwcmusg
+```
+
+Frontend calls `QimaSupabase.transcribeVoice(wavBlob)` from `order-chat.html`.

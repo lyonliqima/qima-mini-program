@@ -90,6 +90,46 @@
       ).then(function (rows) {
         return rows && rows[0] ? rows[0] : rows;
       });
+    },
+    /**
+     * Upload audio blob to Edge Function → NVIDIA Parakeet zh-CN ASR.
+     * @param {Blob} blob WAV (preferred) or other audio
+     * @param {string} [filename]
+     * @returns {Promise<{text: string}>}
+     */
+    transcribeVoice: function (blob, filename) {
+      if (!ready()) {
+        return Promise.reject(new Error('missing_config'));
+      }
+      if (!blob || !blob.size) {
+        return Promise.reject(new Error('empty_audio'));
+      }
+      var fd = new FormData();
+      fd.append('file', blob, filename || 'recording.wav');
+      return fetch(url.replace(/\/$/, '') + '/functions/v1/transcribe-voice', {
+        method: 'POST',
+        headers: {
+          apikey: anonKey,
+          Authorization: 'Bearer ' + anonKey
+        },
+        body: fd
+      }).then(function (res) {
+        return res.text().then(function (text) {
+          var data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch (_) {
+            data = { error: 'bad_response', raw: text };
+          }
+          if (!res.ok) {
+            var err = new Error((data && data.error) || ('http_' + res.status));
+            err.code = (data && data.error) || ('http_' + res.status);
+            err.status = res.status;
+            throw err;
+          }
+          return { text: (data && data.text) ? String(data.text) : '' };
+        });
+      });
     }
   };
 

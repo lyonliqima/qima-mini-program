@@ -1,0 +1,2 @@
+# Allow anon JWT (mini program uses the public anon key).
+verify_jwt = true
