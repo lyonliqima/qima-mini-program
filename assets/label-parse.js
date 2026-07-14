@@ -406,17 +406,29 @@
     };
   }
 
-  function ocrImageFile(file) {
+  function ocrImageFile(file, onProgress) {
     return loadTesseract().then(function (Tesseract) {
+      if (typeof onProgress === 'function') onProgress('正在识别图片文字…');
       return Tesseract.recognize(file, 'eng+chi_sim', {
-        logger: function () {}
+        logger: function (m) {
+          if (!onProgress || !m) return;
+          if (m.status === 'recognizing text' && m.progress != null) {
+            onProgress('正在识别图片文字… ' + Math.round(m.progress * 100) + '%');
+          } else if (m.status === 'loading tesseract core') {
+            onProgress('正在加载识别引擎…');
+          } else if (m.status === 'initializing tesseract') {
+            onProgress('正在初始化识别引擎…');
+          } else if (m.status === 'loading language traineddata') {
+            onProgress('正在加载语言包…');
+          }
+        }
       }).then(function (result) {
         return (result && result.data && result.data.text) || '';
       });
     });
   }
 
-  function parseFilesLocally(files, voiceText, link) {
+  function parseFilesLocally(files, voiceText, link, onProgress) {
     files = files || [];
     var voiceResult = voiceText ? extractFieldsFromVoiceText(voiceText) : null;
     var imageFiles = files.filter(function (f) {
@@ -424,6 +436,7 @@
     });
 
     if (!imageFiles.length) {
+      if (typeof onProgress === 'function') onProgress('正在匹配语音字段…');
       if (voiceResult && voiceResult.raw_excerpt) return Promise.resolve(voiceResult);
       if (link) {
         var linkOnly = extractFieldsFromVoiceText(String(link));
@@ -432,8 +445,10 @@
       return Promise.reject(new Error('empty_local_ocr'));
     }
 
-    var tasks = imageFiles.slice(0, 3).map(function (f) {
-      return ocrImageFile(f).catch(function () {
+    if (typeof onProgress === 'function') onProgress('正在识别上传图片…');
+
+    var tasks = imageFiles.slice(0, 2).map(function (f) {
+      return ocrImageFile(f, onProgress).catch(function () {
         return '';
       });
     });

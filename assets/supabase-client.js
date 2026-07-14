@@ -162,7 +162,16 @@
       }
 
       function post(endpoint) {
-        return fetch(endpoint, { method: 'POST', body: fd }).then(function (res) {
+        var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var timer = null;
+        if (controller) {
+          timer = setTimeout(function () { controller.abort(); }, 8000);
+        }
+        return fetch(endpoint, {
+          method: 'POST',
+          body: fd,
+          signal: controller ? controller.signal : undefined
+        }).then(function (res) {
           return res.text().then(function (text) {
             var data = null;
             try {
@@ -178,6 +187,16 @@
             }
             return data;
           });
+        }).catch(function (err) {
+          if (err && err.name === 'AbortError') {
+            var te = new Error('remote_timeout');
+            te.code = 'remote_timeout';
+            te.status = 408;
+            throw te;
+          }
+          throw err;
+        }).finally(function () {
+          if (timer) clearTimeout(timer);
         });
       }
 
@@ -185,7 +204,8 @@
       for (var e = 1; e < endpoints.length; e++) {
         (function (next) {
           chain = chain.catch(function (err) {
-            if (err && (err.status === 404 || err.status === 405 || err.status === 502)) {
+            var status = err && err.status;
+            if (status === 404 || status === 405 || status === 408 || status === 502 || status === 503 || !status) {
               return post(next);
             }
             throw err;
