@@ -126,6 +126,47 @@
     return out.join('、');
   }
 
+  function cleanModelValue(raw) {
+    var s = String(raw || '').replace(/\s+/g, ' ').trim();
+    if (!s) return '';
+    // Drop trailing label noise after the model token
+    s = s.split(/\s{2,}|\s+[A-Z][a-z]+\s*[:：]/)[0].trim();
+    var token = s.match(/([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/);
+    return token ? token[1].replace(/[.,;:]+$/, '') : '';
+  }
+
+  function extractModel(text) {
+    var normalized = String(text || '')
+      // Common OCR: Model → ModeI / Modеl / Madel / M0del
+      .replace(/\bMode[lI1]\b/gi, 'Model')
+      .replace(/\bMadel\b/gi, 'Model')
+      .replace(/\bM0del\b/gi, 'Model')
+      .replace(/\bMODEI\b/g, 'MODEL')
+      .replace(/型\s*号/g, '型号')
+      .replace(/货\s*号/g, '货号');
+
+    var patterns = [
+      /Model\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
+      /Model\s*[:：]?\s*\n\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
+      /型号\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/,
+      /货号\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/,
+      /Item\s*#?\s*(?:\/\s*)?model\s*#?\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
+      /SKU\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
+      /型\s*号\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/
+    ];
+    for (var i = 0; i < patterns.length; i++) {
+      var m = normalized.match(patterns[i]);
+      if (m && m[1]) {
+        var cleaned = cleanModelValue(m[1]);
+        // Avoid grabbing words like "Wireless" from nearby lines
+        if (cleaned && !/^(name|voltage|current|address|china|mouse|rated)$/i.test(cleaned)) {
+          return cleaned;
+        }
+      }
+    }
+    return '';
+  }
+
   function extractFieldsFromOcrText(ocrText) {
     var text = simplifySpaces(ocrText);
     var productName = pick(text, [
@@ -133,12 +174,12 @@
       /品名\s*[:：]\s*([^\n]+)/,
       /产品名称\s*[:：]\s*([^\n]+)/
     ]);
-    var model = pick(text, [
-      /Model\s*[:：]\s*([^\n]+)/i,
-      /型号\s*[:：]\s*([^\n]+)/,
-      /货号\s*[:：]\s*([^\n]+)/,
-      /Item\s*#?\s*\/?\s*model\s*#?\s*[:：]?\s*([^\n]+)/i
-    ]);
+    if (productName) {
+      productName = productName.replace(/\s+/g, ' ').trim();
+      // Stop before next label if OCR glued lines
+      productName = productName.split(/\s+(?:Model|型号|Rated|FCC|Manufacturer)\b/i)[0].trim();
+    }
+    var model = extractModel(text);
     var manufacturer = pick(text, [
       /Manufacturer\s*[:：]\s*([^\n]+)/i,
       /制造商\s*[:：]\s*([^\n]+)/,
@@ -284,9 +325,13 @@
     var model = pick(text, [
       /型号\s*[是为：:]?\s*([A-Za-z0-9][\w\-./]{1,40})/,
       /货号\s*[是为：:]?\s*([A-Za-z0-9][\w\-./]{1,40})/,
+      /Model\s*[:：#.=]?\s*([A-Za-z0-9][\w\-./]{1,40})/i,
       /model\s*[:=#]?\s*([A-Za-z0-9][\w\-./]{1,40})/i,
       /SKU\s*[:=#]?\s*([A-Za-z0-9][\w\-./]{1,40})/i
     ]);
+    if (model) model = cleanModelValue(model);
+    // Fallback shared Model extractor (OCR-tolerant)
+    if (!model) model = extractModel(text);
 
     var manufacturer = pick(text, [
       /制造商(?:名称|全称)?\s*[是为：:]?\s*([^\n，。,]{2,80})/,

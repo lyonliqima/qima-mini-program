@@ -320,7 +320,7 @@ def _ocr_image_structured(data: bytes, mime: str, filename: str) -> dict:
         "抽取检测下单所需字段，只返回合法 JSON（不要 markdown）。\n"
         "字段说明：\n"
         '- "Product Name": 产品名称（如 Product name / 品名）\n'
-        '- "Item#/model#": 型号/货号（Model / Item No / SKU）\n'
+        '- "Item#/model#": 型号/货号，优先取标签上的 Model / 型号 / SKU / Item No 一行的值（如 XY-03、LX-03）\n'
         '- "Manufacturer": 制造商公司全称\n'
         '- "Manufacturer Address": 制造商地址（完整一行）\n'
         '- "Country of Origin": 原产国（优先 MADE IN / Manufacturing location，值用简体如「中国」）\n'
