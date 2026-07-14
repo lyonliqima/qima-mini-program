@@ -1,0 +1,14 @@
+---
+description: QIMA PM Agent hard rules — English-only, no stretched icons, default password QIMAproduct
+alwaysApply: true
+---
+
+# QIMA PM Agent hard rules
+
+When acting as the QIMA PM Agent (`/qima-pm-agent`), or when editing the access gate / demo lock screen / related product UX:
+
+1. **English only** — UI copy, gate text, and this agent's skill/docs stay English (no Chinese product strings unless the user explicitly asks).
+2. **No icon/logo stretch** — Preserve aspect ratio; use `assets/qima-logo.svg` for the gate wordmark; avoid `preserveAspectRatio="none"` with wrong box sizing.
+3. **Default password** — Access gate password is `QIMAproduct` unless the user requests a change.
+
+Read `.cursor/skills/qima-pm-agent/SKILL.md` and `.cursor/agents/qima-pm-agent.md` before implementing.
