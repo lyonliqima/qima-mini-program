@@ -151,7 +151,13 @@
   .tag { height: 22.5px; border-radius: 6px; font-size: 11px; line-height: 22.5px; padding: 0 8px; }
   .tag.progress { background: var(--pool-050); color: var(--pool-500); }
   .tag.pending { background: #fef0ee; color: #ff5f4e; }
+  .tag.done { background: #e9f8f0; color: #1f9d6b; }
   .order-row .chev { width: 16px; height: 16px; }
+  .order-empty {
+    padding: 16px 4px 8px;
+    font-size: 12px; color: var(--seal); line-height: 18px;
+  }
+  .card-head .more { text-decoration: none; }
 
   /* ===== 底部 Tab Bar ===== */
   .tabbar {
@@ -517,6 +523,8 @@
 <script src="assets/i18n/zh.js"></script>
 <script src="assets/i18n/en.js"></script>
 <script src="assets/i18n-runtime.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/supabase-client.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -586,28 +594,11 @@
               <img src="assets/order_icon.svg" alt="" />
               <span data-i18n="index.myOrders">我的订单</span>
             </div>
-            <div class="more"><span data-i18n="common.viewAll">全部</span> <img src="assets/chevron1.svg" alt="" /></div>
+            <a class="more" href="orders.html"><span data-i18n="common.viewAll">全部</span> <img src="assets/chevron1.svg" alt="" /></a>
           </div>
-          <a class="order-row" href="order-detail.html?order=T-25617004">
-            <div>
-              <div class="oid">T-25617004</div>
-              <div class="odesc" data-i18n="common.serviceLabTestToys">实验室检测 · 玩具</div>
-            </div>
-            <div class="right">
-              <div class="tag progress" data-i18n="status.inProgress">进行中</div>
-              <img class="chev" src="assets/chevron_row.svg" alt="" />
-            </div>
-          </a>
-          <a class="order-row" href="order-detail.html?order=T-25617005">
-            <div>
-              <div class="oid">T-25617005</div>
-              <div class="odesc" data-i18n="common.serviceLabTestToys">实验室检测 · 玩具</div>
-            </div>
-            <div class="right">
-              <div class="tag progress" data-i18n="status.pendingVerification">待验证</div>
-              <img class="chev" src="assets/chevron_row.svg" alt="" />
-            </div>
-          </a>
+          <div id="homeOrderList">
+            <div class="order-empty" data-i18n="index.ordersLoading">正在加载订单…</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1551,8 +1542,86 @@
       if (document.getElementById('supplierPicker').classList.contains('show')) renderSupplierRows();
     };
 
+    function escapeHomeHtml(str) {
+      return window.I18n ? I18n.escapeHtml(str) : String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function homeOrderStatusLabel(status) {
+      if (window.I18n && I18n.translateStatus) return I18n.translateStatus(status);
+      var map = {
+        pending_verification: 'status.pendingVerification',
+        in_progress: 'status.inProgress',
+        report_completed: 'status.reportCompleted',
+        cancelled: 'status.pendingConfirmation'
+      };
+      var key = map[status];
+      return key && typeof t === 'function' ? t(key) : (status || '');
+    }
+
+    function homeOrderTagClass(status) {
+      if (status === 'report_completed') return 'done';
+      if (status === 'cancelled') return 'pending';
+      return 'progress';
+    }
+
+    function homeOrderDesc(row) {
+      var service = row.service_type || (typeof t === 'function' ? t('common.serviceLabTest') : '实验室检测');
+      var detail = row.product_name || row.category || row.project_name || '';
+      if (detail) return service + ' · ' + detail;
+      return service;
+    }
+
+    function homeOrderRow(row) {
+      var ref = row.order_ref || row.application_no || '';
+      var displayId = row.order_ref || row.application_no || '';
+      var status = row.status || 'pending_verification';
+      return '<a class="order-row" href="order-detail.html?order=' + encodeURIComponent(ref) + '">' +
+        '<div>' +
+          '<div class="oid">' + escapeHomeHtml(displayId) + '</div>' +
+          '<div class="odesc">' + escapeHomeHtml(homeOrderDesc(row)) + '</div>' +
+        '</div>' +
+        '<div class="right">' +
+          '<div class="tag ' + homeOrderTagClass(status) + '">' + escapeHomeHtml(homeOrderStatusLabel(status)) + '</div>' +
+          '<img class="chev" src="assets/chevron_row.svg" alt="" />' +
+        '</div>' +
+      '</a>';
+    }
+
+    function renderHomeOrderEmpty(messageKey) {
+      var list = document.getElementById('homeOrderList');
+      if (!list) return;
+      var msg = typeof t === 'function' ? t(messageKey) : messageKey;
+      list.innerHTML = '<div class="order-empty">' + escapeHomeHtml(msg) + '</div>';
+    }
+
+    function loadHomeOrders() {
+      var list = document.getElementById('homeOrderList');
+      var api = window.QimaSupabase;
+      if (!list) return;
+      if (!api || !api.ready()) {
+        renderHomeOrderEmpty('index.ordersEmpty');
+        return;
+      }
+      renderHomeOrderEmpty('index.ordersLoading');
+      api.getFullOrders().then(function (rows) {
+        if (!rows || !rows.length) {
+          renderHomeOrderEmpty('index.ordersEmpty');
+          return;
+        }
+        list.innerHTML = rows.slice(0, 5).map(homeOrderRow).join('');
+      }).catch(function (err) {
+        console.warn('load home orders failed', err);
+        renderHomeOrderEmpty('index.ordersLoadFailed');
+      });
+    }
+
     renderLabOptions();
     renderAdditionalContacts();
+    loadHomeOrders();
 
     if (window.I18n) {
       I18n.onLangApplied = window.onLangApplied;
