@@ -127,43 +127,102 @@
   }
 
   function cleanModelValue(raw) {
-    var s = String(raw || '').replace(/\s+/g, ' ').trim();
+    var s = String(raw || '')
+      .replace(/[‐‑‒–—―]/g, '-')
+      .replace(/[：]/g, ':')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (!s) return '';
-    // Drop trailing label noise after the model token
-    s = s.split(/\s{2,}|\s+[A-Z][a-z]+\s*[:：]/)[0].trim();
-    var token = s.match(/([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/);
-    return token ? token[1].replace(/[.,;:]+$/, '') : '';
+
+    // Drop leading No./Number/# noise often glued after "Model"
+    s = s.replace(/^(?:No\.?|Number|Num|#|№|N°)\s*[:.#=]?\s*/i, '').trim();
+
+    // Cut at next label / sentence noise
+    s = s.split(
+      /\s{2,}|\s+(?:Rated|Voltage|Current|Manufacturer|Address|MADE\b|Batch|Date|Product|FCC|FDA|CE\b|RoHS|Input|Output|Capacity)\b/i
+    )[0].trim();
+    s = s.split(/\s+[A-Z][a-z]+\s*[:：]/)[0].trim();
+
+    // Normalize spaced dashes: "XY - 03" / "XY- 03" → "XY-03"
+    s = s.replace(/\s*-\s*/g, '-');
+    // "XY 03" (letters + spaces + digits) → "XY-03"
+    s = s.replace(/^([A-Za-z][A-Za-z0-9]*?)\s+(\d[\dA-Za-z.\-\/]*)$/, '$1-$2');
+
+    var token = s.match(/([A-Za-z0-9][A-Za-z0-9._\-\/]{0,32})/);
+    if (!token) return '';
+    var cleaned = token[1].replace(/[.,;:]+$/, '');
+    if (!cleaned || isJunkModelToken(cleaned)) return '';
+    // Prefer tokens that look like real model/SKU codes
+    if (cleaned.length < 2) return '';
+    return cleaned;
   }
 
-  function extractModel(text) {
-    var normalized = String(text || '')
-      // Common OCR: Model → ModeI / Modеl / Madel / M0del
-      .replace(/\bMode[lI1]\b/gi, 'Model')
+  function isJunkModelToken(s) {
+    return /^(no|number|num|name|model|sku|item|code|type|rated|voltage|current|address|china|prc|made|in|mouse|wireless|product|fcc|fda|ce|rohs|batch|date|manufacturer|origin|toys?|car|race)$/i.test(
+      String(s || '')
+    );
+  }
+
+  function normalizeModelHaystack(text) {
+    return String(text || '')
+      .replace(/[‐‑‒–—―]/g, '-')
+      // Common OCR / confusable deformations of "Model" (incl. Cyrillic lookalikes)
+      .replace(/[MМм][oо0О][dԁ][eеЕ][lI1І!|]/gi, 'Model')
+      .replace(/\bMode[lI1!|]\b/gi, 'Model')
+      .replace(/\bMad\s*el\b/gi, 'Model')
       .replace(/\bMadel\b/gi, 'Model')
       .replace(/\bM0del\b/gi, 'Model')
       .replace(/\bMODEI\b/g, 'MODEL')
+      .replace(/\bMODFL\b/gi, 'Model')
+      .replace(/\bMode\b(?=\s*(?:No|Number|#|:|：))/gi, 'Model')
       .replace(/型\s*号/g, '型号')
-      .replace(/货\s*号/g, '货号');
+      .replace(/货\s*号/g, '货号')
+      .replace(/型\s*號/g, '型号')
+      .replace(/貨\s*號/g, '货号')
+      .replace(/规格\s*型号/g, '型号')
+      .replace(/料\s*号/g, '货号')
+      .replace(/款\s*号/g, '货号');
+  }
+
+  function extractModel(text) {
+    var normalized = normalizeModelHaystack(text);
 
     var patterns = [
-      /Model\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
-      /Model\s*[:：]?\s*\n\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
-      /型号\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/,
-      /货号\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/,
-      /Item\s*#?\s*(?:\/\s*)?model\s*#?\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
-      /SKU\s*[:：#.=]?\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
-      /型\s*号\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/
+      // Model No. / Model Number / Model# / Model：
+      /Model\s*(?:No\.?|Number|Num|#|№|N°)?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /Model\s*(?:No\.?|Number|Num|#)?\s*[:：#.=]?\s*\n\s*([^\n]{1,40})/i,
+      // Glued: ModelNo.XY-03 / Model:XY-03
+      /Model(?:No\.?|Number)?[:：#.=]?([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i,
+      /型号\s*[:：#.=]?\s*([^\n]{1,40})/,
+      /货号\s*(?:\/\s*型号)?\s*[:：#.=]?\s*([^\n]{1,40})/,
+      /Item\s*#?\s*(?:\/\s*)?model\s*#?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /SKU\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /P\s*\/?\s*N\.?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /Part\s*(?:No\.?|Number|#)?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /Item\s*(?:No\.?|Number|#)?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /Art(?:icle)?\.?\s*(?:No\.?|Number|#)?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /Style\s*(?:No\.?|Number|#)?\s*[:：#.=]?\s*([^\n]{1,40})/i,
+      /型\s*号\s*([^\n]{1,40})/,
+      /货\s*号\s*([^\n]{1,40})/
     ];
+
     for (var i = 0; i < patterns.length; i++) {
       var m = normalized.match(patterns[i]);
       if (m && m[1]) {
         var cleaned = cleanModelValue(m[1]);
-        // Avoid grabbing words like "Wireless" from nearby lines
-        if (cleaned && !/^(name|voltage|current|address|china|mouse|rated)$/i.test(cleaned)) {
-          return cleaned;
-        }
+        if (cleaned) return cleaned;
       }
     }
+
+    // Last-resort: "Model" on one line, code-like token on the next
+    var lineMatch = normalized.match(
+      /(?:^|\n)\s*Model\s*(?:No\.?|Number|#)?\s*[:：#.=]?\s*(?:\n|\r)+\s*([A-Za-z0-9][A-Za-z0-9._\-\/]{1,32})/i
+    );
+    if (lineMatch && lineMatch[1]) {
+      var fromNextLine = cleanModelValue(lineMatch[1]);
+      if (fromNextLine) return fromNextLine;
+    }
+
     return '';
   }
 
@@ -345,11 +404,11 @@
     }
 
     var model = pick(text, [
-      /型号\s*[是为：:]?\s*([A-Za-z0-9][\w\-./]{1,40})/,
-      /货号\s*[是为：:]?\s*([A-Za-z0-9][\w\-./]{1,40})/,
-      /Model\s*[:：#.=]?\s*([A-Za-z0-9][\w\-./]{1,40})/i,
-      /model\s*[:=#]?\s*([A-Za-z0-9][\w\-./]{1,40})/i,
-      /SKU\s*[:=#]?\s*([A-Za-z0-9][\w\-./]{1,40})/i
+      /型号\s*[是为：:]?\s*([^\n，。,]{1,40})/,
+      /货号\s*[是为：:]?\s*([^\n，。,]{1,40})/,
+      /Model\s*(?:No\.?|Number|#)?\s*[:：#.=]?\s*([^\n，。,]{1,40})/i,
+      /SKU\s*[:=#]?\s*([^\n，。,]{1,40})/i,
+      /P\s*\/?\s*N\.?\s*[:=#]?\s*([^\n，。,]{1,40})/i
     ]);
     if (model) model = cleanModelValue(model);
     // Fallback shared Model extractor (OCR-tolerant)
