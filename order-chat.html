@@ -1158,9 +1158,9 @@
 <link rel="stylesheet" href="assets/lang-toggle.css" />
 <link rel="stylesheet" href="assets/i18n-en.css" />
 <script>window.PAGE_TITLE_KEY = 'title.orderChat';</script>
-<script src="assets/i18n/zh.js?v=20260714b"></script>
-<script src="assets/i18n/en.js?v=20260714b"></script>
-<script src="assets/i18n-runtime.js?v=20260714b"></script>
+<script src="assets/i18n/zh.js?v=20260714c"></script>
+<script src="assets/i18n/en.js?v=20260714c"></script>
+<script src="assets/i18n-runtime.js?v=20260714c"></script>
 <script src="assets/supabase-config.js?v=20260714c"></script>
 <script src="assets/supabase-client.js?v=20260714c"></script>
 <script src="assets/label-parse.js?v=20260714k"></script>
@@ -1646,8 +1646,12 @@
     function chipsRow(inner){ return '<div style="width:268px"><div class="chips">'+inner+'</div></div>'; }
 
     function placeOrderChips(extra){
-      var html = I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)') +
-        I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)');
+      var missing = (typeof getOrderBlockers === 'function') ? getOrderBlockers() : [];
+      var html = missing.length
+        ? I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()') +
+          I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)')
+        : I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)') +
+          I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)');
       if(extra) html += extra;
       return chipsRow(html);
     }
@@ -4346,10 +4350,10 @@
       closeFieldEditor();
       userMsg(t('orderChat.editedFields'));
       const completion = calculateRequiredCompletion();
-      const missing = getMissingRequiredFields();
-      if(completion === 100){
+      const missing = getOrderBlockers();
+      if(!missing.length){
         botMsg(tHtml('orderChat.savedEditComplete'), false);
-        botMsg(chipsRow(I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
+        botMsg(placeOrderChips(), true);
       } else {
         botMsg(tHtml('orderChat.savedEditPartial', {percent: completion, count: missing.length}), false);
         botMsg(t('orderChat.fillMissingInForm'), false);
@@ -4375,6 +4379,38 @@
 
     function getMissingRequiredFields(){
       return REQUIRED_ORDER_FIELDS.filter(name => !getFieldDisplayValue(name));
+    }
+
+    /** Required + conditional shipping when user ships samples themselves. */
+    function getOrderBlockers(){
+      const missing = getMissingRequiredFields().slice();
+      const method = getFieldDisplayValue('Sample Collection Method');
+      if(method && isSampleShip(method)){
+        if(!getFieldDisplayValue('Carrier')) missing.push('Carrier');
+        if(!getFieldDisplayValue('Tracking Number')) missing.push('Tracking Number');
+      }
+      // de-dupe
+      const seen = {};
+      return missing.filter(function(k){
+        if(seen[k]) return false;
+        seen[k] = true;
+        return true;
+      });
+    }
+
+    function blockPlaceOrderIfIncomplete(btn){
+      const blockers = getOrderBlockers();
+      if(!blockers.length) return false;
+      const labels = blockers.map(function(k){ return fieldLabel(k); }).join('、');
+      botMsg(tHtml('orderChat.cannotPlaceOrderList', {
+        count: blockers.length,
+        fields: labels
+      }), false);
+      botMsg(chipsRow(
+        I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')+
+        I18n.chipHtml('orderChat.chipEditFields','edit','openFieldEditor(this)')
+      ), true);
+      return true;
     }
 
     function pendingRequiredFieldsCard(){
@@ -5029,6 +5065,7 @@
     }
 
     function placeOrder(btn, skipReportFieldsQuestion){
+      if(blockPlaceOrderIfIncomplete(btn)) return;
       if(!skipReportFieldsQuestion && manualAnswers[FIELD_REPORT_NEED] === undefined){
         askReportFieldsStep(btn);
         return;
@@ -5192,6 +5229,13 @@
 
     function submitOrderSuccess(){
       if(orderSubmitInFlight) return;
+      const blockers = getOrderBlockers();
+      if(blockers.length){
+        closeOrderConfirm();
+        botMsg(t('orderChat.cannotSubmitOrder'), false);
+        blockPlaceOrderIfIncomplete(null);
+        return;
+      }
       const payload = buildFullOrderPayload();
       const api = window.QimaSupabase;
 
@@ -5216,38 +5260,42 @@
     }
 
     function readonlyOrderConfirmCard(){
-      const productName = manualAnswers['Product Name'] || getFieldValue('Product Name') || t('orderChat.productRobotToy');
-      const program = manualAnswers['Program'] || getFieldValue('Program') || t('orderChat.projectTemuHardwareRefund');
-      const manufacturer = manualAnswers['Manufacturer'] || getFieldValue('Manufacturer') || t('orderChat.manufacturerDemo');
-      const origin = manualAnswers['Country of Origin'] || getFieldValue('Country of Origin') || t('orderChat.originAland');
-      const distribution = manualAnswers['Countries/Regions of Distribution'] || getFieldValue('Countries/Regions of Distribution') || t('orderChat.distributionPresetEn');
-      const itemModel = manualAnswers['Item#/model#'] || getFieldValue('Item#/model#') || 'RBT-2025-X9';
+      function v(name, fallback){
+        const val = getFieldDisplayValue(name) || manualAnswers[name] || getFieldValue(name) || '';
+        return isCountedFieldValue(val) ? String(val).trim() : (fallback || t('orderChat.fieldPending'));
+      }
+      const productName = v('Product Name');
+      const program = v('Program');
+      const manufacturer = v('Manufacturer');
+      const origin = v('Country of Origin');
+      const distribution = v('Countries/Regions of Distribution');
+      const itemModel = v('Item#/model#');
       const electricType = manualAnswer(FIELD_ELECTRIC, '产品是否带电');
       const electricDescription = manualAnswer(FIELD_ELECTRIC_DESC, '产品说明');
-      const manufacturerAddress = manualAnswers['Manufacturer Address'] || getFieldValue('Manufacturer Address') || t('orderChat.manufacturerAddrDemo');
-      const carrier = manualAnswers['Carrier'] || getFieldValue('Carrier') || t('orderChat.fieldPending');
-      const tracking = manualAnswers['Tracking Number'] || getFieldValue('Tracking Number') || t('orderChat.fieldPending');
-      const collectionMethod = manualAnswers['Sample Collection Method'] || getFieldValue('Sample Collection Method') || t('orderChat.fieldPending');
-      const shippingRemark = manualAnswers['Shipping Remark'] || getFieldValue('Shipping Remark') || '';
+      const manufacturerAddress = v('Manufacturer Address');
+      const carrier = v('Carrier');
+      const tracking = v('Tracking Number');
+      const collectionMethod = v('Sample Collection Method');
+      const shippingRemark = getFieldDisplayValue('Shipping Remark') || '';
       const reportFieldsNeed = manualAnswer(FIELD_REPORT_NEED, '是否需要增加更多字段展示在报告上') || t('common.no');
       const reportFieldsDetail = manualAnswer(FIELD_REPORT_DETAIL, '报告额外字段');
       return '<div class="panel">'+
         '<div class="fields">'+
-          field('Product Name', productName, true)+
-          field('Program', program, true)+
-          field('Country of Origin', origin, true)+
-          field('Countries/Regions of Distribution', distribution, true)+
-          field('Item#/model#', itemModel, true)+
-          (electricType ? field(FIELD_ELECTRIC, electricType, true) : '')+
-          (electricDescription ? field(FIELD_ELECTRIC_DESC, electricDescription, true) : '')+
-          field('Manufacturer', manufacturer, true)+
-          field('Manufacturer Address', manufacturerAddress, true)+
-          field('Sample Collection Method', collectionMethod, true)+
+          field('Product Name', productName, isCountedFieldValue(productName))+
+          field('Program', program, isCountedFieldValue(program))+
+          field('Country of Origin', origin, isCountedFieldValue(origin))+
+          field('Countries/Regions of Distribution', distribution, isCountedFieldValue(distribution))+
+          field('Item#/model#', itemModel, isCountedFieldValue(itemModel))+
+          (isCountedFieldValue(electricType) ? field(FIELD_ELECTRIC, electricType, true) : '')+
+          (isCountedFieldValue(electricDescription) ? field(FIELD_ELECTRIC_DESC, electricDescription, true) : '')+
+          field('Manufacturer', manufacturer, isCountedFieldValue(manufacturer))+
+          field('Manufacturer Address', manufacturerAddress, isCountedFieldValue(manufacturerAddress))+
+          field('Sample Collection Method', collectionMethod, isCountedFieldValue(collectionMethod))+
           field(FIELD_REPORT_NEED, reportFieldsNeed, true)+
           (reportFieldsNeed === t('common.yes') && reportFieldsDetail ? field(FIELD_REPORT_DETAIL, reportFieldsDetail, true) : '')+
           (isSampleCollect(collectionMethod) ? '' :
-            field('Carrier', carrier, carrier !== t('orderChat.fieldPending'))+
-            field('Tracking Number', tracking, tracking !== t('orderChat.fieldPending'))+
+            field('Carrier', carrier, isCountedFieldValue(carrier))+
+            field('Tracking Number', tracking, isCountedFieldValue(tracking))+
             field('Shipping Remark', shippingRemark, !!shippingRemark, true)
           )+
         '</div>'+
