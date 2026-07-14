@@ -2,6 +2,10 @@
 :root {
   --phone-width: 390px;
   --phone-height: 1009px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 .phone {
@@ -10,4 +14,103 @@
   min-height: var(--phone-height);
   max-height: var(--phone-height);
   flex-shrink: 0;
+}
+
+/**
+ * Real phone / narrow viewport:
+ * Fill the device instead of the desktop 390×1009 mock shell.
+ */
+@media (max-width: 640px) {
+  html {
+    height: 100%;
+  }
+
+  html,
+  body {
+    background: #f2f5fc !important;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    display: block;
+    min-height: 100%;
+    min-height: 100dvh;
+    padding: 0;
+    margin: 0;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Notch / Dynamic Island */
+  .statusbar {
+    padding-top: var(--safe-top);
+    height: calc(47px + var(--safe-top));
+    box-sizing: border-box;
+  }
+
+  /* Home indicator */
+  .tabbar {
+    height: calc(71.5px + var(--safe-bottom)) !important;
+    padding-bottom: var(--safe-bottom);
+    box-sizing: border-box;
+  }
+
+  .fab {
+    bottom: calc(30px + var(--safe-bottom)) !important;
+  }
+
+  /* Bottom sheets / forms */
+  .sheet {
+    padding-bottom: calc(20px + var(--safe-bottom)) !important;
+  }
+
+  .detail-body {
+    padding-bottom: calc(96px + var(--safe-bottom)) !important;
+  }
+
+  .detail-panel,
+  .order-confirm-modal,
+  .supplier-modal,
+  .form-modal,
+  .edit-modal,
+  .examples-modal,
+  .action-sheet {
+    max-height: calc(100dvh - var(--safe-top) - 12px);
+  }
+
+  .examples-body,
+  .order-confirm-body,
+  .edit-modal-body,
+  .form-modal-body,
+  .supplier-body {
+    max-height: min(560px, calc(100dvh - 180px - var(--safe-top) - var(--safe-bottom))) !important;
+  }
+
+  .order-confirm-actions,
+  .supplier-foot,
+  .form-modal-actions,
+  .edit-modal-actions,
+  .action-sheet {
+    padding-bottom: calc(12px + var(--safe-bottom)) !important;
+  }
+
+  /* Chat bubbles: use fluid width on tall/wide phones */
+  .bubble {
+    max-width: min(320px, calc(100vw - 74px)) !important;
+  }
+  .wide {
+    width: min(320px, calc(100vw - 74px)) !important;
+    max-width: min(320px, calc(100vw - 74px)) !important;
+  }
 }
