@@ -509,9 +509,111 @@
     });
   }
 
+  function extractWaybillFromOcrText(ocrText) {
+    var text = simplifySpaces(ocrText);
+    var upper = text.toUpperCase();
+    var carrier = '';
+    var carrierKey = '';
+
+    var brandRules = [
+      { key: 'sf', re: /顺丰|SF\s*EXPRESS|\bSFEXPRESS\b/i, label: '顺丰速运' },
+      { key: 'zto', re: /中通|ZTO|ZHONG\s*TONG/i, label: '中通快递' },
+      { key: 'yto', re: /圆通|YTO|YUAN\s*TONG/i, label: '圆通速递' },
+      { key: 'sto', re: /申通|STO|SHEN\s*TONG/i, label: '申通快递' },
+      { key: 'yunda', re: /韵达|YUNDA/i, label: '韵达快递' },
+      { key: 'jd', re: /京东(物流|快递)?|\bJD\b|京东速运/i, label: '京东物流' },
+      { key: 'jt', re: /极兔|J&T|JT\s*EXPRESS/i, label: '极兔速递' },
+      { key: 'dhl', re: /\bDHL\b/i, label: 'DHL' },
+      { key: 'ups', re: /\bUPS\b/i, label: 'UPS' },
+      { key: 'fedex', re: /FEDEX|联邦快递/i, label: 'FedEx' }
+    ];
+
+    for (var i = 0; i < brandRules.length; i++) {
+      if (brandRules[i].re.test(text)) {
+        carrierKey = brandRules[i].key;
+        carrier = brandRules[i].label;
+        break;
+      }
+    }
+
+    var tracking = '';
+    var labeled = text.match(
+      /(?:运单号|快递单号|物流单号|单号|邮件号|Waybill|Tracking(?:\s*No\.?)?|Consignment)\s*[:：#]?\s*([A-Za-z0-9][A-Za-z0-9\-]{7,24})/i
+    );
+    if (labeled) tracking = labeled[1].toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    if (!tracking) {
+      var candidates = [];
+      var re = /\b([A-Z]{0,3}\d{10,18}|[A-Z]{2}\d{9,18}[A-Z]?|SF[A-Z0-9]{10,18}|JD[A-Z0-9]{8,18}|YT\d{10,16}|JT\d{10,16})\b/gi;
+      var m;
+      while ((m = re.exec(upper)) !== null) {
+        var code = String(m[1] || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (code.length < 10 || code.length > 22) continue;
+        // Skip FCC / phone-like numbers
+        if (/^(86)?1[3-9]\d{9}$/.test(code)) continue;
+        if (/^XM\d+|FCC/i.test(code)) continue;
+        candidates.push(code);
+      }
+      if (candidates.length) {
+        candidates.sort(function (a, b) {
+          var score = function (c) {
+            var s = c.length;
+            if (/^SF/.test(c)) s += 20;
+            if (/^JD/.test(c)) s += 15;
+            if (/^YT|^JT|^ZT|^STO/.test(c)) s += 12;
+            if (/^\d{12,15}$/.test(c)) s += 8;
+            return s;
+          };
+          return score(b) - score(a);
+        });
+        tracking = candidates[0];
+      }
+    }
+
+    // Infer carrier from tracking prefix when brand text missing
+    if (tracking && !carrier) {
+      if (/^SF/.test(tracking)) {
+        carrier = '顺丰速运';
+        carrierKey = 'sf';
+      } else if (/^JD/.test(tracking)) {
+        carrier = '京东物流';
+        carrierKey = 'jd';
+      } else if (/^YT/.test(tracking)) {
+        carrier = '圆通速递';
+        carrierKey = 'yto';
+      } else if (/^JT/.test(tracking)) {
+        carrier = '极兔速递';
+        carrierKey = 'jt';
+      }
+    }
+
+    return {
+      carrier: carrier,
+      carrierKey: carrierKey,
+      tracking: tracking,
+      raw_excerpt: text.slice(0, 400),
+      source: 'waybill_ocr'
+    };
+  }
+
+  function recognizeWaybillImage(file, onProgress) {
+    return ocrImageFile(file, onProgress).then(function (text) {
+      var parsed = extractWaybillFromOcrText(text);
+      if (!parsed.tracking && !parsed.carrier) {
+        var err = new Error('waybill_not_recognized');
+        err.code = 'waybill_not_recognized';
+        err.raw = text;
+        throw err;
+      }
+      return parsed;
+    });
+  }
+
   global.QimaLabelParse = {
     extractFieldsFromOcrText: extractFieldsFromOcrText,
     extractFieldsFromVoiceText: extractFieldsFromVoiceText,
+    extractWaybillFromOcrText: extractWaybillFromOcrText,
+    recognizeWaybillImage: recognizeWaybillImage,
     mergeFieldSets: mergeFieldSets,
     parseFilesLocally: parseFilesLocally,
     loadTesseract: loadTesseract

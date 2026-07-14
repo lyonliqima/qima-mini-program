@@ -477,6 +477,8 @@ window.I18N_EN = {
   'orderChat.selectRefPrompt': 'Now select the <b>product inspection order reference</b> for this collection.',
   'orderChat.waybillCameraHint': 'Aim at the shipping label so the carrier and tracking number are fully visible.',
   'orderChat.waybillRecognized': 'Shipping details recognized from the label ✅',
+  'orderChat.waybillRecognizing': 'Recognizing shipping label…',
+  'orderChat.waybillRecognizeFailed': 'Could not read the label. Retake the photo or enter carrier and tracking manually.',
   'orderChat.shippingRecorded': 'Shipping details saved ✅',
   'orderChat.shippingRecordedConfirm': 'Shipping details saved ✅ Please review the order again.',
   'orderChat.refRecorded': 'Reference number saved ✅',

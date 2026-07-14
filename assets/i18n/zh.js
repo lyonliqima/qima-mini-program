@@ -477,6 +477,8 @@ window.I18N_ZH = {
   'orderChat.selectRefPrompt': '请再选择本次要参考的<b>产品检验订单参考编号</b>。',
   'orderChat.waybillCameraHint': '请对准快递面单拍照，尽量让运单号和快递公司完整入镜。',
   'orderChat.waybillRecognized': '已从面单照片中识别出快递信息 ✅',
+  'orderChat.waybillRecognizing': '正在识别快递面单…',
+  'orderChat.waybillRecognizeFailed': '未能识别面单，请重拍或手动填写快递公司与运单号。',
   'orderChat.shippingRecorded': '已记录物流信息 ✅',
   'orderChat.shippingRecordedConfirm': '已记录物流信息 ✅ 请再次确认订单信息。',
   'orderChat.refRecorded': '已记录参考编号 ✅',

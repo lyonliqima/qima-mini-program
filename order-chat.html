@@ -581,11 +581,15 @@
   .missing-subsection.show { display: flex; }
   .missing-hint { font-size: 11px; color: var(--seal); line-height: 16px; margin-top: -2px; }
   .waybill-scan-btn {
-    height: 36px; border: 1px dashed #b8c6ee; border-radius: 10px;
+    width: 100%; height: 36px; border: 1px dashed #b8c6ee; border-radius: 10px;
     background: #f7f9ff; color: var(--pool-500);
     font-size: 12px; font-weight: 700; cursor: pointer;
   }
+  .waybill-scan-btn:disabled {
+    opacity: .65; cursor: wait;
+  }
   .waybill-scan-btn:active { background: #eef3ff; }
+  #mf_shippingSection .waybill-scan-btn { margin-bottom: 2px; }
   .missing-input, .missing-select, .missing-textarea {
     width: 100%; border: 1px solid #e3e7ef; border-radius: 10px;
     background: #fff; color: var(--carbon); font-size: 12px;
@@ -1157,7 +1161,7 @@
 <script src="assets/i18n-runtime.js?v=20260714b"></script>
 <script src="assets/supabase-config.js?v=20260714b"></script>
 <script src="assets/supabase-client.js?v=20260714b"></script>
-<script src="assets/label-parse.js?v=20260714c"></script>
+<script src="assets/label-parse.js?v=20260714d"></script>
 </head>
 <body>
   <div class="phone">
@@ -1466,6 +1470,9 @@
           </div>
 
           <div id="mf_shippingSection" style="display:none;">
+            <div class="fm-row">
+              <button class="waybill-scan-btn" type="button" id="mf_scanWaybillBtn" onclick="scanWaybillIntoManualForm()">📷 <span data-i18n="orderChat.chipPhotoWaybill">拍照识别面单</span></button>
+            </div>
             <div class="fm-row">
               <div class="fm-label" data-i18n="carrier.label">快递公司</div>
               <select class="fm-select" id="mf_carrier">
@@ -4073,40 +4080,182 @@
     }
 
     let waybillOrigin = '';
-    function openWaybillCamera(origin){
-      waybillOrigin = origin || '';
-      const typingRow = botTyping();
-      setTimeout(()=>{ typingRow.remove(); botMsg(t('orderChat.waybillCameraHint'), false); }, 300);
-      const input = document.getElementById('waybillCamera');
-      input.value = '';
-      input.click();
-      // 原型演示：即使浏览器环境没有真实相机选择，也模拟一次识别结果。
-      setTimeout(()=>{ processWaybillPhoto(true); }, 900);
+    let waybillTargetCard = null;
+
+    function resolveCarrierDisplayName(parsed){
+      if(!parsed) return '';
+      const carriers = getCarriers();
+      const keyMap = {
+        sf: 0, zto: 1, yto: 2, sto: 3, yunda: 4, jd: 5, jt: 6
+      };
+      if(parsed.carrierKey && keyMap[parsed.carrierKey] != null && carriers[keyMap[parsed.carrierKey]]){
+        return carriers[keyMap[parsed.carrierKey]];
+      }
+      if(parsed.carrier){
+        const hit = carriers.find(function(c){ return c.indexOf(parsed.carrier) !== -1 || parsed.carrier.indexOf(c) !== -1; });
+        return hit || parsed.carrier;
+      }
+      return '';
     }
 
-    function processWaybillPhoto(fromDemo){
-      if(!waybillOrigin) return;
-      userMsg(t('orderChat.userWaybillPhoto'));
-      const typingRow = botTyping();
-      setTimeout(()=>{ typingRow.remove();
-        const carrier = t('carrier.sf');
-        const tracking = 'SF1234567890123';
+    function applyWaybillResult(parsed, previewUrl){
+      const carrier = resolveCarrierDisplayName(parsed);
+      const tracking = (parsed && parsed.tracking) || '';
+      if(carrier){
         manualAnswers['Carrier'] = carrier;
-        manualAnswers['Tracking Number'] = tracking;
         setFieldValue('Carrier', carrier);
+        const mfCarrier = document.getElementById('mf_carrier');
+        if(mfCarrier) matchSelectOption(mfCarrier, carrier);
+      }
+      if(tracking){
+        manualAnswers['Tracking Number'] = tracking;
         setFieldValue('Tracking Number', tracking);
-        botMsg('<div class="waybill-card"><div class="waybill-photo" data-photo-label="'+escapeHtml(t('carrier.waybillPhoto'))+'"></div><div class="waybill-row"><span>'+t('carrier.label')+'</span><span>'+escapeHtml(carrier)+'</span></div><div class="waybill-row"><span>'+t('carrier.trackingNo')+'</span><span>'+escapeHtml(tracking)+'</span></div></div>', true);
-        botMsg(t('orderChat.waybillRecognized'), false);
-        if(waybillOrigin === 'manual'){
-          manualIndex++;
-          waybillOrigin = '';
-          askManualField();
-        } else if(waybillOrigin === 'missing'){
-          mi++;
-          waybillOrigin = '';
-          askMissing();
+        const mfTracking = document.getElementById('mf_trackingNo');
+        if(mfTracking) mfTracking.value = tracking;
+      }
+      if(waybillTargetCard){
+        const carrierSel = waybillTargetCard.querySelector('#missingCarrier');
+        const trackingInput = waybillTargetCard.querySelector('#missingTracking');
+        if(carrierSel && carrier){
+          matchSelectOption(carrierSel, carrier);
+          carrierSel.value = carrier;
         }
-      }, 800);
+        if(trackingInput && tracking) trackingInput.value = tracking;
+        const err = waybillTargetCard.querySelector('#missingFormError');
+        if(err) err.classList.remove('show');
+      }
+
+      const photo = previewUrl
+        ? '<div class="waybill-photo" style="background-image:url(\''+escapeHtml(previewUrl)+'\');background-size:cover;background-position:center;"></div>'
+        : '<div class="waybill-photo" data-photo-label="'+escapeHtml(t('carrier.waybillPhoto'))+'"></div>';
+      botMsg(
+        '<div class="waybill-card">'+photo+
+          '<div class="waybill-row"><span>'+t('carrier.label')+'</span><span>'+escapeHtml(carrier || t('orderChat.fieldPending'))+'</span></div>'+
+          '<div class="waybill-row"><span>'+t('carrier.trackingNo')+'</span><span>'+escapeHtml(tracking || t('orderChat.fieldPending'))+'</span></div>'+
+        '</div>',
+        true
+      );
+      botMsg(t('orderChat.waybillRecognized'), false);
+    }
+
+    function openWaybillCamera(origin, targetCard){
+      waybillOrigin = origin || '';
+      waybillTargetCard = targetCard || null;
+      const input = document.getElementById('waybillCamera');
+      if(!input) return;
+      input.value = '';
+      if(waybillOrigin !== 'form' && waybillOrigin !== 'missing'){
+        botMsg(t('orderChat.waybillCameraHint'), false);
+      }
+      input.click();
+    }
+
+    function scanWaybillIntoManualForm(){
+      const btn = document.getElementById('mf_scanWaybillBtn');
+      if(btn){
+        btn.disabled = true;
+        btn.dataset.prevHtml = btn.innerHTML;
+        btn.textContent = t('carrier.scanning');
+      }
+      openWaybillCamera('form');
+      // Re-enable if user cancels file picker (no change event)
+      setTimeout(function(){
+        const input = document.getElementById('waybillCamera');
+        if(input && !input.files.length && btn){
+          btn.disabled = false;
+          if(btn.dataset.prevHtml){ btn.innerHTML = btn.dataset.prevHtml; delete btn.dataset.prevHtml; }
+        }
+      }, 1500);
+    }
+
+    function processWaybillPhoto(){
+      const input = document.getElementById('waybillCamera');
+      const file = input && input.files && input.files[0] ? input.files[0] : null;
+      const origin = waybillOrigin;
+      if(!file){
+        resetWaybillScanButton();
+        return;
+      }
+      if(!origin) waybillOrigin = 'form';
+
+      let previewUrl = '';
+      try { previewUrl = URL.createObjectURL(file); } catch (_) {}
+
+      if(waybillOrigin !== 'form'){
+        userMsg(t('orderChat.userWaybillPhoto'));
+      }
+
+      const progressRow = botMsg(parseProgressCard(t('orderChat.waybillRecognizing')), true);
+      const btn = document.getElementById('mf_scanWaybillBtn');
+      if(btn && waybillOrigin === 'form'){
+        btn.disabled = true;
+        btn.textContent = t('carrier.scanning');
+      }
+
+      const recognize = (window.QimaLabelParse && typeof QimaLabelParse.recognizeWaybillImage === 'function')
+        ? QimaLabelParse.recognizeWaybillImage(file, function(msg){
+            updateParseProgressCard(progressRow, msg || t('orderChat.waybillRecognizing'));
+          })
+        : Promise.reject(new Error('missing_waybill_ocr'));
+
+      recognize.then(function(parsed){
+        if(progressRow && progressRow.parentNode) progressRow.remove();
+        applyWaybillResult(parsed, previewUrl);
+        finishWaybillFlow();
+      }).catch(function(err){
+        console.error('waybill OCR failed', err);
+        if(progressRow && progressRow.parentNode) progressRow.remove();
+        botMsg(t('orderChat.waybillRecognizeFailed'), false);
+        if(waybillOrigin === 'form'){
+          // keep form open for manual entry
+        } else {
+          finishWaybillFlow();
+        }
+      }).finally(function(){
+        resetWaybillScanButton();
+        if(input) input.value = '';
+      });
+    }
+
+    function resetWaybillScanButton(){
+      const btn = document.getElementById('mf_scanWaybillBtn');
+      if(!btn) return;
+      btn.disabled = false;
+      if(btn.dataset.prevHtml){
+        btn.innerHTML = btn.dataset.prevHtml;
+        delete btn.dataset.prevHtml;
+      } else {
+        btn.innerHTML = '📷 <span data-i18n="orderChat.chipPhotoWaybill">'+escapeHtml(t('orderChat.chipPhotoWaybill'))+'</span>';
+      }
+    }
+
+    function finishWaybillFlow(){
+      const origin = waybillOrigin;
+      waybillOrigin = '';
+      waybillTargetCard = null;
+      if(origin === 'manual'){
+        manualIndex++;
+        askManualField();
+      } else if(origin === 'missing'){
+        if(typeof mi !== 'undefined') mi++;
+        if(typeof askMissing === 'function') askMissing();
+      }
+    }
+
+    function scanWaybillIntoMissingCard(btn){
+      const card = btn.closest('.missing-card');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = t('carrier.scanning');
+      btn.dataset.prevText = originalText;
+      openWaybillCamera('missing', card);
+      setTimeout(function(){
+        const input = document.getElementById('waybillCamera');
+        if(input && !input.files.length){
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      }, 1500);
     }
 
     function setFieldValue(name, value){
@@ -4158,7 +4307,7 @@
               '</div>'+
               '<div class="missing-group">'+
                 '<div class="missing-label">'+t('carrier.trackingNo')+'</div>'+
-                '<input class="missing-input" id="missingTracking" value="SF1234567890123" placeholder="SF1234567890123">'+
+                '<input class="missing-input" id="missingTracking" value="" placeholder="SF1234567890123">'+
               '</div>'+
             '</div>'+
             '<div class="missing-group">'+
@@ -4203,20 +4352,6 @@
       const isYes = input.value === t('common.yes') && input.checked;
       section.classList.toggle('show', isYes);
       card.querySelector('#missingFormError').classList.remove('show');
-    }
-
-    function scanWaybillIntoMissingCard(btn){
-      const card = btn.closest('.missing-card');
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = t('carrier.scanning');
-      setTimeout(()=>{
-        card.querySelector('#missingCarrier').value = t('carrier.sf');
-        card.querySelector('#missingTracking').value = 'SF1234567890123';
-        card.querySelector('#missingFormError').classList.remove('show');
-        btn.textContent = t('carrier.scanned');
-        setTimeout(()=>{ btn.disabled = false; btn.textContent = originalText; }, 900);
-      }, 600);
     }
 
     function toggleMissingSampleFields(input){
