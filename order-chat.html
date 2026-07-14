@@ -1501,7 +1501,7 @@
         </div>
         <div class="form-modal-actions">
           <button class="form-modal-action" type="button" onclick="closeManualFormModal()" data-i18n="common.cancel">取消</button>
-          <button class="form-modal-action primary" type="button" onclick="submitManualForm()" data-i18n="common.submit">提交下单</button>
+          <button class="form-modal-action primary" type="button" onclick="submitManualForm()" data-i18n="orderChat.formConfirmBtn">确定</button>
         </div>
       </div>
     </div>
@@ -2980,8 +2980,7 @@
         if(fallback && fallback.fields && Object.keys(fallback.fields).some(function(k){ return fallback.fields[k]; })){
           runRecognize(src, fallback);
         } else {
-          botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')+I18n.chipHtml('orderChat.noDataFill','plus','startManualFill()')), true);
-          openManualFormModal();
+          botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')+I18n.chipHtml('orderChat.noDataFill','plus','startManualFill()')), true);
         }
       });
     }
@@ -3043,6 +3042,11 @@
           }, 50);
         }
       }
+    }
+
+    function openManualFormModalForComplete(){
+      const needSample = !getFieldDisplayValue('Sample Collection Method');
+      openManualFormModal({ scrollToSample: needSample });
     }
 
     function syncManualAnswersFromForm(){
@@ -3305,10 +3309,7 @@
       const missingCore = getMissingRequiredFields();
       if(!missingCore.length) return;
       botMsg(tHtml('orderChat.continueFillMissing', { count: missingCore.length }), false);
-      botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
-      openManualFormModal({
-        scrollToSample: missingCore.indexOf('Sample Collection Method') !== -1
-      });
+      botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')), true);
     }
 
     function selectFieldCard(item, source){
@@ -3809,12 +3810,9 @@
 
           if(needForm){
             botMsg(t('orderChat.fillMissingInForm'), false);
-            botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
-            setTimeout(function(){
-              openManualFormModal({ scrollToSample: needSampleOrShip });
-            }, 350);
+            botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')), true);
           } else {
-            botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')+I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')), true);
+            botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')+I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')), true);
           }
         }, 600);
       }, 500);
@@ -4144,8 +4142,7 @@
       } else {
         botMsg(tHtml('orderChat.savedEditPartial', {percent: completion, count: missing.length}), false);
         botMsg(t('orderChat.fillMissingInForm'), false);
-        botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')+I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
-        setTimeout(function(){ openManualFormModal(); }, 300);
+        botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')+I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
       }
     }
 
