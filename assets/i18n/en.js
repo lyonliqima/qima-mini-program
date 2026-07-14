@@ -397,7 +397,7 @@ window.I18N_EN = {
   'orderChat.fileTypes': 'JPG / PNG / PDF / Excel / Word — max 10 MB per file',
   'orderChat.uploadHintTitle': 'What you can upload or paste',
   'orderChat.viewDetails': 'Detail',
-  'orderChat.uploadHintTags': 'Spec sheets, photos, packaging labels, PO/PI, invoices, test reports, product links',
+  'orderChat.uploadHintTags': 'Spec sheets, photos, packaging labels, PO/PI, invoices, test reports, product links (images / PDF / Word .docx)',
   'orderChat.linkPlaceholder': 'Paste Amazon / TEMU / Shopify product link',
   'orderChat.parseBtn': 'Parse now',
   'orderChat.noDataFill': 'No documents — fill manually',

@@ -19,25 +19,89 @@
   };
 
   var TESSERACT_CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+  var PDFJS_CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+  var PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  var MAMMOTH_CDN = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
   var tesseractLoading = null;
+  var pdfjsLoading = null;
+  var mammothLoading = null;
+
+  function loadScriptOnce(src, key) {
+    return new Promise(function (resolve, reject) {
+      if (document.querySelector('script[data-qima-lib="' + key + '"]')) {
+        resolve();
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.setAttribute('data-qima-lib', key);
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('script_load_failed:' + key)); };
+      document.head.appendChild(s);
+    });
+  }
 
   function loadTesseract() {
     if (global.Tesseract) return Promise.resolve(global.Tesseract);
     if (tesseractLoading) return tesseractLoading;
-    tesseractLoading = new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      s.src = TESSERACT_CDN;
-      s.async = true;
-      s.onload = function () {
-        if (global.Tesseract) resolve(global.Tesseract);
-        else reject(new Error('tesseract_load_failed'));
-      };
-      s.onerror = function () {
-        reject(new Error('tesseract_cdn_failed'));
-      };
-      document.head.appendChild(s);
+    tesseractLoading = loadScriptOnce(TESSERACT_CDN, 'tesseract').then(function () {
+      if (global.Tesseract) return global.Tesseract;
+      throw new Error('tesseract_load_failed');
     });
     return tesseractLoading;
+  }
+
+  function loadPdfJs() {
+    if (global.pdfjsLib) return Promise.resolve(global.pdfjsLib);
+    if (pdfjsLoading) return pdfjsLoading;
+    pdfjsLoading = loadScriptOnce(PDFJS_CDN, 'pdfjs').then(function () {
+      if (!global.pdfjsLib) throw new Error('pdfjs_load_failed');
+      global.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+      return global.pdfjsLib;
+    });
+    return pdfjsLoading;
+  }
+
+  function loadMammoth() {
+    if (global.mammoth) return Promise.resolve(global.mammoth);
+    if (mammothLoading) return mammothLoading;
+    mammothLoading = loadScriptOnce(MAMMOTH_CDN, 'mammoth').then(function () {
+      if (!global.mammoth) throw new Error('mammoth_load_failed');
+      return global.mammoth;
+    });
+    return mammothLoading;
+  }
+
+  function fileNameOf(file) {
+    return String((file && file.name) || '').toLowerCase();
+  }
+
+  function isImageFile(file) {
+    var type = (file && file.type) || '';
+    var name = fileNameOf(file);
+    return type.indexOf('image/') === 0 || /\.(jpe?g|png|gif|webp|bmp|heic)$/.test(name);
+  }
+
+  function isPdfFile(file) {
+    var type = (file && file.type) || '';
+    var name = fileNameOf(file);
+    return type === 'application/pdf' || name.endsWith('.pdf');
+  }
+
+  function isDocxFile(file) {
+    var type = (file && file.type) || '';
+    var name = fileNameOf(file);
+    return (
+      name.endsWith('.docx') ||
+      type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
+  }
+
+  function isLegacyDocFile(file) {
+    var type = (file && file.type) || '';
+    var name = fileNameOf(file);
+    return (name.endsWith('.doc') && !name.endsWith('.docx')) || type === 'application/msword';
   }
 
   function simplifySpaces(text) {
@@ -226,28 +290,80 @@
     return '';
   }
 
-  function extractFieldsFromOcrText(ocrText) {
-    var text = simplifySpaces(ocrText);
+  function pickLabelValue(text, labels) {
+    var src = String(text || '');
+    for (var i = 0; i < labels.length; i++) {
+      var label = labels[i];
+      var escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*');
+      var patterns = [
+        // Label: value
+        new RegExp(escaped + '\\s*[:：#.=]\\s*([^\\n]{1,120})', 'i'),
+        // Label\nvalue
+        new RegExp(escaped + '\\s*[:：#.=]?\\s*(?:\\n|\\r)+\\s*([^\\n]{1,120})', 'i'),
+        // Label value (same line, no colon) — stop before next known header
+        new RegExp(
+          escaped +
+            '\\s+([^\\n]{1,120}?)(?=\\s+(?:Model|Rating|Manufacturer|Address|Contact|EC\\s*REP|UK\\s*REP|MADE\\s+IN|型号|额定|制造商|地址)\\b|$)',
+          'i'
+        )
+      ];
+      for (var p = 0; p < patterns.length; p++) {
+        var m = src.match(patterns[p]);
+        if (m && m[1]) {
+          var val = String(m[1]).replace(/\s+/g, ' ').trim();
+          // Reject if we accidentally captured another label name
+          if (!val) continue;
+          if (/^(Model|Rating|Manufacturer|Address|Contact|EC|UK|MADE)$/i.test(val)) continue;
+          return val;
+        }
+      }
+    }
+    return '';
+  }
+
+  function extractProductName(text) {
     var productName = pick(text, [
       /Product\s*name\s*[:：]\s*([^\n]+)/i,
-      /品名\s*[:：]\s*([^\n]+)/,
-      /产品名称\s*[:：]\s*([^\n]+)/
+      /品名\s*[:：]?\s*([^\n]+)/,
+      /产品名称\s*[:：]?\s*([^\n]+)/
     ]);
     if (productName) {
       productName = productName.replace(/\s+/g, ' ').trim();
-      // Stop before next label if OCR glued lines
-      productName = productName.split(/\s+(?:Model|型号|Rated|FCC|Manufacturer)\b/i)[0].trim();
+      productName = productName.split(/\s+(?:Model|型号|Rated|Rating|FCC|Manufacturer)\b/i)[0].trim();
+      if (productName) return productName;
     }
+    // Title line directly above Model (common nameplate / Word table export)
+    var aboveModel = text.match(
+      /(?:^|\n)\s*([A-Za-z\u4e00-\u9fff][A-Za-z0-9\u4e00-\u9fff &/\-]{1,60}?)\s*(?:\n|\r)+\s*Model\b/i
+    );
+    if (aboveModel) {
+      var title = aboveModel[1].replace(/\s+/g, ' ').trim();
+      if (title && !/^(Manufacturer|Address|Rating|Contact|EC\s*REP|UK\s*REP)$/i.test(title)) {
+        return title;
+      }
+    }
+    // Common appliance titles glued on one line: "Electric Fan Model XP-085"
+    var glued = text.match(
+      /\b((?:Electric|Wireless|Smart|Portable)?\s*(?:Fan|Heater|Lamp|Light|Mouse|Speaker|Robot|Toy|Blender|Kettle)[A-Za-z ]{0,20})\s+Model\b/i
+    );
+    if (glued) return glued[1].replace(/\s+/g, ' ').trim();
+    return '';
+  }
+
+  function extractFieldsFromOcrText(ocrText) {
+    var text = simplifySpaces(ocrText);
+    var productName = extractProductName(text);
     var model = extractModel(text);
-    var manufacturer = pick(text, [
-      /Manufacturer\s*[:：]\s*([^\n]+)/i,
-      /制造商\s*[:：]\s*([^\n]+)/,
-      /生产商\s*[:：]\s*([^\n]+)/
-    ]);
-    var address = pick(text, [
-      /Address\s*[:：]\s*([^\n]+)/i,
-      /地址\s*[:：]\s*([^\n]+)/
-    ]);
+    var manufacturer = pickLabelValue(text, ['Manufacturer', '制造商', '生产商', '厂家']);
+    var address = pickLabelValue(text, ['Address', '制造商地址', '地址', '厂址']);
+    if (manufacturer) {
+      manufacturer = manufacturer.split(/\s+(?:Address|Contact|EC\s*REP|UK\s*REP|Rating)\b/i)[0].trim();
+      manufacturer = manufacturer.replace(/[,，;；]\s*$/, '').trim();
+    }
+    if (address) {
+      address = address.split(/\s+(?:Contact|EC\s*REP|UK\s*REP|Manufacturer|Model)\b/i)[0].trim();
+    }
+
     var originRaw =
       pick(text, [
         /MADE\s+IN\s+([A-Z][A-Z\s]+)/i,
@@ -255,18 +371,38 @@
         /原产地?\s*[:：]\s*([^\n]+)/,
         /产地\s*[:：]\s*([^\n]+)/
       ]) || (/MADE\s+IN\s+CHINA/i.test(text) ? '中国' : '');
+    // Infer China from Shenzhen / CN address when Made-in missing
+    if (!originRaw && /Shenzhen|深圳|\bCN\b|China/i.test(address || text)) {
+      originRaw = '中国';
+    }
+
     var batch = pick(text, [/Batch\s*[:：]\s*([^\n]+)/i, /批号\s*[:：]\s*([^\n]+)/]);
     var date = pick(text, [
       /Date\s+of\s+manufacture\s*[:：]\s*([^\n]+)/i,
       /生产日期\s*[:：]\s*([^\n]+)/
     ]);
+    var rating = pickLabelValue(text, ['Rating', 'Rated', '额定', '额定参数', '规格']);
     var ecRep = '';
-    var ecMatch = text.match(/EC\s*REP[\s\S]{0,40}?([A-Za-z][^\n]+(?:\n[^\n]+){0,3})/i);
+    var ecMatch = text.match(/EC\s*REP[\s\S]{0,80}?([A-Za-z][^\n]+(?:\n[^\n]+){0,3})/i);
     if (ecMatch) ecRep = simplifySpaces(ecMatch[1]).split('\n').slice(0, 4).join(' ');
 
     var marks = detectMarks(text);
     var regions = extractDistributionRegions(text);
-    var electric = inferElectricFromText(text);
+    // French sorting marks / Triman often mean EU (France) market
+    if (/Triman|LE\s*TRI|info-?tri|BAC\s*DE\s*TRI/i.test(text)) {
+      regions = mergeRegions([regions, '欧盟']);
+    }
+    if (/UK\s*REP/i.test(text)) {
+      regions = mergeRegions([regions, '英国']);
+    }
+
+    var electric = inferElectricFromText(text + (rating ? '\nRating: ' + rating : '') + (productName ? '\n' + productName : ''));
+    if (rating && electric.code === '__ELECTRIC_YES__' && !electric.desc) {
+      electric.desc = '额定：' + rating;
+    } else if (rating && electric.code === '__ELECTRIC_YES__' && electric.desc && electric.desc.indexOf(rating) === -1) {
+      electric.desc = ('额定：' + rating + '；' + electric.desc).slice(0, 200);
+    }
+
     var remarkParts = [];
     if (batch) remarkParts.push('批号：' + batch);
     if (date) remarkParts.push('生产日期：' + date);
@@ -323,9 +459,11 @@
   function extractElectricDescription(text) {
     var parts = [];
     var rated = pick(text, [
-      /Rated(?:\s*(?:voltage|current|power|input|output))?\s*[:：]?\s*([^\n]{2,60})/i,
+      /Rated(?:\s*(?:voltage|current|power|input|output))?\s*[:：]?\s*([^\n]{2,60}?)(?=\s+(?:Manufacturer|Address|Model|Contact|MADE)|$)/i,
+      /Rating\s*[:：]?\s*([^\n]{2,80}?)(?=\s+(?:Manufacturer|Address|Model|Contact|MADE)|$)/i,
       /额定(?:电压|电流|功率|参数|值)?\s*[:：]?\s*([^\n]{2,60})/
     ]);
+    if (rated) rated = rated.replace(/\s+/g, ' ').trim();
     var input = pick(text, [/Input\s*[:：]\s*([^\n]{2,60})/i, /输入\s*[:：]\s*([^\n]{2,60})/]);
     var output = pick(text, [/Output\s*[:：]\s*([^\n]{2,60})/i, /输出\s*[:：]\s*([^\n]{2,60})/]);
     var battery = pick(text, [
@@ -374,10 +512,11 @@
     var score = 0;
     if (/batter(?:y|ies)|rechargeable|锂电|锂电池|干电池|纽扣电池|蓄电池|充电电池/i.test(raw)) score += 4;
     if (/\b\d+(?:\.\d+)?\s*V(?:olt)?(?:\s*DC|\s*AC)?\b|\b\d+(?:\.\d+)?\s*(?:mA|A)\b|\b\d+(?:\.\d+)?\s*W\b|额定(?:电压|电流|功率)|电压|电流|功率/i.test(raw)) score += 3;
+    if (/\b\d+\s*\/\s*\d+\s*Hz\b|\b50\s*\/\s*60\s*Hz\b|\b\d+\s*Hz\b|Rating\s*[:：]?\s*[^\n]*\d+\s*W/i.test(raw)) score += 3;
     if (/USB|Type-?C|DC\s*in(?:put)?|AC\s*(?:adapter|input)|充电器|适配器|电源适配|充电口|充电仓/i.test(raw)) score += 3;
     if (/FCC\s*ID|Bluetooth|Wi-?Fi|无线充电|电机|马达|\bLED\b|PCB|电路/i.test(raw)) score += 2;
-    if (/Input\s*[:：]|Output\s*[:：]|Rated\s*[:：]|Power\s*[:：]/i.test(raw)) score += 2;
-    if (/Wireless\s+Mouse|无线鼠标|耳机|earbud|headphone|speaker|音箱|台灯|robot|机器人|drone|无人机/i.test(raw)) score += 2;
+    if (/Input\s*[:：]|Output\s*[:：]|Rated\s*[:：]|Power\s*[:：]|Rating\s*[:：]/i.test(raw)) score += 2;
+    if (/Wireless\s+Mouse|无线鼠标|耳机|earbud|headphone|speaker|音箱|台灯|robot|机器人|drone|无人机|Electric\s+Fan|电风扇|风扇/i.test(raw)) score += 2;
     if (/充电|charger|adapter/i.test(raw)) score += 2;
 
     if (score >= 3) {
@@ -626,14 +765,100 @@
     });
   }
 
+  function extractTextFromDocx(file, onProgress) {
+    return loadMammoth().then(function (mammoth) {
+      if (typeof onProgress === 'function') onProgress('正在读取 Word 文档…');
+      return file.arrayBuffer().then(function (buf) {
+        return mammoth.extractRawText({ arrayBuffer: buf });
+      }).then(function (result) {
+        return ((result && result.value) || '').trim();
+      });
+    });
+  }
+
+  function extractTextFromPdf(file, onProgress) {
+    return loadPdfJs().then(function (pdfjsLib) {
+      if (typeof onProgress === 'function') onProgress('正在读取 PDF…');
+      return file.arrayBuffer().then(function (buf) {
+        return pdfjsLib.getDocument({ data: buf }).promise;
+      }).then(function (pdf) {
+        var maxPages = Math.min(pdf.numPages || 1, 3);
+        var texts = [];
+        var chain = Promise.resolve();
+        for (var i = 1; i <= maxPages; i++) {
+          (function (pageNum) {
+            chain = chain.then(function () {
+              return pdf.getPage(pageNum).then(function (page) {
+                return page.getTextContent().then(function (tc) {
+                  var pageText = (tc.items || [])
+                    .map(function (it) { return it.str; })
+                    .join(' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                  if (pageText) texts.push(pageText);
+                });
+              });
+            });
+          })(i);
+        }
+        return chain.then(function () {
+          var combined = texts.join('\n\n').trim();
+          if (combined.length >= 30) return combined;
+
+          // Scanned PDF: rasterize first page then OCR
+          if (typeof onProgress === 'function') onProgress('PDF 无文本层，改为图片识别…');
+          return pdf.getPage(1).then(function (page) {
+            var viewport = page.getViewport({ scale: 2 });
+            var canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            var ctx = canvas.getContext('2d');
+            return page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function () {
+              return new Promise(function (resolve) {
+                canvas.toBlob(function (blob) {
+                  if (!blob) {
+                    resolve('');
+                    return;
+                  }
+                  var imgFile = new File([blob], 'pdf-page1.png', { type: 'image/png' });
+                  ocrImageFile(imgFile, onProgress).then(resolve).catch(function () { resolve(''); });
+                }, 'image/png');
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+
+  function extractTextFromUpload(file, onProgress) {
+    if (!file) return Promise.resolve('');
+    if (isImageFile(file)) return ocrImageFile(file, onProgress).catch(function () { return ''; });
+    if (isPdfFile(file)) return extractTextFromPdf(file, onProgress).catch(function (err) {
+      console.warn('pdf extract failed', err);
+      return '';
+    });
+    if (isDocxFile(file)) return extractTextFromDocx(file, onProgress).catch(function (err) {
+      console.warn('docx extract failed', err);
+      return '';
+    });
+    if (isLegacyDocFile(file)) {
+      if (typeof onProgress === 'function') {
+        onProgress('暂不支持旧版 .doc，请另存为 .docx / PDF / 图片后再试');
+      }
+      return Promise.resolve('');
+    }
+    return Promise.resolve('');
+  }
+
   function parseFilesLocally(files, voiceText, link, onProgress) {
     files = files || [];
     var voiceResult = voiceText ? extractFieldsFromVoiceText(voiceText) : null;
-    var imageFiles = files.filter(function (f) {
-      return f && f.type && f.type.indexOf('image/') === 0;
+    var usable = files.filter(function (f) {
+      return f && f.size && (isImageFile(f) || isPdfFile(f) || isDocxFile(f) || isLegacyDocFile(f));
     });
 
-    if (!imageFiles.length) {
+    if (!usable.length) {
       if (typeof onProgress === 'function') onProgress('正在匹配语音字段…');
       if (voiceResult && voiceResult.raw_excerpt) return Promise.resolve(voiceResult);
       if (link) {
@@ -643,12 +868,10 @@
       return Promise.reject(new Error('empty_local_ocr'));
     }
 
-    if (typeof onProgress === 'function') onProgress('正在识别上传图片…');
+    if (typeof onProgress === 'function') onProgress('正在识别上传文件…');
 
-    var tasks = imageFiles.slice(0, 2).map(function (f) {
-      return ocrImageFile(f, onProgress).catch(function () {
-        return '';
-      });
+    var tasks = usable.slice(0, 3).map(function (f) {
+      return extractTextFromUpload(f, onProgress);
     });
 
     return Promise.all(tasks).then(function (texts) {

@@ -397,7 +397,7 @@ window.I18N_ZH = {
   'orderChat.fileTypes': '支持 JPG / PNG / PDF / Excel / Word，单个文件 ≤ 10MB',
   'orderChat.uploadHintTitle': '可上传 / 粘贴的信息',
   'orderChat.viewDetails': '详情',
-  'orderChat.uploadHintTags': '规格书、产品照、包装标签、采购单/PI、发票、测试报告、商品链接',
+  'orderChat.uploadHintTags': '规格书、产品照、包装标签、采购单/PI、发票、测试报告、商品链接（支持图片 / PDF / Word .docx）',
   'orderChat.linkPlaceholder': '粘贴 Amazon / TEMU / Shopify 商品链接',
   'orderChat.parseBtn': '开始解析',
   'orderChat.noDataFill': '暂无资料，直接填写',
