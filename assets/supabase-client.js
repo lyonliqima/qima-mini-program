@@ -165,10 +165,16 @@
         var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
         var timer = null;
         if (controller) {
-          timer = setTimeout(function () { controller.abort(); }, 60000);
+          timer = setTimeout(function () { controller.abort(); }, 90000);
+        }
+        var headers = {};
+        if (endpoint.indexOf('/functions/v1/') !== -1 && anonKey) {
+          headers.apikey = anonKey;
+          headers.Authorization = 'Bearer ' + anonKey;
         }
         return fetch(endpoint, {
           method: 'POST',
+          headers: headers,
           body: fd,
           signal: controller ? controller.signal : undefined
         }).then(function (res) {
@@ -215,8 +221,7 @@
       return chain;
     },
     /**
-     * Upload audio blob → NVIDIA Whisper zh-CN ASR (Vercel /api/transcribe).
-     * Falls back to Supabase Edge Function if asrEndpoint is unset.
+     * Upload audio blob → NVIDIA Whisper zh-CN ASR via Supabase Edge Function.
      * @param {Blob} blob WAV (preferred) or other audio
      * @param {string} [filename]
      * @returns {Promise<{text: string}>}

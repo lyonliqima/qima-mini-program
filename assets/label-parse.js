@@ -1,6 +1,6 @@
 /**
  * Client-side product-label parsing fallback.
- * Used when Vercel /api/parse is unavailable; OCR via Tesseract.js CDN.
+ * Used when Supabase Edge Function parse-order is unavailable; OCR via Tesseract.js CDN.
  */
 (function (global) {
   'use strict';

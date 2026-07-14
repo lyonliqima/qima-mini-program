@@ -93,18 +93,29 @@ npx supabase start
 npx supabase db reset   # applies migrations + seed
 ```
 
-## Voice ASR (NVIDIA Whisper zh-CN)
+## Order parse + Voice ASR (Supabase Edge + NVIDIA)
 
-Primary endpoint: Vercel Python serverless [`api/transcribe.py`](../api/transcribe.py)
+Frontend calls **Supabase Edge Functions only** (no Vercel):
 
-NVIDIA hosted Parakeet zh-CN is **streaming-only gRPC**; offline Chinese ASR uses **Whisper Large v3** via Riva gRPC (`grpc.nvcf.nvidia.com`).
+| Function | Purpose |
+|---|---|
+| `parse-order` | Multimodal OCR / label parse (NVIDIA vision + LLM) |
+| `transcribe-voice` | Chinese ASR proxy (Whisper via upstream if configured) |
 
 ```bash
-# Vercel secret
-vercel env add NVIDIA_API_KEY production
+export SUPABASE_ACCESS_TOKEN=sbp_xxx   # https://supabase.com/dashboard/account/tokens
 
-# Optional: Supabase Edge proxy → Vercel
+# One-time secret (NVIDIA NIM / NVCF key)
+npx supabase secrets set NVIDIA_API_KEY=nvapi-xxx --project-ref dewcjtkqykkclxwcmusg
+
+npx supabase functions deploy parse-order --project-ref dewcjtkqykkclxwcmusg
 npx supabase functions deploy transcribe-voice --project-ref dewcjtkqykkclxwcmusg
 ```
 
-Frontend: `QimaSupabase.transcribeVoice(wavBlob)` → `SUPABASE_CONFIG.asrEndpoint`.
+Endpoints:
+
+- `https://dewcjtkqykkclxwcmusg.supabase.co/functions/v1/parse-order`
+- `https://dewcjtkqykkclxwcmusg.supabase.co/functions/v1/transcribe-voice`
+
+Frontend: `SUPABASE_CONFIG.parseEndpoint` / `asrEndpoint` in `assets/supabase-config.js`.
+Local `assets/label-parse.js` is fallback only when the edge API is unavailable.

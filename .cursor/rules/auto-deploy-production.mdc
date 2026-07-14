@@ -1,5 +1,5 @@
 ---
-description: After UI/feature changes, automatically commit, push to GitHub Pages; redeploy Vercel when API changes
+description: After UI/feature changes, automatically commit and push to GitHub Pages; deploy Supabase Edge Functions when they change
 alwaysApply: true
 ---
 
@@ -12,14 +12,16 @@ When the user asks to publish/deploy, or after completing a batch of product UI 
 1. Stage relevant files only (exclude `.DS_Store`, `*.zip`, and untracked folders the user did not ask to ship, e.g. `mini program english/` unless requested).
 2. Commit with a concise Chinese message focused on why.
 3. `git push -u origin HEAD` to `main` (GitHub Pages source).
-4. If `api/` or `vercel.json` / `requirements.txt` changed, also run `vercel --prod --yes` so edge OCR/ASR stay in sync.
+4. If `supabase/functions/` changed, deploy Edge Functions:
+   `npx supabase functions deploy parse-order --project-ref dewcjtkqykkclxwcmusg`
+   (and `transcribe-voice` when ASR changed). Requires `SUPABASE_ACCESS_TOKEN` and secret `NVIDIA_API_KEY`.
 5. Reply with production URLs:
    - GitHub Pages (frontend): https://lyonliqima.github.io/qima-mini-program/
-   - Vercel API: https://qima-mini-program.vercel.app (used by `/api/parse`, `/api/transcribe`)
+   - Supabase project: https://supabase.com/dashboard/project/dewcjtkqykkclxwcmusg
 
 ## Defaults for this project
 
-- Frontend ships via GitHub Pages; OCR/ASR run on Vercel Python functions (NVIDIA AI).
+- Frontend ships via GitHub Pages; OCR/ASR run on **Supabase Edge Functions** (NVIDIA AI). Do **not** deploy or call Vercel for parse/OCR.
 - Prefer shipping after a coherent change set is done (not mid-edit).
 - If the user says「发布」「上线」「发到生产」「每次自动发布」, treat that as explicit deploy approval for the current work.
 - Do not force-push. Do not commit secrets.
