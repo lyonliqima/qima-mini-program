@@ -1161,7 +1161,7 @@
 <script src="assets/i18n-runtime.js?v=20260714b"></script>
 <script src="assets/supabase-config.js?v=20260714b"></script>
 <script src="assets/supabase-client.js?v=20260714b"></script>
-<script src="assets/label-parse.js?v=20260714f"></script>
+<script src="assets/label-parse.js?v=20260714g"></script>
 </head>
 <body>
   <div class="phone">
@@ -2732,6 +2732,12 @@
       }
 
       normalizeParsedDistributionCountries();
+
+      const elec = manualAnswers[FIELD_ELECTRIC] || manualAnswers['产品是否带电'] || '';
+      if(elec === '__ELECTRIC_YES__') manualAnswers[FIELD_ELECTRIC] = t('index.electricYes');
+      else if(elec === '__ELECTRIC_NO__') manualAnswers[FIELD_ELECTRIC] = t('index.electricNo');
+      else if(elec === 'electric' || elec === 'yes') manualAnswers[FIELD_ELECTRIC] = t('index.electricYes');
+      else if(elec === 'non-electric' || elec === 'no') manualAnswers[FIELD_ELECTRIC] = t('index.electricNo');
     }
 
     function normalizeCountryLabel(value){
@@ -2847,6 +2853,23 @@
           if(radio) radio.checked = true;
         }
       }
+
+      const elecRaw = manualAnswers[FIELD_ELECTRIC] || manualAnswers['产品是否带电'] || '';
+      if(elecRaw){
+        let elecVal = '';
+        if(elecRaw === '__ELECTRIC_YES__' || elecRaw === 'electric' || isElectricYes(elecRaw)) elecVal = 'electric';
+        else if(elecRaw === '__ELECTRIC_NO__' || elecRaw === 'non-electric' || elecRaw === t('index.electricNo') || /非电|non[-\s]?electric|^no$/i.test(elecRaw)) elecVal = 'non-electric';
+        if(elecVal){
+          const elecRadio = document.querySelector('input[name="mf_electric"][value="'+elecVal+'"]');
+          if(elecRadio) elecRadio.checked = true;
+        }
+      }
+      const elecDesc = manualAnswers[FIELD_ELECTRIC_DESC] || manualAnswers['产品说明'] || '';
+      if(elecDesc){
+        const descEl = document.getElementById('mf_electricDescription');
+        if(descEl) descEl.value = elecDesc;
+      }
+      mfToggleElectricDescription();
 
       syncManualSalesCountriesFromAnswers();
     }
@@ -3023,6 +3046,13 @@
 
       const sample = document.querySelector('input[name="mf_sample"]:checked');
       if(sample) manualAnswers['Sample Collection Method'] = sampleLabelFromValue(sample.value);
+
+      const electric = document.querySelector('input[name="mf_electric"]:checked');
+      if(electric){
+        manualAnswers[FIELD_ELECTRIC] = electric.value === 'electric' ? t('index.electricYes') : t('index.electricNo');
+        const elecDesc = ((document.getElementById('mf_electricDescription') || {}).value || '').trim();
+        manualAnswers[FIELD_ELECTRIC_DESC] = electric.value === 'electric' ? elecDesc : '';
+      }
     }
 
     function closeManualFormModal(e){
@@ -4740,8 +4770,8 @@
     function isElectricYes(value){
       if(!value) return false;
       const s = String(value).trim();
-      if(s === t('common.no') || s === t('index.electricNo')) return false;
-      return s === t('common.yes') || s === t('index.electricYes') || /带电|electric|yes/i.test(s);
+      if(s === '__ELECTRIC_NO__' || s === 'non-electric' || s === t('common.no') || s === t('index.electricNo')) return false;
+      return s === '__ELECTRIC_YES__' || s === 'electric' || s === t('common.yes') || s === t('index.electricYes') || /带电|electric|yes/i.test(s);
     }
 
     function isReportFieldsYes(value){

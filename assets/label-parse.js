@@ -266,6 +266,7 @@
 
     var marks = detectMarks(text);
     var regions = extractDistributionRegions(text);
+    var electric = inferElectricFromText(text);
     var remarkParts = [];
     if (batch) remarkParts.push('批号：' + batch);
     if (date) remarkParts.push('生产日期：' + date);
@@ -281,6 +282,8 @@
       Manufacturer: manufacturer,
       'Manufacturer Address': address,
       'Sample Collection Method': '',
+      'Electric Product': electric.code,
+      'Product Description': electric.desc,
       Carrier: '',
       'Tracking Number': '',
       'Shipping Remark': remarkParts.join('；')
@@ -309,10 +312,78 @@
       Manufacturer: '',
       'Manufacturer Address': '',
       'Sample Collection Method': '',
+      'Electric Product': '',
+      'Product Description': '',
       Carrier: '',
       'Tracking Number': '',
       'Shipping Remark': ''
     };
+  }
+
+  function extractElectricDescription(text) {
+    var parts = [];
+    var rated = pick(text, [
+      /Rated(?:\s*(?:voltage|current|power|input|output))?\s*[:：]?\s*([^\n]{2,60})/i,
+      /额定(?:电压|电流|功率|参数|值)?\s*[:：]?\s*([^\n]{2,60})/
+    ]);
+    var input = pick(text, [/Input\s*[:：]\s*([^\n]{2,60})/i, /输入\s*[:：]\s*([^\n]{2,60})/]);
+    var output = pick(text, [/Output\s*[:：]\s*([^\n]{2,60})/i, /输出\s*[:：]\s*([^\n]{2,60})/]);
+    var battery = pick(text, [
+      /Batter(?:y|ies)\s*[:：]?\s*([^\n]{2,60})/i,
+      /(?:锂)?电池\s*[:：]?\s*([^\n]{2,60})/,
+      /Power\s*(?:source|supply)?\s*[:：]\s*([^\n]{2,60})/i
+    ]);
+    var charge = pick(text, [
+      /Charg(?:e|ing)\s*[:：]?\s*([^\n]{2,60})/i,
+      /充电(?:方式|类型)?\s*[:：]?\s*([^\n]{2,60})/
+    ]);
+    if (rated) parts.push('额定：' + rated.replace(/\s+/g, ' ').trim());
+    if (input) parts.push('输入：' + input.replace(/\s+/g, ' ').trim());
+    if (output) parts.push('输出：' + output.replace(/\s+/g, ' ').trim());
+    if (battery) parts.push('电池：' + battery.replace(/\s+/g, ' ').trim());
+    if (charge) parts.push('充电：' + charge.replace(/\s+/g, ' ').trim());
+
+    // Compact electrical specs scattered in text
+    if (!parts.length) {
+      var volt = text.match(/\b\d+(?:\.\d+)?\s*V(?:olt)?(?:\s*DC|\s*AC)?\b/i);
+      var amp = text.match(/\b\d+(?:\.\d+)?\s*(?:mA|A)\b/i);
+      var watt = text.match(/\b\d+(?:\.\d+)?\s*W\b/i);
+      if (volt) parts.push(volt[0]);
+      if (amp) parts.push(amp[0]);
+      if (watt) parts.push(watt[0]);
+    }
+    return parts.join('；').slice(0, 200);
+  }
+
+  /**
+   * Infer whether product is electric from OCR/voice text.
+   * Returns { code: '__ELECTRIC_YES__'|'__ELECTRIC_NO__'|'', desc: string }
+   */
+  function inferElectricFromText(text) {
+    var raw = String(text || '');
+    if (!raw.trim()) return { code: '', desc: '' };
+
+    // Explicit statements win
+    if (/非电(?:产品)?|不带电|不含电池|无电池|不带电源|non[-\s]?electric|without\s+batter(?:y|ies)|no\s+batter(?:y|ies)|battery[-\s]?free/i.test(raw)) {
+      return { code: '__ELECTRIC_NO__', desc: '' };
+    }
+    if (/带电(?:产品)?|含电池|内置电池|配电池|电动|electric\s+product|contains?\s+batter|powered\s+by|with\s+batter/i.test(raw)) {
+      return { code: '__ELECTRIC_YES__', desc: extractElectricDescription(raw) };
+    }
+
+    var score = 0;
+    if (/batter(?:y|ies)|rechargeable|锂电|锂电池|干电池|纽扣电池|蓄电池|充电电池/i.test(raw)) score += 4;
+    if (/\b\d+(?:\.\d+)?\s*V(?:olt)?(?:\s*DC|\s*AC)?\b|\b\d+(?:\.\d+)?\s*(?:mA|A)\b|\b\d+(?:\.\d+)?\s*W\b|额定(?:电压|电流|功率)|电压|电流|功率/i.test(raw)) score += 3;
+    if (/USB|Type-?C|DC\s*in(?:put)?|AC\s*(?:adapter|input)|充电器|适配器|电源适配|充电口|充电仓/i.test(raw)) score += 3;
+    if (/FCC\s*ID|Bluetooth|Wi-?Fi|无线充电|电机|马达|\bLED\b|PCB|电路/i.test(raw)) score += 2;
+    if (/Input\s*[:：]|Output\s*[:：]|Rated\s*[:：]|Power\s*[:：]/i.test(raw)) score += 2;
+    if (/Wireless\s+Mouse|无线鼠标|耳机|earbud|headphone|speaker|音箱|台灯|robot|机器人|drone|无人机/i.test(raw)) score += 2;
+    if (/充电|charger|adapter/i.test(raw)) score += 2;
+
+    if (score >= 3) {
+      return { code: '__ELECTRIC_YES__', desc: extractElectricDescription(raw) };
+    }
+    return { code: '', desc: '' };
   }
 
   function extractSpokenRegions(text) {
@@ -473,6 +544,9 @@
     fields.Manufacturer = manufacturer;
     fields['Manufacturer Address'] = address;
     fields['Sample Collection Method'] = sampleLabel;
+    var electric = inferElectricFromText(text);
+    fields['Electric Product'] = electric.code;
+    fields['Product Description'] = electric.desc;
     fields.Carrier = carrier || '';
     fields['Tracking Number'] = tracking || '';
 
@@ -501,8 +575,15 @@
         out[key] = mergeRegions([av, bv]);
         return;
       }
-      if (key === 'Shipping Remark' && av && bv && av !== bv) {
+      if ((key === 'Shipping Remark' || key === 'Product Description') && av && bv && av !== bv) {
         out[key] = av + '；' + bv;
+        return;
+      }
+      // Prefer explicit electric yes/no when either side has it
+      if (key === 'Electric Product') {
+        out[key] = av || bv;
+        if (av === '__ELECTRIC_YES__' || bv === '__ELECTRIC_YES__') out[key] = '__ELECTRIC_YES__';
+        else if (av === '__ELECTRIC_NO__' || bv === '__ELECTRIC_NO__') out[key] = out[key] || '__ELECTRIC_NO__';
         return;
       }
       out[key] = av || bv;
