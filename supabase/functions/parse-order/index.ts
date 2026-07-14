@@ -130,6 +130,56 @@ function parseJsonFromLlm(text: string): Record<string, unknown> {
   }
 }
 
+/** Keep product_name concise — strip service wrappers and trailing clauses. */
+function cleanProductName(raw: string): string {
+  let name = String(raw || "").replace(/\s+/g, " ").trim();
+  if (!name) return "";
+
+  name = name.replace(
+    /^(?:实验室(?:检测|测试)|检测服务|验货服务|装运前(?:检测|检验)|质检|Lab(?:oratory)?\s*(?:testing|test|inspection)|Pre[-\s]?Shipment\s*Inspection|PSI|Inspection|Testing)\s*[·•\-–—|:\/]+\s*/i,
+    "",
+  );
+  name = name.replace(/^[·•]\s*/, "");
+  name = name.replace(
+    /^(?:我需要|我想要|我想|请帮我|帮我|需要)?(?:给|为|对)?(?:一款|一个|一台|一件)?(?:做|进行|申请|下单|测试|检测|测)?(?:一下)?(?:实验室)?(?:检测|测试|验货|服务)?(?:订单)?[：:\s]*/i,
+    "",
+  );
+  name = name.replace(
+    /^(?:(?:I|we)\s+(?:need|want|would\s+like)|please)\s+/i,
+    "",
+  );
+  name = name.replace(
+    /^(?:(?:to\s+)?(?:order|book|do|get|request)\s+)?(?:lab(?:oratory)?\s+)?(?:testing|test|inspection)\s+(?:for|of|on)\s+/i,
+    "",
+  );
+  name = name.replace(/^product\s*name\s*[:：=]\s*/i, "");
+  name = name.replace(/^品名\s*[:：=]\s*/, "");
+  name = name.replace(/^产品名称\s*[:：=]\s*/, "");
+  name = name.split(
+    /\s+(?:sold\s+(?:in|to|for)|manufactured\s+by|made\s+(?:by|in)|produced\s+by|exported\s+to|shipped\s+to|distribut(?:ed|ion)\s+(?:in|to|for)|intended\s+for|for\s+(?:the\s+)?(?:US|U\.S\.|USA|UK|EU|European|American|Chinese|market)|from\s+(?:the\s+)?(?:factory|manufacturer|supplier)|that\s+(?:is|are|was|were|has|have)|which\s+(?:is|are|was|were)|and\s+(?:I|we|the|it)|(?:I|we)\s+(?:need|want|will)|with\s+(?:batter|power)|Model\b|型号|item\s*(?:no\.?|number|#)|SKU|P\s*\/?\s*N)\b/i,
+  )[0];
+  name = name.split(
+    /(?:[，,。；;]\s*)?(?:销往|销售(?:国家|地区|市场)?|出口到?|运往|发往|制造商(?:名称|全称)?|厂家|工厂|生产商|厂商|原产(?:国家或地区|国|地)|产自|产地|型号|货号|SKU|需要(?:做)?(?:检测|测试)|做(?:实验室)?检测|检测服务|带电|非电|样本|送样|寄送)/,
+  )[0];
+  name = name.replace(/^(?:一款|一个|一台|一件|这种|这个|那个|该|a|an|the|my|our|this|that)\s+/i, "").trim();
+  name = name.replace(/(?:做(?:实验室)?(?:检测|测试)|的检测|的测试|for\s+(?:lab\s+)?(?:testing|test|inspection))$/i, "").trim();
+  name = name.replace(/[,，。.;；:：!！?？\-~–—|/\\·•]+$/g, "").trim();
+  name = name.replace(/^[,，。.;；:：\-~–—|/\\·•]+/, "").trim();
+
+  const hasCjk = /[\u4e00-\u9fff]/.test(name);
+  const maxLen = hasCjk ? 24 : 48;
+  if (name.length > maxLen) {
+    if (hasCjk) {
+      name = name.slice(0, maxLen).replace(/[的地得了着过与和及]$/, "");
+    } else {
+      const cut = name.slice(0, maxLen);
+      const sp = cut.lastIndexOf(" ");
+      name = (sp > 12 ? cut.slice(0, sp) : cut).trim();
+    }
+  }
+  return name.length >= 2 ? name : "";
+}
+
 function normalizeOrigin(raw: string): string {
   const s = String(raw || "").trim();
   if (!s) return "";
@@ -292,7 +342,8 @@ async function ocrImageStructured(
     "你是产品标签/合格证/铭牌识别助手。请仔细阅读图片中的全部文字与标识，" +
     "抽取检测下单所需字段，只返回合法 JSON（不要 markdown）。\n" +
     "字段说明：\n" +
-    '- "Product Name": 产品名称（如 Product name / 品名 / 标题 Electric Fan）\n' +
+    '- "Product Name": 简短产品名称 ONLY（如 Electric Fan、Toy Race Car、智能机器人玩具）。' +
+    '不要整句、不要「实验室检测 · xxx」、不要销往/制造商/型号后缀。从语音长句中只抠出品名\n' +
     '- "Item#/model#": 型号/货号，优先取 Model / Model No / 型号 / SKU / Item No / P/N（如 XP-085、XY-03）\n' +
     '- "Manufacturer": 制造商公司全称\n' +
     '- "Manufacturer Address": 制造商地址（完整一行）\n' +
@@ -429,7 +480,9 @@ function seedFieldsFromLabels(
       ]
     ) {
       const val = String(label[key] || "").trim();
-      if (val && !seed[key]) seed[key] = val;
+      if (val && !seed[key]) {
+        seed[key] = key === "Product Name" ? (cleanProductName(val) || val) : val;
+      }
     }
     const origin = normalizeOrigin(String(label["Country of Origin"] || ""));
     if (origin && !seed["Country of Origin"]) {
@@ -486,6 +539,10 @@ function normalizeResult(
     if (val == null || String(val).trim() === "") val = seedFields[key] || "";
     fields[key] = val != null ? String(val).trim() : "";
   }
+  if (fields["Product Name"]) {
+    fields["Product Name"] = cleanProductName(fields["Product Name"]) ||
+      fields["Product Name"];
+  }
   if (fields["Country of Origin"]) {
     fields["Country of Origin"] = normalizeOrigin(fields["Country of Origin"]);
   }
@@ -505,8 +562,10 @@ function normalizeResult(
     parsed.product_summary && typeof parsed.product_summary === "object"
       ? parsed.product_summary as Record<string, unknown>
       : {};
+  let summaryName = String(summaryIn.name || fields["Product Name"] || "").trim();
+  summaryName = cleanProductName(summaryName) || fields["Product Name"] || summaryName;
   const productSummary = {
-    name: String(summaryIn.name || fields["Product Name"] || "").trim(),
+    name: summaryName,
     brand: String(summaryIn.brand || "").trim(),
     hint: String(summaryIn.hint || "").trim(),
   };
@@ -534,18 +593,21 @@ async function structureFields(
   const fieldList = FIELD_KEYS.map((k) => `- "${k}"`).join("\n");
   const system =
     "你是 QIMA 检测订单信息抽取助手。根据用户提供的语音、文档、产品标签识别结果和商品链接，" +
-    "抽取订单字段。必须输出合法 JSON，不要 markdown。所有字段值使用简体中文。\n" +
+    "抽取订单字段。必须输出合法 JSON，不要 markdown。字段值可用简体中文或与原文一致的英文品名。\n" +
     "规则：\n" +
-    "1) Country of Origin：MADE IN CHINA / Manufacturing location 含 China →「中国」\n" +
-    "2) Countries/Regions of Distribution：CE/EC REP/Triman→欧盟，UKCA/UK REP→英国，" +
+    "1) Product Name：只填简洁产品名（2–8 个英文词或 ≤24 个汉字），例如「Toy Race Car」「智能机器人玩具」。" +
+    "禁止整句语音、禁止「Lab testing · … / 实验室检测 · …」、禁止带上 sold in / manufactured by / 销往 / 制造商 / 型号等从句。" +
+    "从 rambling 语音中智能抠出品名，其余信息分别写入对应字段。\n" +
+    "2) Country of Origin：MADE IN CHINA / Manufacturing location 含 China →「中国」\n" +
+    "3) Countries/Regions of Distribution：CE/EC REP/Triman→欧盟，UKCA/UK REP→英国，" +
     "FC/FCC→美国；多个用顿号「、」连接\n" +
-    "3) Item#/model# 取 Model / Model No / SKU / 货号（不要把 NO/Number 当成型号）\n" +
-    "4) Electric Product：有电压/功率/Hz/电池/充电/电机/Electric/Rating 填「带电产品」，" +
+    "4) Item#/model# 取 Model / Model No / SKU / 货号（不要把 NO/Number 当成型号）\n" +
+    "5) Electric Product：有电压/功率/Hz/电池/充电/电机/Electric/Rating 填「带电产品」，" +
     "明确非电填「非电产品」，否则空字符串\n" +
-    "5) Product Description：带电时写入 Rating/电池/充电等要点\n" +
-    "6) Shipping Remark 可汇总批号、生产日期、欧代、合规标识\n" +
-    "7) 无法确定的字段留空字符串\n" +
-    'JSON：{"product_summary":{"name":"","brand":"","hint":""},' +
+    "6) Product Description：带电时写入 Rating/电池/充电等要点\n" +
+    "7) Shipping Remark 可汇总批号、生产日期、欧代、合规标识\n" +
+    "8) 无法确定的字段留空字符串\n" +
+    'JSON：{"product_summary":{"name":"短品名","brand":"","hint":""},' +
     '"fields":{...},"confidence":{...},"raw_excerpt":""}';
 
   const seedNote = Object.values(seedFields).some(Boolean)

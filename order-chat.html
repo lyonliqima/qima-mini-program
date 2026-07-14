@@ -4803,7 +4803,11 @@
     }
 
     function buildFullOrderPayload(){
-      const productName = manualAnswers['Product Name'] || getFieldValue('Product Name') || '';
+      let productName = manualAnswers['Product Name'] || getFieldValue('Product Name') || '';
+      if(window.QimaLabelParse && typeof QimaLabelParse.cleanProductName === 'function'){
+        const cleaned = QimaLabelParse.cleanProductName(productName);
+        if(cleaned) productName = cleaned;
+      }
       const program = manualAnswers['Program'] || getFieldValue('Program') || '';
       const origin = manualAnswers['Country of Origin'] || getFieldValue('Country of Origin') || '';
       const distribution = manualAnswers['Countries/Regions of Distribution'] || getFieldValue('Countries/Regions of Distribution') || '';

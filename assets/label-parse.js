@@ -120,6 +120,132 @@
     return '';
   }
 
+  /**
+   * Isolate a concise product name from voice transcripts, OCR lines, or
+   * "service · product" list strings. Keeps EN/ZH titles short — no full sentences.
+   *
+   * Examples:
+   *   "I need lab testing for a toy race car sold in the US manufactured by Acme"
+   *     → "toy race car"
+   *   "实验室检测 · 智能机器人玩具"
+   *     → "智能机器人玩具"
+   *   "需要给一款智能机器人玩具做检测，销往美国，制造商是深圳XX"
+   *     → "智能机器人玩具"
+   */
+  function cleanProductName(raw) {
+    var name = String(raw || '').replace(/\s+/g, ' ').trim();
+    if (!name) return '';
+
+    // Strip "service · product" / "Lab testing · xxx" wrappers (ASCII or middle-dot)
+    name = name.replace(
+      /^(?:实验室(?:检测|测试)|检测服务|验货服务|装运前(?:检测|检验)|质检|Lab(?:oratory)?\s*(?:testing|test|inspection)|Pre[-\s]?Shipment\s*Inspection|PSI|Inspection|Testing)\s*[·•\-–—|:\/]+\s*/i,
+      ''
+    );
+    // Bare leading middle-dot / bullet left after bad splits
+    name = name.replace(/^[·•]\s*/, '');
+
+    // Leading service intent phrases (voice) — longest tokens first
+    name = name.replace(
+      /^(?:我需要|我想要|我想|请帮我|帮我|需要)?(?:给|为|对)?(?:一款|一个|一台|一件)?(?:做|进行|申请|下单|测试|检测|测)?(?:一下)?(?:实验室)?(?:检测|测试|验货|服务)?(?:订单)?[：:\s]*/i,
+      ''
+    );
+    // English: "I need lab testing for …"
+    name = name.replace(
+      /^(?:(?:I|we)\s+(?:need|want|would\s+like)|please)\s+/i,
+      ''
+    );
+    name = name.replace(
+      /^(?:(?:to\s+)?(?:order|book|do|get|request)\s+)?(?:lab(?:oratory)?\s+)?(?:testing|test|inspection)\s+(?:for|of|on)\s+/i,
+      ''
+    );
+    name = name.replace(/^product\s*name\s*[:：=]\s*/i, '');
+    name = name.replace(/^品名\s*[:：=]\s*/, '');
+    name = name.replace(/^产品名称\s*[:：=]\s*/, '');
+
+    // Cut English trailing clauses / model suffixes
+    name = name.split(
+      /\s+(?:sold\s+(?:in|to|for)|manufactured\s+by|made\s+(?:by|in)|produced\s+by|exported\s+to|shipped\s+to|distribut(?:ed|ion)\s+(?:in|to|for)|intended\s+for|for\s+(?:the\s+)?(?:US|U\.S\.|USA|UK|EU|European|American|Chinese|market)|from\s+(?:the\s+)?(?:factory|manufacturer|supplier)|that\s+(?:is|are|was|were|has|have)|which\s+(?:is|are|was|were)|and\s+(?:I|we|the|it)|(?:I|we)\s+(?:need|want|will)|with\s+(?:batter|power)|Model\b|型号|item\s*(?:no\.?|number|#)|SKU|P\s*\/?\s*N)\b/i
+    )[0];
+
+    // Cut Chinese trailing clauses
+    name = name.split(
+      /(?:[，,。；;]\s*)?(?:销往|销售(?:国家|地区|市场)?|出口到?|运往|发往|制造商(?:名称|全称)?|厂家|工厂|生产商|厂商|原产(?:国家或地区|国|地)|产自|产地|型号|货号|SKU|需要(?:做)?(?:检测|测试)|做(?:实验室)?检测|检测服务|带电|非电|样本|送样|寄送)/
+    )[0];
+
+    // Drop leading articles / quantifiers
+    name = name.replace(/^(?:一款|一个|一台|一件|这种|这个|那个|该|a|an|the|my|our|this|that)\s+/i, '').trim();
+    // Drop trailing "做检测/for testing" leftovers
+    name = name.replace(/(?:做(?:实验室)?(?:检测|测试)|的检测|的测试|for\s+(?:lab\s+)?(?:testing|test|inspection))$/i, '').trim();
+    name = name.replace(/[,，。.;；:：!！?？\-~–—|/\\·•]+$/g, '').trim();
+    name = name.replace(/^[,，。.;；:：\-~–—|/\\·•]+/, '').trim();
+
+    // Prefer short titles — CJK vs Latin length caps
+    var hasCjk = /[\u4e00-\u9fff]/.test(name);
+    var maxLen = hasCjk ? 24 : 48;
+    if (name.length > maxLen) {
+      if (hasCjk) {
+        name = name.slice(0, maxLen).replace(/[的地得了着过与和及]$/, '');
+      } else {
+        var cut = name.slice(0, maxLen);
+        var sp = cut.lastIndexOf(' ');
+        name = (sp > 12 ? cut.slice(0, sp) : cut).trim();
+      }
+    }
+
+    // Reject if still looks like a whole sentence / bare service phrase
+    if (/^(?:实验室|检测|测试|lab|testing|inspection)\b/i.test(name) && !/(?:玩具|机器人|风扇|鼠标|Fan|Toy|Mouse|Robot)/i.test(name)) {
+      if (name.length > 12) return '';
+    }
+    if ((hasCjk && name.length > 1) || (!hasCjk && name.length > 1)) return name;
+    return name.length >= 2 ? name : '';
+  }
+
+  function extractSpokenProductName(text) {
+    var raw = String(text || '');
+    // Fast path: "Lab testing · Product" / "实验室检测 · 品名"
+    var serviceDot = raw.match(
+      /^(?:实验室(?:检测|测试)|检测服务|装运前(?:检测|检验)|Lab(?:oratory)?\s*(?:testing|test|inspection)|PSI|Testing|Inspection)\s*[·•\-–—|:\/]+\s*(.+)$/i
+    );
+    if (serviceDot) {
+      var fromDot = cleanProductName(serviceDot[1]);
+      if (fromDot) return fromDot;
+    }
+
+    var candidate = pick(raw, [
+      /产品名称\s*[是为：:]\s*([^\n，。,;；]{2,40})/,
+      /产品(?:叫|是|名为?)[：:]?\s*([^\n，。,;；]{2,40})/,
+      /品名\s*[是为：:]\s*([^\n，。,;；]{2,40})/,
+      /(?:要测|检测|测试|检验)一款\s*([^\n，。,;；]{2,30})/,
+      /(?:给|为|对)一款\s*([^\n，。,;；]{2,30}?)(?:做|进行|申请)/,
+      /一款\s*([^\n，。,;；]{2,30}?(?:玩具|产品|台灯|耳机|杯|车|机器人|风扇|鼠标|音箱|水壶|灯|积木|娃娃|遥控(?:车|飞机)?))/,
+      /(?:测|做|检)\s*([^\n，。,;；]{2,30}?(?:玩具|产品|机器人))/,
+      /product\s*name\s*[:=]\s*([^\n,.;]{2,50})/i,
+      /(?:product\s*(?:is|called|named)|called|named)\s+([A-Za-z][A-Za-z0-9 &'/\-]{1,45})/i,
+      /(?:need|want|order|request|book)\s+(?:lab(?:oratory)?\s+)?(?:testing|test|inspection)\s+for\s+(?:a|an|the\s+)?([A-Za-z][A-Za-z0-9 &'/\-]{1,45}?)(?=\s+(?:sold|manufactured|made|produced|for|from|that|which|and|Model|,|;|\.|$))/i,
+      /(?:lab(?:oratory)?\s+)?(?:testing|test|inspection)\s+(?:for|of|on)\s+(?:a|an|the\s+)?([A-Za-z][A-Za-z0-9 &'/\-]{1,45}?)(?=\s+(?:sold|manufactured|made|produced|for|from|that|which|and|Model|,|;|\.|$))/i,
+      /(?:for\s+(?:a|an|the)\s+)((?:smart|electric|wireless|portable|toy|kids'?|children'?s?)\s+[A-Za-z][A-Za-z0-9 &'/\-]{1,35})/i
+    ]);
+
+    if (!candidate) {
+      // Prefer product-noun endings (玩具 before 机器人 so "智能机器人玩具" stays whole)
+      var zh = raw.match(
+        /([\u4e00-\u9fff]{2,18}(?:玩具|积木|娃娃|遥控车|风扇|鼠标|耳机|音箱|台灯|水壶|充电器|机器人|灯))/
+      );
+      if (zh) candidate = zh[1];
+    }
+    if (!candidate) {
+      var en = raw.match(
+        /\b((?:smart|electric|wireless|portable|rechargeable|toy|kids'?|children'?s?)\s+(?:[A-Za-z]+(?:\s+[A-Za-z]+){0,3})|(?:[A-Za-z]+\s+){0,2}(?:toy|robot|car|fan|mouse|speaker|lamp|light|kettle|blender|headphones?|earbuds?|drone))\b/i
+      );
+      if (en) candidate = en[1];
+    }
+
+    var cleaned = cleanProductName(candidate);
+    if (cleaned) return cleaned;
+    // Last resort: clean the whole utterance (handles service wrappers / I-need-testing-for)
+    return cleanProductName(raw);
+  }
+
   function normalizeOrigin(raw) {
     var s = String(raw || '').trim();
     if (!s) return '';
@@ -330,6 +456,7 @@
     if (productName) {
       productName = productName.replace(/\s+/g, ' ').trim();
       productName = productName.split(/\s+(?:Model|型号|Rated|Rating|FCC|Manufacturer)\b/i)[0].trim();
+      productName = cleanProductName(productName);
       if (productName) return productName;
     }
     // Title line directly above Model (common nameplate / Word table export)
@@ -337,7 +464,7 @@
       /(?:^|\n)\s*([A-Za-z\u4e00-\u9fff][A-Za-z0-9\u4e00-\u9fff &/\-]{1,60}?)\s*(?:\n|\r)+\s*Model\b/i
     );
     if (aboveModel) {
-      var title = aboveModel[1].replace(/\s+/g, ' ').trim();
+      var title = cleanProductName(aboveModel[1]);
       if (title && !/^(Manufacturer|Address|Rating|Contact|EC\s*REP|UK\s*REP)$/i.test(title)) {
         return title;
       }
@@ -346,8 +473,9 @@
     var glued = text.match(
       /\b((?:Electric|Wireless|Smart|Portable)?\s*(?:Fan|Heater|Lamp|Light|Mouse|Speaker|Robot|Toy|Blender|Kettle)[A-Za-z ]{0,20})\s+Model\b/i
     );
-    if (glued) return glued[1].replace(/\s+/g, ' ').trim();
-    return '';
+    if (glued) return cleanProductName(glued[1]);
+    // Voice / free-text fallback when OCR layout patterns miss
+    return extractSpokenProductName(text);
   }
 
   function extractFieldsFromOcrText(ocrText) {
@@ -600,18 +728,7 @@
       };
     }
 
-    var productName = pick(text, [
-      /产品名称\s*[是为：:]\s*([^\n，。,]{2,60})/,
-      /产品(?:叫|是|名为?)[：:]?\s*([^\n，。,]{2,60})/,
-      /(?:要测|检测|测试)一款\s*([^\n，。,]{2,40})/,
-      /一款\s*([^\n，。,]{2,40}?(?:玩具|产品|台灯|耳机|杯|车|机器人))/,
-      /(?:测|做)\s*([^\n，。,]{2,40}?(?:玩具|产品))/,
-      /product\s*name\s*[:=]\s*([^\n,.]{2,60})/i,
-      /(?:need\s+testing\s+for|testing\s+for)\s+(?:a\s+)?([^\n,.]{2,50})/i
-    ]);
-    if (productName) {
-      productName = productName.replace(/^(一款|这个|那个)/, '').trim();
-    }
+    var productName = extractSpokenProductName(text);
 
     var model = pick(text, [
       /型号\s*[是为：:]?\s*([^\n，。,]{1,40})/,
@@ -726,12 +843,18 @@
         return;
       }
       out[key] = av || bv;
+      if (key === 'Product Name' && out[key]) {
+        out[key] = cleanProductName(out[key]) || out[key];
+      }
     });
     var summaryA = (primary && primary.product_summary) || {};
     var summaryB = (secondary && secondary.product_summary) || {};
+    var mergedName = cleanProductName(summaryA.name || out['Product Name'] || summaryB.name || '') ||
+      out['Product Name'] ||
+      '';
     return {
       product_summary: {
-        name: summaryA.name || out['Product Name'] || summaryB.name || '',
+        name: mergedName,
         brand: summaryA.brand || summaryB.brand || '',
         hint: summaryA.hint || summaryB.hint || ''
       },
@@ -1011,6 +1134,9 @@
   }
 
   global.QimaLabelParse = {
+    cleanProductName: cleanProductName,
+    extractSpokenProductName: extractSpokenProductName,
+    extractProductName: extractProductName,
     extractFieldsFromOcrText: extractFieldsFromOcrText,
     extractFieldsFromVoiceText: extractFieldsFromVoiceText,
     extractWaybillFromOcrText: extractWaybillFromOcrText,
