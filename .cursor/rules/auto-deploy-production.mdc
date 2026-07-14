@@ -1,5 +1,5 @@
 ---
-description: After UI/feature changes, automatically commit, push, and deploy to production
+description: After UI/feature changes, automatically commit, push to GitHub Pages production
 alwaysApply: true
 ---
 
@@ -12,9 +12,8 @@ When the user asks to publish/deploy, or after completing a batch of product UI 
 1. Stage relevant files only (exclude `.DS_Store`, `*.zip`, and untracked folders the user did not ask to ship, e.g. `mini program english/` unless requested).
 2. Commit with a concise Chinese message focused on why.
 3. `git push -u origin HEAD` to `main` (GitHub Pages source).
-4. `vercel --prod --yes` for Vercel production.
-5. Reply with the production URLs:
-   - Vercel: https://qima-mini-program.vercel.app
+4. Do **not** run `vercel --prod` — production frontend is GitHub Pages only.
+5. Reply with the production URL:
    - GitHub Pages: https://lyonliqima.github.io/qima-mini-program/
 
 ## Defaults for this project
