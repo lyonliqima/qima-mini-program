@@ -430,6 +430,7 @@ window.I18N_EN = {
   'orderChat.fieldMissing': 'Missing',
   'orderChat.recognizeDone': 'Recognition complete — <b>7/10 (70%)</b> fields filled 🎉<br>Please confirm the remaining <b>3</b> items below 👇',
   'orderChat.recognizeDoneDynamic': 'Recognition complete — <b>{filled}/{total} ({percent}%)</b> fields filled 🎉<br>Please confirm the remaining <b>{missing}</b> items below 👇',
+  'orderChat.continueFillMissing': 'Matched some fields from your voice/files. <b>{count}</b> remaining — I\'ll ask you for each one 👇',
   'orderChat.parsingOrder': 'Parsing your materials…',
   'orderChat.parseFailed': 'Parsing failed. Please retry later or fill in manually.',
   'orderChat.progressPercent': '{percent}% complete',

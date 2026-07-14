@@ -199,6 +199,213 @@
     };
   }
 
+  function emptyFields() {
+    return {
+      'Product Name': '',
+      Program: '',
+      'Country of Origin': '',
+      'Countries/Regions of Distribution': '',
+      'Item#/model#': '',
+      Manufacturer: '',
+      'Manufacturer Address': '',
+      'Sample Collection Method': '',
+      Carrier: '',
+      'Tracking Number': '',
+      'Shipping Remark': ''
+    };
+  }
+
+  function extractSpokenRegions(text) {
+    var regions = [];
+    var pairs = [
+      [/欧盟|欧洲|EU\b|European\s+Union/i, '欧盟'],
+      [/美国|USA\b|U\.S\.A|United\s+States|\bUS\b/i, '美国'],
+      [/英国|UK\b|United\s+Kingdom|Great\s+Britain/i, '英国'],
+      [/加拿大|Canada/i, '加拿大'],
+      [/澳大利亚|澳洲|Australia/i, '澳大利亚'],
+      [/南非|South\s+Africa/i, '南非'],
+      [/日本|Japan/i, '日本'],
+      [/韩国|Korea/i, '韩国']
+    ];
+    pairs.forEach(function (pair) {
+      if (pair[0].test(text) && regions.indexOf(pair[1]) === -1) regions.push(pair[1]);
+    });
+    return regions;
+  }
+
+  function extractProgram(text) {
+    if (/TEMU/i.test(text) && /硬件/.test(text)) return '__PROGRAM_TEMU_HW__';
+    if (/TEMU\s*玩具|玩具\s*[-—]?\s*商家|temu.*toy/i.test(text)) return '__PROGRAM_TEMU_TOY__';
+    if (/Amazon|亚马逊/i.test(text)) return '__PROGRAM_AMAZON__';
+    if (/TEMU/i.test(text) && /商家付款|退款|program/i.test(text)) return '__PROGRAM_TEMU_HW__';
+    if (/TEMU/i.test(text)) return '__PROGRAM_TEMU_HW__';
+    var m = text.match(/(?:关联)?(?:项目|Program)\s*[是为：:]\s*([^\n，。,]{2,60})/i);
+    return m ? m[1].trim() : '';
+  }
+
+  function extractSampleMethod(text) {
+    if (/已经拿到|已拿到|已经收到|仓库里?已有|QIMA\s*已经|已经有样本/i.test(text)) {
+      return 'received';
+    }
+    if (/现场收集|服务时收集|检验时收集|上门取样|QIMA\s*将?在|启迈.*收集/i.test(text)) {
+      return 'collect';
+    }
+    if (/寄送|邮寄|快递.*样本|我们.*寄|供应商.*寄|送样/i.test(text)) {
+      return 'ship';
+    }
+    return '';
+  }
+
+  function extractFieldsFromVoiceText(voiceText) {
+    var text = simplifySpaces(voiceText);
+    if (!text) {
+      return {
+        product_summary: { name: '', brand: '', hint: '' },
+        fields: emptyFields(),
+        confidence: {},
+        raw_excerpt: '',
+        source: 'voice'
+      };
+    }
+
+    var productName = pick(text, [
+      /产品名称\s*[是为：:]\s*([^\n，。,]{2,60})/,
+      /产品(?:叫|是|名为?)[：:]?\s*([^\n，。,]{2,60})/,
+      /(?:要测|检测|测试)一款\s*([^\n，。,]{2,40})/,
+      /一款\s*([^\n，。,]{2,40}?(?:玩具|产品|台灯|耳机|杯|车|机器人))/,
+      /(?:测|做)\s*([^\n，。,]{2,40}?(?:玩具|产品))/,
+      /product\s*name\s*[:=]\s*([^\n,.]{2,60})/i,
+      /(?:need\s+testing\s+for|testing\s+for)\s+(?:a\s+)?([^\n,.]{2,50})/i
+    ]);
+    if (productName) {
+      productName = productName.replace(/^(一款|这个|那个)/, '').trim();
+    }
+
+    var model = pick(text, [
+      /型号\s*[是为：:]?\s*([A-Za-z0-9][\w\-./]{1,40})/,
+      /货号\s*[是为：:]?\s*([A-Za-z0-9][\w\-./]{1,40})/,
+      /model\s*[:=#]?\s*([A-Za-z0-9][\w\-./]{1,40})/i,
+      /SKU\s*[:=#]?\s*([A-Za-z0-9][\w\-./]{1,40})/i
+    ]);
+
+    var manufacturer = pick(text, [
+      /制造商(?:名称|全称)?\s*[是为：:]?\s*([^\n，。,]{2,80})/,
+      /(?:厂家|工厂|生产商|厂商)\s*[是为：:]?\s*([^\n，。,]{2,80})/,
+      /manufacturer\s*[:=]\s*([^\n,.]{2,80})/i
+    ]);
+
+    var address = pick(text, [
+      /制造商地址\s*[是为：:]?\s*([^\n，。,;；]{4,80})/,
+      /(?:工厂|厂家|公司)?地址\s*[是为：:]?\s*([^\n，。,;；]{4,80})/,
+      /address\s*[:=]\s*([^\n,.;]{4,80})/i
+    ]);
+    if (address) {
+      address = address.replace(/(?:我们|供应商|会|将).*$/, '').trim();
+    }
+
+    var originRaw =
+      pick(text, [
+        /原产国(?:家或地区)?\s*[是为：:]\s*([^\n，。,]{1,40})/,
+        /原产地?\s*[是为：:]\s*([^\n，。,]{1,40})/,
+        /产自\s*([^\n，。,]{1,40})/,
+        /made\s+in\s+([A-Za-z\u4e00-\u9fff][^\n,.]{0,40})/i,
+        /country\s+of\s+origin\s*[:=]\s*([^\n,.]{1,40})/i
+      ]) || '';
+    if (!originRaw) {
+      if (/原产国.{0,6}中国|中国产|国产|中国制造/i.test(text)) originRaw = '中国';
+      else if (/原产国.{0,6}越南|越南产/i.test(text)) originRaw = '越南';
+      else if (/原产国.{0,6}印度|印度产/i.test(text)) originRaw = '印度';
+    }
+
+    var regionHint = pick(text, [
+      /销往\s*([^\n。]{2,60})/,
+      /销售(?:国家|地区|市场)?\s*[是为：:]\s*([^\n。]{2,60})/,
+      /出口到?\s*([^\n。]{2,60})/,
+      /sold\s+in\s+([^\n.]{2,60})/i,
+      /distribut(?:ion|ed)\s+(?:in|to)\s+([^\n.]{2,60})/i
+    ]);
+    var regions = mergeRegions(
+      extractSpokenRegions(regionHint || text)
+    );
+
+    var program = extractProgram(text);
+    var sampleCode = extractSampleMethod(text);
+    var sampleLabel = '';
+    if (sampleCode === 'ship') sampleLabel = '__SAMPLE_SHIP__';
+    if (sampleCode === 'collect') sampleLabel = '__SAMPLE_COLLECT__';
+    if (sampleCode === 'received') sampleLabel = '__SAMPLE_RECEIVED__';
+
+    var carrier = pick(text, [
+      /承运商\s*[是为：:]\s*([^\n，。,]{2,40})/,
+      /快递\s*[是为：:]\s*([^\n，。,]{2,40})/,
+      /(?:顺丰|中通|圆通|韵达|京东|DHL|UPS|FedEx)/
+    ]);
+    if (carrier && /顺丰|SF/i.test(carrier)) carrier = '顺丰速运';
+    var tracking = pick(text, [
+      /运单号\s*[是为：:]\s*([A-Za-z0-9]{6,40})/,
+      /快递单号\s*[是为：:]\s*([A-Za-z0-9]{6,40})/,
+      /tracking\s*(?:number|no\.?)?\s*[:=]?\s*([A-Za-z0-9]{6,40})/i
+    ]);
+
+    var fields = emptyFields();
+    fields['Product Name'] = productName;
+    fields.Program = program;
+    fields['Country of Origin'] = normalizeOrigin(originRaw);
+    fields['Countries/Regions of Distribution'] = regions;
+    fields['Item#/model#'] = model;
+    fields.Manufacturer = manufacturer;
+    fields['Manufacturer Address'] = address;
+    fields['Sample Collection Method'] = sampleLabel;
+    fields.Carrier = carrier || '';
+    fields['Tracking Number'] = tracking || '';
+
+    return {
+      product_summary: {
+        name: productName || '语音描述产品',
+        brand: '',
+        hint: '来自语音识别'
+      },
+      fields: fields,
+      sample_code: sampleCode,
+      confidence: {},
+      raw_excerpt: text.slice(0, 500),
+      source: 'voice'
+    };
+  }
+
+  function mergeFieldSets(primary, secondary) {
+    var out = emptyFields();
+    var a = (primary && primary.fields) || primary || {};
+    var b = (secondary && secondary.fields) || secondary || {};
+    Object.keys(out).forEach(function (key) {
+      var av = a[key] != null ? String(a[key]).trim() : '';
+      var bv = b[key] != null ? String(b[key]).trim() : '';
+      if (key === 'Countries/Regions of Distribution') {
+        out[key] = mergeRegions([av, bv]);
+        return;
+      }
+      if (key === 'Shipping Remark' && av && bv && av !== bv) {
+        out[key] = av + '；' + bv;
+        return;
+      }
+      out[key] = av || bv;
+    });
+    var summaryA = (primary && primary.product_summary) || {};
+    var summaryB = (secondary && secondary.product_summary) || {};
+    return {
+      product_summary: {
+        name: summaryA.name || out['Product Name'] || summaryB.name || '',
+        brand: summaryA.brand || summaryB.brand || '',
+        hint: summaryA.hint || summaryB.hint || ''
+      },
+      fields: out,
+      sample_code: (primary && primary.sample_code) || (secondary && secondary.sample_code) || '',
+      confidence: Object.assign({}, (secondary && secondary.confidence) || {}, (primary && primary.confidence) || {}),
+      raw_excerpt: ((primary && primary.raw_excerpt) || (secondary && secondary.raw_excerpt) || '').slice(0, 500),
+      source: [primary && primary.source, secondary && secondary.source].filter(Boolean).join('+') || 'merged'
+    };
+  }
+
   function ocrImageFile(file) {
     return loadTesseract().then(function (Tesseract) {
       return Tesseract.recognize(file, 'eng+chi_sim', {
@@ -211,9 +418,20 @@
 
   function parseFilesLocally(files, voiceText, link) {
     files = files || [];
+    var voiceResult = voiceText ? extractFieldsFromVoiceText(voiceText) : null;
     var imageFiles = files.filter(function (f) {
       return f && f.type && f.type.indexOf('image/') === 0;
     });
+
+    if (!imageFiles.length) {
+      if (voiceResult && voiceResult.raw_excerpt) return Promise.resolve(voiceResult);
+      if (link) {
+        var linkOnly = extractFieldsFromVoiceText(String(link));
+        return Promise.resolve(linkOnly);
+      }
+      return Promise.reject(new Error('empty_local_ocr'));
+    }
+
     var tasks = imageFiles.slice(0, 3).map(function (f) {
       return ocrImageFile(f).catch(function () {
         return '';
@@ -222,17 +440,19 @@
 
     return Promise.all(tasks).then(function (texts) {
       var combined = texts.filter(Boolean).join('\n\n');
-      if (voiceText) combined = String(voiceText) + '\n\n' + combined;
       if (link) combined = combined + '\n\n' + String(link);
-      if (!combined.trim()) {
-        return Promise.reject(new Error('empty_local_ocr'));
-      }
-      return extractFieldsFromOcrText(combined);
+      var ocrResult = combined.trim() ? extractFieldsFromOcrText(combined) : null;
+      if (voiceResult && ocrResult) return mergeFieldSets(ocrResult, voiceResult);
+      if (ocrResult) return ocrResult;
+      if (voiceResult && voiceResult.raw_excerpt) return voiceResult;
+      return Promise.reject(new Error('empty_local_ocr'));
     });
   }
 
   global.QimaLabelParse = {
     extractFieldsFromOcrText: extractFieldsFromOcrText,
+    extractFieldsFromVoiceText: extractFieldsFromVoiceText,
+    mergeFieldSets: mergeFieldSets,
     parseFilesLocally: parseFilesLocally,
     loadTesseract: loadTesseract
   };

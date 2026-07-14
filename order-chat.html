@@ -1460,6 +1460,7 @@
     function sampleMethodReceived(){ return t('index.sampleReceived'); }
     function isSampleCollect(val){ return val === sampleMethodCollect(); }
     function isSampleShip(val){ return val === sampleMethodShip(); }
+    function isSampleReceived(val){ return val === sampleMethodReceived(); }
 
     function getCarriers(){
       return ['carrier.sf','carrier.zto','carrier.yto','carrier.sto','carrier.yunda','carrier.jd','carrier.jt','carrier.other'].map(function(k){ return t(k); });
@@ -2578,7 +2579,49 @@
         const val = fields[key];
         if(val != null && String(val).trim()) manualAnswers[key] = String(val).trim();
       });
+      resolveParsedSamplePlaceholders();
       fillManualFormFromAnswers();
+    }
+
+    function resolveParsedSamplePlaceholders(){
+      const raw = manualAnswers['Sample Collection Method'] || '';
+      if(raw === '__SAMPLE_SHIP__') manualAnswers['Sample Collection Method'] = sampleMethodShip();
+      else if(raw === '__SAMPLE_COLLECT__') manualAnswers['Sample Collection Method'] = sampleMethodCollect();
+      else if(raw === '__SAMPLE_RECEIVED__') manualAnswers['Sample Collection Method'] = sampleMethodReceived();
+
+      const prog = manualAnswers['Program'] || '';
+      const programs = getProgramOptions();
+      if(prog === '__PROGRAM_TEMU_HW__' && programs[0]) manualAnswers['Program'] = programs[0];
+      else if(prog === '__PROGRAM_TEMU_TOY__' && programs[1]) manualAnswers['Program'] = programs[1];
+      else if(prog === '__PROGRAM_AMAZON__' && programs[2]) manualAnswers['Program'] = programs[2];
+
+      const origin = manualAnswers['Country of Origin'] || '';
+      if(origin === '中国' || /china/i.test(origin)){
+        const opts = getOriginOptions();
+        const hit = opts.find(function(o){ return /中国|china/i.test(o); });
+        if(hit) manualAnswers['Country of Origin'] = hit;
+      } else if(origin === '越南' || /vietnam/i.test(origin)){
+        const opts = getOriginOptions();
+        const hit = opts.find(function(o){ return /越南|vietnam/i.test(o); });
+        if(hit) manualAnswers['Country of Origin'] = hit;
+      } else if(origin === '印度' || /india/i.test(origin)){
+        const opts = getOriginOptions();
+        const hit = opts.find(function(o){ return /印度|india/i.test(o); });
+        if(hit) manualAnswers['Country of Origin'] = hit;
+      }
+    }
+
+    function enrichParseResultWithVoice(result, voiceText){
+      if(!voiceText || !window.QimaLabelParse || typeof QimaLabelParse.extractFieldsFromVoiceText !== 'function'){
+        return result || { fields: {}, product_summary: {} };
+      }
+      const voiceResult = QimaLabelParse.extractFieldsFromVoiceText(voiceText);
+      if(!result) return voiceResult;
+      if(typeof QimaLabelParse.mergeFieldSets === 'function'){
+        // Prefer remote/OCR (result) when present; voice fills gaps
+        return QimaLabelParse.mergeFieldSets(result, voiceResult);
+      }
+      return result;
     }
 
     function matchSelectOption(select, value){
@@ -2642,6 +2685,18 @@
       const carrier = document.getElementById('mf_carrier');
       if(carrier && manualAnswers['Carrier']) matchSelectOption(carrier, manualAnswers['Carrier']);
 
+      const sampleLabel = manualAnswers['Sample Collection Method'] || '';
+      if(sampleLabel){
+        let sampleVal = '';
+        if(isSampleShip(sampleLabel) || sampleLabel === 'ship') sampleVal = 'ship';
+        else if(isSampleCollect(sampleLabel) || sampleLabel === 'collect') sampleVal = 'collect';
+        else if(isSampleReceived(sampleLabel) || sampleLabel === 'received') sampleVal = 'received';
+        if(sampleVal){
+          const radio = document.querySelector('input[name="mf_sample"][value="'+sampleVal+'"]');
+          if(radio) radio.checked = true;
+        }
+      }
+
       syncManualSalesCountriesFromAnswers();
     }
 
@@ -2694,11 +2749,13 @@
           : Promise.reject(new Error('missing_parse_client'));
 
         return remote.catch(function(err){
-          console.warn('parseOrder remote failed, trying local label OCR', err);
+          console.warn('parseOrder remote failed, trying local parse', err);
           if(window.QimaLabelParse && typeof QimaLabelParse.parseFilesLocally === 'function'){
             return QimaLabelParse.parseFilesLocally(files, voiceTranscript, v);
           }
           throw err;
+        }).then(function(result){
+          return enrichParseResultWithVoice(result, voiceTranscript);
         });
       }).then(function(result){
         typingRow.remove();
@@ -2761,9 +2818,49 @@
       mfToggleElectricDescription();
     }
 
+    let pendingMissingFillAfterForm = false;
+
+    function syncManualAnswersFromForm(){
+      const productName = (document.getElementById('mf_productName') || {}).value;
+      const program = (document.getElementById('mf_program') || {}).value;
+      const origin = (document.getElementById('mf_origin') || {}).value;
+      const sku = (document.getElementById('mf_sku') || {}).value;
+      const manufacturer = (document.getElementById('mf_manufacturer') || {}).value;
+      const manufacturerAddr = (document.getElementById('mf_manufacturerAddr') || {}).value;
+      const carrier = (document.getElementById('mf_carrier') || {}).value;
+      const trackingNo = (document.getElementById('mf_trackingNo') || {}).value;
+      const shippingRemark = (document.getElementById('mf_shippingRemark') || {}).value;
+      if(productName && productName.trim()) manualAnswers['Product Name'] = productName.trim();
+      if(program) manualAnswers['Program'] = program;
+      if(origin) manualAnswers['Country of Origin'] = origin;
+      if(sku && sku.trim()) manualAnswers['Item#/model#'] = sku.trim();
+      if(manufacturer && manufacturer.trim()) manualAnswers['Manufacturer'] = manufacturer.trim();
+      if(manufacturerAddr && manufacturerAddr.trim()) manualAnswers['Manufacturer Address'] = manufacturerAddr.trim();
+      if(carrier) manualAnswers['Carrier'] = carrier;
+      if(trackingNo && trackingNo.trim()) manualAnswers['Tracking Number'] = trackingNo.trim();
+      if(shippingRemark && shippingRemark.trim()) manualAnswers['Shipping Remark'] = shippingRemark.trim();
+
+      const salesCountries = [];
+      document.querySelectorAll('#mf_salesCountryGrid input:checked').forEach(function(cb){
+        const value = (cb.value || '').trim();
+        if(value) salesCountries.push(value);
+      });
+      if(salesCountries.length){
+        manualAnswers['Countries/Regions of Distribution'] = salesCountries.join(t('orderChat.listSep'));
+      }
+
+      const sample = document.querySelector('input[name="mf_sample"]:checked');
+      if(sample) manualAnswers['Sample Collection Method'] = sampleLabelFromValue(sample.value);
+    }
+
     function closeManualFormModal(e){
       if(e && e.target !== e.currentTarget) return;
+      syncManualAnswersFromForm();
       document.getElementById('manualFormModal').classList.remove('show');
+      if(pendingMissingFillAfterForm){
+        pendingMissingFillAfterForm = false;
+        setTimeout(function(){ startFillMissingAfterParse(); }, 300);
+      }
     }
 
     function getManualSalesCountryGrid(){
@@ -2931,8 +3028,18 @@
     }
 
     function askManualField(){
-      if(manualIndex >= getManualQuestions().length){ finishManualFill(); return; }
-      const item = getManualQuestions()[manualIndex];
+      const questions = getManualQuestions();
+      while(manualIndex < questions.length){
+        const item = questions[manualIndex];
+        const answerKey = item.key === 'Sample Collection' ? 'Sample Collection Method' : item.key;
+        if(getFieldDisplayValue(answerKey)){
+          manualIndex++;
+          continue;
+        }
+        break;
+      }
+      if(manualIndex >= questions.length){ finishManualFill(); return; }
+      const item = questions[manualIndex];
       botMsg(item.q, false);
       if(item.control === 'select'){
         pendingInput = null;
@@ -2950,6 +3057,16 @@
         return;
       }
       waitForInput({ type:'manual', item });
+    }
+
+    function startFillMissingAfterParse(){
+      manualIndex = 0;
+      const missingCore = getMissingRequiredFields().filter(function(name){
+        return name !== 'Sample Collection Method';
+      });
+      if(!missingCore.length) return;
+      botMsg(tHtml('orderChat.continueFillMissing', { count: missingCore.length }), false);
+      askManualField();
     }
 
     function selectFieldCard(item, source){
@@ -3396,11 +3513,10 @@
       applyParsedFields(fields);
 
       const allStats = countFilledExtractFields(fields);
-      const reqStats = countFilledRequiredFields(fields);
+      const reqStats = countFilledRequiredFields(manualAnswers);
       const percent = Math.round((allStats.filled / allStats.total) * 100);
-      const missingRequired = REQUIRED_ORDER_FIELDS.filter(function(name){
-        return !(fields[name] && String(fields[name]).trim());
-      }).length;
+      const missingRequired = getMissingRequiredFields();
+      const missingCount = missingRequired.length;
 
       const typingRow = botTyping();
       setTimeout(function(){
@@ -3410,18 +3526,31 @@
         setTimeout(function(){
           typingRow2.remove();
           botMsg(productSummaryCard(summary, fields), true);
-          botMsg(extractCard(fields, percent), true);
+          botMsg(extractCard(Object.assign({}, fields, manualAnswers), percent), true);
           botMsg(tHtml('orderChat.recognizeDoneDynamic', {
             filled: reqStats.filled,
             total: reqStats.total,
             percent: Math.round((reqStats.filled / reqStats.total) * 100),
-            missing: missingRequired
+            missing: missingCount
           }), false);
           botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
-          botMsg(missingFieldsCard(), true);
-          // Auto-open filled form so label fields are immediately visible
-          if(fields['Product Name'] || fields['Item#/model#'] || fields['Manufacturer']){
-            setTimeout(function(){ openManualFormModal(); }, 400);
+
+          const needSampleOrShip = !getFieldDisplayValue('Sample Collection Method');
+          if(needSampleOrShip){
+            botMsg(missingFieldsCard(), true);
+          } else if(missingCount){
+            botMsg(pendingRequiredFieldsCard(), true);
+          }
+
+          // Always open prefilled form when something was recognized
+          const hasMatched = !!(getFieldDisplayValue('Product Name') || getFieldDisplayValue('Item#/model#') || getFieldDisplayValue('Manufacturer') || getFieldDisplayValue('Program') || getFieldDisplayValue('Country of Origin') || getFieldDisplayValue('Countries/Regions of Distribution'));
+          const needGuidedMissing = missingRequired.some(function(name){ return name !== 'Sample Collection Method'; });
+
+          if(hasMatched){
+            pendingMissingFillAfterForm = needGuidedMissing;
+            setTimeout(function(){ openManualFormModal(); }, 350);
+          } else if(needGuidedMissing){
+            setTimeout(function(){ startFillMissingAfterParse(); }, 500);
           }
         }, 600);
       }, 500);

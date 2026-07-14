@@ -430,6 +430,7 @@ window.I18N_ZH = {
   'orderChat.fieldMissing': '缺失',
   'orderChat.recognizeDone': '识别完成！已自动完成 <b>7/10（70%）</b> 字段填写 🎉<br>还有 <b>3</b> 项需要您确认，请在下方一次性补充 👇',
   'orderChat.recognizeDoneDynamic': '识别完成！已自动完成 <b>{filled}/{total}（{percent}%）</b> 字段填写 🎉<br>还有 <b>{missing}</b> 项需要您确认，请在下方一次性补充 👇',
+  'orderChat.continueFillMissing': '已根据语音/资料自动匹配部分字段。还剩 <b>{count}</b> 项，我继续逐个请您确认 👇',
   'orderChat.parsingOrder': '正在解析资料…',
   'orderChat.parseFailed': '解析失败，请稍后重试或手动填写。',
   'orderChat.progressPercent': '已完成 {percent}%',
