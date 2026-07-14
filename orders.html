@@ -142,6 +142,13 @@
   .date-pill svg { color: #9aa0ad; flex-shrink: 0; }
 
   .ocard-product { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .ocard-product.text-only {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #f7f8fb;
+    border-radius: 10px;
+    gap: 10px;
+  }
   .thumb {
     position: relative; width: 64px; height: 64px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
   }
@@ -152,6 +159,7 @@
     content: ""; position: absolute; inset: 0;
     background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px);
   }
+  .thumb:empty { display: none; }
   .ribbon {
     position: absolute; top: 9px; right: -20px; z-index: 2;
     transform: rotate(45deg);
@@ -160,11 +168,26 @@
     box-shadow: 0 1px 2px rgba(0,0,0,.2);
   }
   .pinfo { flex: 1; min-width: 0; }
-  .pinfo .pname { font-size: 15px; color: var(--carbon); font-weight: 500; }
-  .pinfo .psub { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .pinfo .pname {
+    font-size: 15px; color: var(--carbon); font-weight: 600;
+    line-height: 1.35;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ocard-product.text-only .pname { font-size: 16px; }
+  .pinfo .psub {
+    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+    font-size: 12px; color: var(--seal); line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
   .pinfo .ptag { background: #f3f4f6; color: var(--seal); font-size: 11px; padding: 2px 6px; border-radius: 4px; }
   .pinfo .pval { font-size: 13px; color: var(--carbon); }
-  .ocard-product .chev { width: 16px; height: 16px; flex-shrink: 0; }
+  .ocard-product .chev { width: 16px; height: 16px; flex-shrink: 0; opacity: .55; }
+
+  .ocard.live {
+    padding: 14px 14px 12px;
+  }
+  .ocard.live .ocard-dates { margin-top: 10px; }
+  .ocard.live .ocard-foot { margin-top: 10px; padding-top: 9px; }
 
   .ocard-foot { margin-top: 12px; padding-top: 10px; border-top: .5px solid #eef0f4; }
   .ocard-foot span { color: var(--pool-500); font-size: 13px; }
@@ -409,8 +432,15 @@
       var ref = row.order_ref || row.application_no || '';
       var appNo = row.application_no || ref;
       var status = row.status || 'pending_verification';
-      var product = row.product_name || '';
+      var product = row.product_name || row.category || row.project_name || '';
+      if(!product && typeof t === 'function') product = t('orderChat.productUnrecognized') || '—';
+      if(!product) product = '—';
       var ordered = formatDate(row.ordered_at || row.created_at);
+      var sub = row.service_type || row.project_name || row.program || '';
+      if(sub && product && String(sub).toLowerCase() === String(product).toLowerCase()) sub = '';
+      var subHtml = sub
+        ? '<div class="psub">' + escapeHtml(sub) + '</div>'
+        : '';
       return '<a class="ocard live" href="order-detail.html?order=' + encodeURIComponent(ref) + '">'+
         '<div class="ocard-head">'+
           '<div class="left">'+
@@ -426,9 +456,11 @@
             '<span>' + (typeof t === 'function' ? t('common.orderDate') : '下单日期') + '</span> ' + escapeHtml(ordered) +
           '</div>'+
         '</div>'+
-        '<div class="ocard-product">'+
-          '<div class="thumb"></div>'+
-          '<div class="pinfo"><div class="pname">' + escapeHtml(product) + '</div></div>'+
+        '<div class="ocard-product text-only">'+
+          '<div class="pinfo">'+
+            '<div class="pname">' + escapeHtml(product) + '</div>'+
+            subHtml +
+          '</div>'+
           '<img class="chev" src="assets/chevron_row.svg" alt="" />'+
         '</div>'+
         '<div class="ocard-foot"><span>' + (typeof t === 'function' ? t('common.viewAll') : '查看全部') + '</span></div>'+
