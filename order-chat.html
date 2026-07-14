@@ -3024,15 +3024,23 @@
       labs.forEach(function(l){ map[l.key] = l.address; });
       return map;
     }
-    function openManualFormModal(){
+    function openManualFormModal(opts){
+      opts = opts || {};
       document.getElementById('manualFormModal').classList.add('show');
       populateManualFormI18n();
       fillManualFormFromAnswers();
       mfToggleSampleFields();
       mfToggleElectricDescription();
+      if(opts.scrollToSample){
+        const sampleTitle = document.querySelector('#manualFormModal .fm-section-title');
+        const body = document.querySelector('#manualFormModal .form-modal-body');
+        if(sampleTitle && body){
+          setTimeout(function(){
+            body.scrollTop = Math.max(0, sampleTitle.offsetTop - 12);
+          }, 50);
+        }
+      }
     }
-
-    let pendingMissingFillAfterForm = false;
 
     function syncManualAnswersFromForm(){
       const productName = (document.getElementById('mf_productName') || {}).value;
@@ -3078,10 +3086,6 @@
       if(e && e.target !== e.currentTarget) return;
       syncManualAnswersFromForm();
       document.getElementById('manualFormModal').classList.remove('show');
-      if(pendingMissingFillAfterForm){
-        pendingMissingFillAfterForm = false;
-        setTimeout(function(){ startFillMissingAfterParse(); }, 300);
-      }
     }
 
     function getManualSalesCountryGrid(){
@@ -3294,13 +3298,14 @@
     }
 
     function startFillMissingAfterParse(){
-      manualIndex = 0;
-      const missingCore = getMissingRequiredFields().filter(function(name){
-        return name !== 'Sample Collection Method';
-      });
+      // Missing fields are completed in the form modal, not chat cards
+      const missingCore = getMissingRequiredFields();
       if(!missingCore.length) return;
       botMsg(tHtml('orderChat.continueFillMissing', { count: missingCore.length }), false);
-      askManualField();
+      botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
+      openManualFormModal({
+        scrollToSample: missingCore.indexOf('Sample Collection Method') !== -1
+      });
     }
 
     function selectFieldCard(item, source){
@@ -3794,24 +3799,19 @@
             percent: Math.round((reqStats.filled / reqStats.total) * 100),
             missing: missingCount
           }), false);
-          botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
 
           const needSampleOrShip = !getFieldDisplayValue('Sample Collection Method');
-          if(needSampleOrShip){
-            botMsg(missingFieldsCard(), true);
-          } else if(missingCount){
-            botMsg(pendingRequiredFieldsCard(), true);
-          }
-
-          // Always open prefilled form when something was recognized
           const hasMatched = !!(getFieldDisplayValue('Product Name') || getFieldDisplayValue('Item#/model#') || getFieldDisplayValue('Manufacturer') || getFieldDisplayValue('Program') || getFieldDisplayValue('Country of Origin') || getFieldDisplayValue('Countries/Regions of Distribution'));
-          const needGuidedMissing = missingRequired.some(function(name){ return name !== 'Sample Collection Method'; });
+          const needForm = hasMatched || missingCount > 0 || needSampleOrShip;
 
-          if(hasMatched){
-            pendingMissingFillAfterForm = needGuidedMissing;
-            setTimeout(function(){ openManualFormModal(); }, 350);
-          } else if(needGuidedMissing){
-            setTimeout(function(){ startFillMissingAfterParse(); }, 500);
+          if(needForm){
+            botMsg(t('orderChat.fillMissingInForm'), false);
+            botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
+            setTimeout(function(){
+              openManualFormModal({ scrollToSample: needSampleOrShip });
+            }, 350);
+          } else {
+            botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')+I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')), true);
           }
         }, 600);
       }, 500);
@@ -4140,8 +4140,9 @@
         botMsg(chipsRow(I18n.chipHtml('orderChat.chipPlaceOrder','cart','placeOrder(this)')+I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
       } else {
         botMsg(tHtml('orderChat.savedEditPartial', {percent: completion, count: missing.length}), false);
-        botMsg(pendingRequiredFieldsCard(), true);
-        botMsg(chipsRow(I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
+        botMsg(t('orderChat.fillMissingInForm'), false);
+        botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')+I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')), true);
+        setTimeout(function(){ openManualFormModal(); }, 300);
       }
     }
 
