@@ -4319,6 +4319,7 @@
 
     let waybillOrigin = '';
     let waybillTargetCard = null;
+    let pendingWaybillOrigin = '';
 
     function resolveCarrierDisplayName(parsed){
       if(!parsed) return '';
@@ -4374,6 +4375,81 @@
         true
       );
       botMsg(t('orderChat.waybillRecognized'), false);
+      showWaybillNextStepChips();
+    }
+
+    function showWaybillNextStepChips(){
+      pendingWaybillOrigin = waybillOrigin || pendingWaybillOrigin || 'chat';
+      botMsg(chipsRow(
+        I18n.chipHtml('orderChat.chipConfirmWaybill','check','confirmWaybillResult(this)')+
+        I18n.chipHtml('orderChat.chipRetakeWaybill','refresh','retakeWaybillPhoto(this)')+
+        I18n.chipHtml('orderChat.chipEditFields','edit','editWaybillResult(this)')
+      ), true);
+    }
+
+    function confirmWaybillResult(btn){
+      removeActionRow(btn);
+      userMsg(t('orderChat.confirmWaybillOk'));
+      const origin = pendingWaybillOrigin || waybillOrigin || 'chat';
+      pendingWaybillOrigin = '';
+      waybillOrigin = '';
+      waybillTargetCard = null;
+
+      if(origin === 'manual'){
+        manualIndex++;
+        const typingRow = botTyping();
+        setTimeout(function(){ typingRow.remove(); botMsg(t('orderChat.shippingRecorded'), false); askManualField(); }, 500);
+        return;
+      }
+      if(origin === 'missing'){
+        if(typeof mi !== 'undefined') mi++;
+        const typingRow = botTyping();
+        setTimeout(function(){ typingRow.remove(); botMsg(t('orderChat.shippingRecorded'), false); askMissing(); }, 500);
+        return;
+      }
+
+      const formOpen = document.getElementById('manualFormModal') && document.getElementById('manualFormModal').classList.contains('show');
+      if(origin === 'form' && formOpen){
+        botMsg(t('orderChat.waybillSavedInForm'), false);
+        return;
+      }
+      continueAfterWaybillShipping();
+    }
+
+    function continueAfterWaybillShipping(){
+      const missing = getMissingRequiredFields();
+      const typingRow = botTyping();
+      setTimeout(function(){
+        typingRow.remove();
+        if(!missing.length){
+          botMsg(t('orderChat.shippingRecordedConfirm'), false);
+          botMsg(manualOrderCard(), true);
+          botMsg(placeOrderChips(), true);
+        } else {
+          botMsg(tHtml('orderChat.savedEditPartial', {percent: calculateRequiredCompletion(), count: missing.length}), false);
+          botMsg(t('orderChat.fillMissingInForm'), false);
+          botMsg(chipsRow(
+            I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModalForComplete()')+
+            I18n.chipHtml('orderChat.chipContinueEdit','edit','openFieldEditor(this)')
+          ), true);
+        }
+      }, 500);
+    }
+
+    function retakeWaybillPhoto(btn){
+      removeActionRow(btn);
+      userMsg(t('orderChat.chipRetakeWaybill'));
+      const origin = pendingWaybillOrigin || 'chat';
+      openWaybillCamera(origin);
+    }
+
+    function editWaybillResult(btn){
+      removeActionRow(btn);
+      userMsg(t('orderChat.chipEditFields'));
+      pendingWaybillOrigin = '';
+      waybillOrigin = '';
+      waybillTargetCard = null;
+      openFieldEditor();
     }
 
     function openWaybillCamera(origin, targetCard){
@@ -4438,17 +4514,23 @@
 
       recognize.then(function(parsed){
         if(progressRow && progressRow.parentNode) progressRow.remove();
+        // Preserve origin for confirm chips before applyWaybillResult captures it
+        if(!waybillOrigin) waybillOrigin = origin || 'form';
         applyWaybillResult(parsed, previewUrl);
-        finishWaybillFlow();
+        waybillOrigin = '';
+        waybillTargetCard = null;
       }).catch(function(err){
         console.error('waybill OCR failed', err);
         if(progressRow && progressRow.parentNode) progressRow.remove();
         botMsg(t('orderChat.waybillRecognizeFailed'), false);
-        if(waybillOrigin === 'form'){
-          // keep form open for manual entry
-        } else {
-          finishWaybillFlow();
-        }
+        pendingWaybillOrigin = origin || waybillOrigin || 'chat';
+        botMsg(chipsRow(
+          I18n.chipHtml('orderChat.chipRetakeWaybill','refresh','retakeWaybillPhoto(this)')+
+          I18n.chipHtml('orderChat.chipManualShipping','edit','chooseShippingInput(\'manual\', this, \''+escapeJs(pendingWaybillOrigin)+'\')')+
+          I18n.chipHtml('orderChat.chipEditFields','edit','editWaybillResult(this)')
+        ), true);
+        waybillOrigin = '';
+        waybillTargetCard = null;
       }).finally(function(){
         resetWaybillScanButton();
         if(input) input.value = '';
