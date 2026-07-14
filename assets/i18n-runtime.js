@@ -21,12 +21,17 @@
     '报告已完成': 'green',
     '合格': 'green',
     '待确认': 'orange',
+    '已取消': 'orange',
     'in progress': 'blue',
     'pending verification': 'blue',
+    'pending_verification': 'blue',
+    'in_progress': 'blue',
+    'report_completed': 'green',
     'report ready': 'green',
     'report completed': 'green',
     'pass': 'green',
-    'pending confirmation': 'orange'
+    'pending confirmation': 'orange',
+    'cancelled': 'orange'
   };
 
   var COUNTRY_CANONICAL = {
@@ -329,6 +334,13 @@
   function translateStatus(status) {
     var raw = String(status || '').trim();
     if (!raw) return '';
+    var dbMap = {
+      pending_verification: 'status.pendingVerification',
+      in_progress: 'status.inProgress',
+      report_completed: 'status.reportCompleted',
+      cancelled: 'status.pendingConfirmation'
+    };
+    if (dbMap[raw]) return t(dbMap[raw]);
     var lang = getLang();
     if (lang === 'zh') {
       var zhDict = global.I18N_ZH || {};

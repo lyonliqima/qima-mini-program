@@ -201,6 +201,8 @@
 <script src="assets/i18n/zh.js"></script>
 <script src="assets/i18n/en.js"></script>
 <script src="assets/i18n-runtime.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/supabase-client.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -258,7 +260,7 @@
     </div>
 
     <!-- 订单列表 -->
-    <div class="list">
+    <div class="list" id="orderList">
       <!-- 卡片 1 -->
       <a class="ocard" href="order-detail.html?order=08008571">
         <div class="ocard-head">
@@ -370,7 +372,80 @@
     </div>
   </div>
   <script>
+    function escapeHtml(str){
+      return window.I18n ? I18n.escapeHtml(str) : String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function mapStatusLabel(status){
+      var map = {
+        pending_verification: 'status.pendingVerification',
+        in_progress: 'status.inProgress',
+        report_completed: 'status.reportCompleted',
+        cancelled: 'status.pendingConfirmation'
+      };
+      var key = map[status];
+      return key && typeof t === 'function' ? t(key) : (status || '');
+    }
+
+    function statusTone(status){
+      if(status === 'report_completed') return 'green';
+      return 'blue';
+    }
+
+    function formatDate(value){
+      if(!value) return '';
+      return String(value).slice(0, 10);
+    }
+
+    function liveOrderCard(row){
+      var ref = row.order_ref || row.application_no || '';
+      var appNo = row.application_no || ref;
+      var status = row.status || 'pending_verification';
+      var product = row.product_name || '';
+      var ordered = formatDate(row.ordered_at || row.created_at);
+      return '<a class="ocard live" href="order-detail.html?order=' + encodeURIComponent(ref) + '">'+
+        '<div class="ocard-head">'+
+          '<div class="left">'+
+            '<img src="assets/order_icon.svg" alt="" />'+
+            '<span class="lbl">' + (typeof t === 'function' ? t('common.orderNo') : '申请单号：') + '</span>'+
+            '<span class="num">' + escapeHtml(appNo) + '</span>'+
+          '</div>'+
+          '<div class="status ' + statusTone(status) + '">' + escapeHtml(mapStatusLabel(status)) + '</div>'+
+        '</div>'+
+        '<div class="ocard-dates">'+
+          '<div class="date-pill">'+
+            '<svg width="12" height="12" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.5 6.5h11M5.5 1.8v2.4M10.5 1.8v2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'+
+            '<span>' + (typeof t === 'function' ? t('common.orderDate') : '下单日期') + '</span> ' + escapeHtml(ordered) +
+          '</div>'+
+        '</div>'+
+        '<div class="ocard-product">'+
+          '<div class="thumb"></div>'+
+          '<div class="pinfo"><div class="pname">' + escapeHtml(product) + '</div></div>'+
+          '<img class="chev" src="assets/chevron_row.svg" alt="" />'+
+        '</div>'+
+        '<div class="ocard-foot"><span>' + (typeof t === 'function' ? t('common.viewAll') : '查看全部') + '</span></div>'+
+      '</a>';
+    }
+
+    function loadLiveOrders(){
+      var api = window.QimaSupabase;
+      var list = document.getElementById('orderList');
+      if(!api || !api.ready() || !list) return;
+      api.getFullOrders().then(function(rows){
+        if(!rows || !rows.length) return;
+        var html = rows.slice(0, 20).map(liveOrderCard).join('');
+        list.insertAdjacentHTML('afterbegin', html);
+      }).catch(function(err){
+        console.warn('load live orders failed', err);
+      });
+    }
+
     if (window.I18n) I18n.initLangToggle();
+    loadLiveOrders();
   </script>
 </body>
 </html>

@@ -408,6 +408,8 @@
 <script src="assets/i18n/zh.js"></script>
 <script src="assets/i18n/en.js"></script>
 <script src="assets/i18n-runtime.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/supabase-client.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -504,6 +506,7 @@
           <div class="info-row"><div class="label" data-i18n="orderDetail.skcId">SKC 编号</div><div class="value" id="skcId">N/A</div></div>
           <div class="info-row"><div class="label" data-i18n="orderDetail.itemModel">货号/型号</div><div class="value" id="skuNo">RCR-001</div></div>
           <div class="info-row"><div class="label" data-i18n="orderDetail.manufacturer">制造商</div><div class="value" id="manufacturerName">Xujiating</div></div>
+          <div class="info-row"><div class="label" data-i18n="orderDetail.manufacturerAddress">制造商地址</div><div class="value" id="manufacturerAddress">N/A</div></div>
           <div class="info-row"><div class="label" data-i18n="orderDetail.fibreContent">纤维成分</div><div class="value" id="fibreContent">None</div></div>
           <div class="info-row"><div class="label" data-i18n="orderDetail.color">颜色</div><div class="value" id="colorValue">N/A</div></div>
           <div class="info-row"><div class="label" data-i18n="orderDetail.productType">产品类型</div><div class="value" id="productType">N/A</div></div>
@@ -519,6 +522,9 @@
         <div class="section-head" data-i18n="orderDetail.sampleCollection">样本采集</div>
         <div class="info-list">
           <div class="info-row full"><div class="label" data-i18n="orderDetail.method">方法</div><div class="value" id="collectionMethod">None</div></div>
+          <div class="info-row"><div class="label" data-i18n="carrier.label">快递公司</div><div class="value" id="carrier">N/A</div></div>
+          <div class="info-row"><div class="label" data-i18n="carrier.trackingNo">运单号</div><div class="value" id="trackingNumber">N/A</div></div>
+          <div class="info-row full"><div class="label" data-i18n="index.shippingRemark">备注</div><div class="value" id="shippingRemark">N/A</div></div>
         </div>
       </section>
 
@@ -925,8 +931,121 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    const orderId = params.get('order') || '08008571';
+    let orderId = params.get('order') || '08008571';
     let order = orders[orderId] || orders['08008571'];
+    let orderSource = 'demo';
+
+    function mapDbStatus(status){
+      const map = {
+        pending_verification: '待验证',
+        in_progress: '进行中',
+        report_completed: '报告已完成',
+        cancelled: '已取消'
+      };
+      return map[status] || status || '待验证';
+    }
+
+    function mapDbTestType(testType){
+      const map = {
+        first: '首次测试',
+        retest: '重测',
+        reorder: '再次下单'
+      };
+      return map[testType] || testType || '首次测试';
+    }
+
+    function displayOrNone(value){
+      if(value == null) return 'None';
+      const s = String(value).trim();
+      return s ? s : 'None';
+    }
+
+    function displayOrNA(value){
+      if(value == null) return 'N/A';
+      const s = String(value).trim();
+      return s ? s : 'N/A';
+    }
+
+    function salesCountriesToText(value){
+      if(Array.isArray(value)) return value.filter(Boolean).join('，');
+      if(!value) return '';
+      return String(value);
+    }
+
+    function mapDbOrderToView(row){
+      if(!row) return null;
+      const ref = row.order_ref || row.application_no || orderId;
+      const files = Array.isArray(row.files) ? row.files.map(function(f){
+        return {
+          name: f.file_name || 'file',
+          labelKey: f.label_key === 'chat_upload' ? 'orderDetail.attachments' : '',
+          label: f.label_key === 'chat_upload' ? '' : (f.label_key || '')
+        };
+      }) : [];
+      const recipients = Array.isArray(row.recipients) ? row.recipients.map(function(r){
+        var mail = r.mail_type || 'all';
+        if(mail === 'all') mail = 'All emails';
+        return { email: r.email || '', typeKey: normalizeEmailType(mail) };
+      }) : [];
+      const labLabel = row.lab_name_zh || row.lab_name_en || row.testing_lab_address || row.testing_location || '';
+      return {
+        title: row.service_type || '实验室检测',
+        subtitle: '订单编号: ' + ref,
+        status: mapDbStatus(row.status),
+        statusClass: 'blue',
+        serviceType: row.service_type || '实验室检测',
+        category: row.category || '',
+        productName: row.product_name || '未命名产品',
+        testType: mapDbTestType(row.test_type),
+        testingLocation: labLabel || 'None',
+        supplierName: displayOrNone(row.supplier_name),
+        productRefNo: displayOrNone(row.product_ref_no),
+        poNumber: displayOrNone(row.po_number),
+        skuValue: displayOrNone(row.sku_value),
+        material: displayOrNone(row.material),
+        ageGrade: displayOrNA(row.age_grade),
+        projectName: row.project_name || '',
+        originCountry: row.origin_country || '',
+        salesCountry: salesCountriesToText(row.sales_countries),
+        turnaroundTime: row.turnaround_time || '',
+        needQuotation: row.need_quotation ? '是' : '否',
+        manufacturerName: displayOrNA(row.manufacturer_name),
+        manufacturerAddress: displayOrNA(row.manufacturer_address),
+        skuNo: displayOrNA(row.item_model),
+        fibreContent: displayOrNone(row.fibre_content),
+        colorValue: displayOrNA(row.color_value),
+        productType: displayOrNA(row.product_type),
+        sunLensCat: displayOrNA(row.sun_lens_cat),
+        eanCode: displayOrNA(row.ean_code),
+        brand: displayOrNA(row.brand),
+        batchNumber: displayOrNA(row.batch_number),
+        spuId: displayOrNA(row.spu_id),
+        skcId: displayOrNA(row.skc_id),
+        collectionMethod: displayOrNone(row.collection_method),
+        carrier: displayOrNA(row.carrier),
+        trackingNumber: displayOrNA(row.tracking_number),
+        shippingRemark: displayOrNA(row.shipping_remark),
+        orderRemark: displayOrNone(row.order_remark),
+        recipientEmail: recipients[0] ? recipients[0].email : 'N/A',
+        emailType: recipients[0] ? recipients[0].typeKey : 'N/A',
+        recipients: recipients,
+        files: files,
+        thumbClass: '',
+        applicationNo: row.application_no || '',
+        orderRef: ref,
+        dbId: row.id
+      };
+    }
+
+    function fetchLiveOrder(id){
+      const api = window.QimaSupabase;
+      if(!api || !api.ready()) return Promise.resolve(null);
+      const tryRef = api.getFullOrderByRef(id).catch(function(){ return null; });
+      const tryApp = api.getFullOrderByApplicationNo(id).catch(function(){ return null; });
+      return Promise.all([tryRef, tryApp]).then(function(rows){
+        return rows[0] || rows[1] || null;
+      });
+    }
 
     const editableSections = [
       {
@@ -975,6 +1094,7 @@
           { key: 'skcId', labelKey: 'orderDetail.skcId', type: 'text' },
           { key: 'skuNo', labelKey: 'orderDetail.itemModel', type: 'text' },
           { key: 'manufacturerName', labelKey: 'orderDetail.manufacturer', type: 'text' },
+          { key: 'manufacturerAddress', labelKey: 'orderDetail.manufacturerAddress', type: 'text' },
           { key: 'fibreContent', labelKey: 'orderDetail.fibreContent', type: 'text' },
           { key: 'colorValue', labelKey: 'orderDetail.color', type: 'text' },
           { key: 'productType', labelKey: 'orderDetail.productType', type: 'text' },
@@ -997,7 +1117,10 @@
             'index.sampleShip',
             'index.sampleCollect',
             'index.sampleReceived'
-          ]}
+          ]},
+          { key: 'carrier', labelKey: 'carrier.label', type: 'text' },
+          { key: 'trackingNumber', labelKey: 'carrier.trackingNo', type: 'text' },
+          { key: 'shippingRemark', labelKey: 'index.shippingRemark', type: 'textarea' }
         ]
       },
       {
@@ -1097,6 +1220,7 @@
       skcId: ['skcId'],
       skuNo: ['skuNo'],
       manufacturerName: ['manufacturerName'],
+      manufacturerAddress: ['manufacturerAddress'],
       fibreContent: ['fibreContent'],
       colorValue: ['colorValue'],
       productType: ['productType'],
@@ -1105,6 +1229,9 @@
       brand: ['brand'],
       batchNumber: ['batchNumber'],
       collectionMethod: ['collectionMethod'],
+      carrier: ['carrier'],
+      trackingNumber: ['trackingNumber'],
+      shippingRemark: ['shippingRemark'],
       orderRemark: ['orderRemark'],
       recipientEmail: ['recipientEmail'],
       emailType: ['emailType']
@@ -1443,8 +1570,10 @@
 
     function renderOrderDetail(){
       document.getElementById('orderTitle').textContent = translateServiceType(order.serviceType || order.title);
-      document.getElementById('orderSubtitle').textContent = t('orderDetail.orderNoLabel', { id: orderId });
+      document.getElementById('orderSubtitle').textContent = t('orderDetail.orderNoLabel', { id: order.orderRef || orderId });
       document.getElementById('productName').textContent = order.productName;
+      const modelNo = document.getElementById('modelNo');
+      if(modelNo) modelNo.textContent = order.orderRef || order.skuNo || orderId;
       setText('testType', translateTestType(order.testType));
       setText('testingLocation', translateTestingLocation(order.testingLocation));
       setText('supplierName', order.supplierName === 'None' ? t('common.none') : order.supplierName);
@@ -1462,6 +1591,7 @@
       setText('skcId', order.skcId);
       setText('skuNo', order.skuNo);
       setText('manufacturerName', order.manufacturerName);
+      setText('manufacturerAddress', order.manufacturerAddress);
       setText('fibreContent', order.fibreContent);
       setText('colorValue', order.colorValue);
       setText('productType', order.productType);
@@ -1470,7 +1600,20 @@
       setText('brand', order.brand);
       setText('batchNumber', order.batchNumber);
       setText('collectionMethod', translateCollectionMethod(order.collectionMethod));
+      setText('carrier', order.carrier);
+      setText('trackingNumber', order.trackingNumber);
+      setText('shippingRemark', order.shippingRemark);
       setText('orderRemark', order.orderRemark);
+      const attachments = document.getElementById('attachments');
+      if(attachments){
+        if(order.files && order.files.length){
+          attachments.textContent = order.files.map(function(f){ return f.name; }).join('、');
+          attachments.classList.remove('muted');
+        } else {
+          attachments.textContent = t('common.none');
+          attachments.classList.add('muted');
+        }
+      }
       renderRecipientList();
 
       const statusBadge = document.getElementById('statusBadge');
@@ -1480,7 +1623,7 @@
       const productThumb = document.getElementById('productThumb');
       productThumb.className = ('thumb ' + (order.thumbClass || '')).trim();
 
-      renderFileList(order.files || defaultFiles);
+      renderFileList((order.files && order.files.length) ? order.files : (orderSource === 'live' ? [] : defaultFiles));
     }
 
     window.onLangApplied = function () {
@@ -1490,7 +1633,22 @@
       }
     };
 
-    renderOrderDetail();
+    function bootstrapOrderDetail(){
+      renderOrderDetail();
+      fetchLiveOrder(orderId).then(function(row){
+        if(!row) return;
+        const mapped = mapDbOrderToView(row);
+        if(!mapped) return;
+        order = mapped;
+        orderId = mapped.orderRef || mapped.applicationNo || orderId;
+        orderSource = 'live';
+        renderOrderDetail();
+      }).catch(function(err){
+        console.warn('load live order failed', err);
+      });
+    }
+
+    bootstrapOrderDetail();
 
     function setText(id, value, fallback){
       const node = document.getElementById(id);
