@@ -165,7 +165,7 @@
         var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
         var timer = null;
         if (controller) {
-          timer = setTimeout(function () { controller.abort(); }, 8000);
+          timer = setTimeout(function () { controller.abort(); }, 60000);
         }
         return fetch(endpoint, {
           method: 'POST',

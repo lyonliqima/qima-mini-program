@@ -1,5 +1,5 @@
 ---
-description: After UI/feature changes, automatically commit, push to GitHub Pages production
+description: After UI/feature changes, automatically commit, push to GitHub Pages; redeploy Vercel when API changes
 alwaysApply: true
 ---
 
@@ -12,12 +12,14 @@ When the user asks to publish/deploy, or after completing a batch of product UI 
 1. Stage relevant files only (exclude `.DS_Store`, `*.zip`, and untracked folders the user did not ask to ship, e.g. `mini program english/` unless requested).
 2. Commit with a concise Chinese message focused on why.
 3. `git push -u origin HEAD` to `main` (GitHub Pages source).
-4. Do **not** run `vercel --prod` — production frontend is GitHub Pages only.
-5. Reply with the production URL:
-   - GitHub Pages: https://lyonliqima.github.io/qima-mini-program/
+4. If `api/` or `vercel.json` / `requirements.txt` changed, also run `vercel --prod --yes` so edge OCR/ASR stay in sync.
+5. Reply with production URLs:
+   - GitHub Pages (frontend): https://lyonliqima.github.io/qima-mini-program/
+   - Vercel API: https://qima-mini-program.vercel.app (used by `/api/parse`, `/api/transcribe`)
 
 ## Defaults for this project
 
+- Frontend ships via GitHub Pages; OCR/ASR run on Vercel Python functions (NVIDIA AI).
 - Prefer shipping after a coherent change set is done (not mid-edit).
 - If the user says「发布」「上线」「发到生产」「每次自动发布」, treat that as explicit deploy approval for the current work.
 - Do not force-push. Do not commit secrets.

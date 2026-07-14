@@ -2936,10 +2936,13 @@
         updateParseProgressCard(progressRow, t('orderChat.parsingRemote'));
 
         const remote = (api && typeof api.parseOrder === 'function')
-          ? withTimeout(api.parseOrder({ voiceText: voiceTranscript, link: v, files: files }), 8000, 'remote_timeout')
+          ? withTimeout(api.parseOrder({ voiceText: voiceTranscript, link: v, files: files }), 55000, 'remote_timeout')
           : Promise.reject(Object.assign(new Error('missing_parse_client'), { code: 'missing_parse_client' }));
 
-        return remote.catch(function(err){
+        return remote.then(function(result){
+          if(result && result.fields) result.source = result.source || 'edge_ai';
+          return result;
+        }).catch(function(err){
           console.warn('parseOrder remote failed, trying local parse', err);
           updateParseProgressCard(progressRow, t('orderChat.parsingLocal'));
           if(window.QimaLabelParse && typeof QimaLabelParse.parseFilesLocally === 'function'){

@@ -35,6 +35,8 @@ FIELD_KEYS = [
     "Manufacturer",
     "Manufacturer Address",
     "Sample Collection Method",
+    "Electric Product",
+    "Product Description",
     "Carrier",
     "Tracking Number",
     "Shipping Remark",
@@ -316,20 +318,25 @@ def _ocr_image_structured(data: bytes, mime: str, filename: str) -> dict:
     if media == "application/octet-stream":
         media = "image/jpeg"
     prompt = (
-        "你是产品标签/合格证识别助手。请仔细阅读图片中的全部文字与标识，"
+        "你是产品标签/合格证/铭牌识别助手。请仔细阅读图片中的全部文字与标识，"
         "抽取检测下单所需字段，只返回合法 JSON（不要 markdown）。\n"
         "字段说明：\n"
-        '- "Product Name": 产品名称（如 Product name / 品名）\n'
-        '- "Item#/model#": 型号/货号，优先取标签上的 Model / 型号 / SKU / Item No 一行的值（如 XY-03、LX-03）\n'
+        '- "Product Name": 产品名称（如 Product name / 品名 / 标题 Electric Fan）\n'
+        '- "Item#/model#": 型号/货号，优先取 Model / Model No / 型号 / SKU / Item No / P/N（如 XP-085、XY-03）\n'
         '- "Manufacturer": 制造商公司全称\n'
         '- "Manufacturer Address": 制造商地址（完整一行）\n'
         '- "Country of Origin": 原产国（优先 MADE IN / Manufacturing location，值用简体如「中国」）\n'
         '- "Batch": 批号/Batch\n'
         '- "Date of manufacture": 生产日期\n'
+        '- "Rating": 额定参数原文（如 110/240~, 50/60Hz, 60W）\n'
+        '- "Electric Product": 是否带电，填「带电产品」或「非电产品」；'
+        "有电压/功率/Hz/电池/充电/电机/Electric 等视为带电产品\n"
+        '- "Product Description": 带电说明，可写入 Rating / 电池 / 充电方式\n'
         '- "EC REP": 欧代公司+地址（如有 EC REP）\n'
+        '- "UK REP": 英代（如有）\n'
         '- "marks": 图片上出现的合规标识数组，可能含 CE, UKCA, FC, FCC, RoHS, WEEE 等\n'
         '- "Countries/Regions of Distribution": 销售国家/地区；'
-        "若未写明，则根据标识推断：CE→欧盟，UKCA→英国，FC/FCC→美国，CCC→中国，RCM→澳大利亚\n"
+        "若未写明，则根据标识/代表处推断：CE/EC REP/Triman→欧盟，UKCA/UK REP→英国，FC/FCC→美国，CCC→中国，RCM→澳大利亚\n"
         '- "ocr_text": 关键可见关键文字要点（简体）\n'
         "无法确定的字段用空字符串；marks 用数组。"
     )
@@ -371,6 +378,10 @@ def _label_dict_to_snippet(label: dict, filename: str) -> str:
         "Batch",
         "Date of manufacture",
         "EC REP",
+        "UK REP",
+        "Rating",
+        "Electric Product",
+        "Product Description",
         "ocr_text",
     ):
         val = label.get(key)
@@ -419,11 +430,14 @@ def _structure_fields(context: str, seed_fields: dict | None = None) -> dict:
         "抽取订单字段。必须输出合法 JSON，不要 markdown。所有字段值使用简体中文。"
         "规则：\n"
         "1) Country of Origin：MADE IN CHINA / Manufacturing location 含 China →「中国」\n"
-        "2) Countries/Regions of Distribution：CE→欧盟，UKCA→英国，FC/FCC→美国；"
-        "多个用顿号「、」连接\n"
-        "3) Item#/model# 取 Model / SKU / 货号\n"
-        "4) Shipping Remark 可汇总批号、生产日期、欧代、合规标识\n"
-        "5) 无法确定的字段留空字符串\n"
+        "2) Countries/Regions of Distribution：CE/EC REP/Triman→欧盟，UKCA/UK REP→英国，"
+        "FC/FCC→美国；多个用顿号「、」连接\n"
+        "3) Item#/model# 取 Model / Model No / SKU / 货号（不要把 NO/Number 当成型号）\n"
+        "4) Electric Product：有电压/功率/Hz/电池/充电/电机/Electric/Rating 填「带电产品」，"
+        "明确非电填「非电产品」，否则空字符串\n"
+        "5) Product Description：带电时写入 Rating/电池/充电等要点\n"
+        "6) Shipping Remark 可汇总批号、生产日期、欧代、合规标识\n"
+        "7) 无法确定的字段留空字符串\n"
         'JSON：{"product_summary":{"name":"","brand":"","hint":""},'
         '"fields":{...},"confidence":{...},"raw_excerpt":""}'
     )
@@ -473,6 +487,24 @@ def _seed_fields_from_labels(labels: list[dict]) -> dict:
             seed["Country of Origin"] = origin
         regions.append(str(label.get("Countries/Regions of Distribution") or ""))
         regions.extend(_regions_from_marks(label.get("marks")))
+        if str(label.get("EC REP") or "").strip() or str(label.get("UK REP") or "").strip():
+            if str(label.get("EC REP") or "").strip():
+                regions.append("欧盟")
+            if str(label.get("UK REP") or "").strip():
+                regions.append("英国")
+        elec = str(label.get("Electric Product") or "").strip()
+        if elec and not seed["Electric Product"]:
+            if re.search(r"非电|non[-\s]?electric|no", elec, re.I):
+                seed["Electric Product"] = "非电产品"
+            elif re.search(r"带电|electric|yes", elec, re.I):
+                seed["Electric Product"] = "带电产品"
+        rating = str(label.get("Rating") or label.get("Product Description") or "").strip()
+        if rating and not seed["Product Description"]:
+            seed["Product Description"] = rating if rating.startswith("额定") else f"额定：{rating}"
+            if not seed["Electric Product"] and re.search(
+                r"\d+\s*V|\d+\s*W|\d+\s*Hz|电池|充电|Electric", rating, re.I
+            ):
+                seed["Electric Product"] = "带电产品"
         extra_remark = _build_shipping_remark(label)
         if extra_remark:
             remark_bits.append(extra_remark)
