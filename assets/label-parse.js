@@ -206,7 +206,7 @@
     if (ecMatch) ecRep = simplifySpaces(ecMatch[1]).split('\n').slice(0, 4).join(' ');
 
     var marks = detectMarks(text);
-    var regions = mergeRegions(regionsFromMarks(marks));
+    var regions = extractDistributionRegions(text);
     var remarkParts = [];
     if (batch) remarkParts.push('批号：' + batch);
     if (date) remarkParts.push('生产日期：' + date);
@@ -259,9 +259,9 @@
   function extractSpokenRegions(text) {
     var regions = [];
     var pairs = [
-      [/欧盟|欧洲|EU\b|European\s+Union/i, '欧盟'],
-      [/美国|USA\b|U\.S\.A|United\s+States|\bUS\b/i, '美国'],
-      [/英国|UK\b|United\s+Kingdom|Great\s+Britain/i, '英国'],
+      [/欧盟|欧洲(?:联盟|市场|地区)?|EU\b|European\s+Union|Europe(?:an)?\s+market/i, '欧盟'],
+      [/美国|北美|USA\b|U\.S\.A\.?|United\s+States|\bUS\b|U\.S\.?\s+market/i, '美国'],
+      [/英国|UK\b|United\s+Kingdom|Great\s+Britain|England/i, '英国'],
       [/加拿大|Canada/i, '加拿大'],
       [/澳大利亚|澳洲|Australia/i, '澳大利亚'],
       [/南非|South\s+Africa/i, '南非'],
@@ -272,6 +272,28 @@
       if (pair[0].test(text) && regions.indexOf(pair[1]) === -1) regions.push(pair[1]);
     });
     return regions;
+  }
+
+  function extractDistributionRegions(text) {
+    var regionHint = pick(text, [
+      /销往\s*([^\n。；;]{2,80})/,
+      /销售(?:国家|地区|市场)?\s*[是为：:]\s*([^\n。；;]{2,80})/,
+      /(?:出口|发往|运往|适用于)\s*([^\n。；;]{2,80})/,
+      /(?:目标|目标销售)?市场\s*[是为：:]\s*([^\n。；;]{2,80})/,
+      /sold\s+(?:in|to)\s+([^\n.;]{2,80})/i,
+      /(?:for|intended\s+for)\s+(?:the\s+)?([^\n.;]{2,60}\s+market)/i,
+      /distribut(?:ion|ed)\s+(?:in|to|for)\s+([^\n.;]{2,80})/i,
+      /countries?\s*(?:\/\s*regions?)?\s+of\s+distribution\s*[:=]\s*([^\n.;]{2,80})/i,
+      /destination\s*(?:market|country|countries)?\s*[:=]\s*([^\n.;]{2,80})/i
+    ]);
+    var fromText = extractSpokenRegions(regionHint || text);
+    var marks = detectMarks(text);
+    var fromMarks = regionsFromMarks(marks);
+    // EC REP / Authorized Representative in Europe also implies EU sales
+    if (/EC\s*REP|European\s+Authorized\s+Representative|欧代|欧盟授权代表/i.test(text)) {
+      if (fromMarks.indexOf('欧盟') === -1) fromMarks = fromMarks.concat(['欧盟']);
+    }
+    return mergeRegions(fromText.concat(fromMarks));
   }
 
   function extractProgram(text) {
@@ -362,16 +384,7 @@
       else if (/原产国.{0,6}印度|印度产/i.test(text)) originRaw = '印度';
     }
 
-    var regionHint = pick(text, [
-      /销往\s*([^\n。]{2,60})/,
-      /销售(?:国家|地区|市场)?\s*[是为：:]\s*([^\n。]{2,60})/,
-      /出口到?\s*([^\n。]{2,60})/,
-      /sold\s+in\s+([^\n.]{2,60})/i,
-      /distribut(?:ion|ed)\s+(?:in|to)\s+([^\n.]{2,60})/i
-    ]);
-    var regions = mergeRegions(
-      extractSpokenRegions(regionHint || text)
-    );
+    var regions = extractDistributionRegions(text);
 
     var program = extractProgram(text);
     var sampleCode = extractSampleMethod(text);

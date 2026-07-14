@@ -1161,7 +1161,7 @@
 <script src="assets/i18n-runtime.js?v=20260714b"></script>
 <script src="assets/supabase-config.js?v=20260714b"></script>
 <script src="assets/supabase-client.js?v=20260714b"></script>
-<script src="assets/label-parse.js?v=20260714d"></script>
+<script src="assets/label-parse.js?v=20260714e"></script>
 </head>
 <body>
   <div class="phone">
@@ -1394,11 +1394,11 @@
           <div class="fm-row">
             <div class="fm-label"><span data-i18n="index.salesCountry">销售国家或地区</span> <span class="req" data-i18n="common.required">*</span></div>
             <div class="fm-check-grid" id="mf_salesCountryGrid">
-              <label class="fm-radio-line"><input type="checkbox" value="欧盟"> <span data-dist-preset>欧盟</span></label>
-              <label class="fm-radio-line"><input type="checkbox" value="美国"> <span data-dist-preset>美国</span></label>
-              <label class="fm-radio-line"><input type="checkbox" value="澳大利亚"> <span data-dist-preset>澳大利亚</span></label>
-              <label class="fm-radio-line"><input type="checkbox" value="加拿大"> <span data-dist-preset>加拿大</span></label>
-              <label class="fm-radio-line"><input type="checkbox" value="南非"> <span data-dist-preset>南非</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="美国" data-country-key="us"> <span data-dist-preset>美国</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="欧盟" data-country-key="eu"> <span data-dist-preset>欧盟</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="加拿大" data-country-key="ca"> <span data-dist-preset>加拿大</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="南非" data-country-key="za"> <span data-dist-preset>南非</span></label>
+              <label class="fm-radio-line"><input type="checkbox" value="澳大利亚" data-country-key="au"> <span data-dist-preset>澳大利亚</span></label>
             </div>
             <div class="distribution-add fm-sales-country-add">
               <input class="distribution-input" id="mf_salesCountryInput" type="text" placeholder="添加其他国家或地区" data-i18n-placeholder="orderChat.distributionAddPlaceholder" onkeydown="if(event.key==='Enter'){event.preventDefault();addManualSalesCountry();}">
@@ -1625,8 +1625,17 @@
 
     function populateManualFormI18n(){
       var presets = I18n.getDistributionPresets();
+      var presetKeys = ['us', 'eu', 'ca', 'za', 'au'];
       document.querySelectorAll('#manualFormModal [data-dist-preset]').forEach(function(sp, i){
-        if(presets[i]){ sp.textContent = presets[i]; sp.previousElementSibling.value = presets[i]; }
+        var key = presetKeys[i];
+        var label = presets[i] || (key && t('country.' + key)) || sp.textContent;
+        if(!label) return;
+        sp.textContent = label;
+        var input = sp.previousElementSibling;
+        if(input && input.tagName === 'INPUT'){
+          input.value = label;
+          if(key) input.setAttribute('data-country-key', key);
+        }
       });
       var prog = document.getElementById('mf_program');
       if(prog && prog.options.length > 1){
@@ -2721,6 +2730,36 @@
         const hit = opts.find(function(o){ return /印度|india/i.test(o); });
         if(hit) manualAnswers['Country of Origin'] = hit;
       }
+
+      normalizeParsedDistributionCountries();
+    }
+
+    function normalizeCountryLabel(value){
+      const raw = String(value || '').trim();
+      if(!raw) return '';
+      if(window.I18n && I18n.displayCountry){
+        const display = I18n.displayCountry(raw);
+        if(display) return display;
+      }
+      return raw;
+    }
+
+    function normalizeParsedDistributionCountries(){
+      const raw = manualAnswers['Countries/Regions of Distribution'] || '';
+      if(!raw) return;
+      const parts = splitSalesCountryValues(raw).map(normalizeCountryLabel).filter(Boolean);
+      if(!parts.length) return;
+      // Deduplicate by country key when possible
+      const seen = {};
+      const out = [];
+      parts.forEach(function(label){
+        const key = (window.I18n && I18n.resolveCountryKey) ? I18n.resolveCountryKey(label) : '';
+        const id = key || label.toLowerCase();
+        if(seen[id]) return;
+        seen[id] = true;
+        out.push(label);
+      });
+      manualAnswers['Countries/Regions of Distribution'] = out.join(t('orderChat.listSep') || '、');
     }
 
     function enrichParseResultWithVoice(result, voiceText){
@@ -3004,8 +3043,15 @@
       const grid = getManualSalesCountryGrid();
       if(!grid || !value) return null;
       const needle = String(value).trim().toLowerCase();
+      const needleKey = (window.I18n && I18n.resolveCountryKey) ? I18n.resolveCountryKey(value) : '';
+      const needleDisplay = normalizeCountryLabel(value).toLowerCase();
       return Array.from(grid.querySelectorAll('input[type="checkbox"]')).find(function(cb){
-        return String(cb.value || '').trim().toLowerCase() === needle;
+        const cbVal = String(cb.value || '').trim();
+        if(!cbVal) return false;
+        if(cbVal.toLowerCase() === needle || cbVal.toLowerCase() === needleDisplay) return true;
+        const cbKey = cb.getAttribute('data-country-key') ||
+          ((window.I18n && I18n.resolveCountryKey) ? I18n.resolveCountryKey(cbVal) : '');
+        return !!(needleKey && cbKey && needleKey === cbKey);
       }) || null;
     }
 
@@ -3018,9 +3064,10 @@
         if(checked) existing.checked = true;
         return existing;
       }
+      const key = (window.I18n && I18n.resolveCountryKey) ? I18n.resolveCountryKey(label) : '';
       const el = document.createElement('label');
       el.className = 'fm-radio-line';
-      el.innerHTML = '<input type="checkbox" value="'+escapeHtml(label)+'"'+(checked ? ' checked' : '')+'> <span>'+escapeHtml(label)+'</span>';
+      el.innerHTML = '<input type="checkbox" value="'+escapeHtml(label)+'"'+(key ? ' data-country-key="'+escapeHtml(key)+'"' : '')+(checked ? ' checked' : '')+'> <span>'+escapeHtml(label)+'</span>';
       grid.appendChild(el);
       return el.querySelector('input');
     }
@@ -3051,8 +3098,13 @@
       const countries = splitSalesCountryValues(raw);
       grid.querySelectorAll('input[type="checkbox"]').forEach(function(cb){ cb.checked = false; });
       countries.forEach(function(country){
-        const display = (window.I18n && I18n.displayCountry) ? I18n.displayCountry(country) : country;
-        appendManualSalesCountryOption(display || country, true);
+        const display = normalizeCountryLabel(country) || country;
+        const existing = findManualSalesCountryCheckbox(country) || findManualSalesCountryCheckbox(display);
+        if(existing){
+          existing.checked = true;
+          return;
+        }
+        appendManualSalesCountryOption(display, true);
       });
     }
 
