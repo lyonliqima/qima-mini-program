@@ -3,12 +3,12 @@
  * Deterrence only — HTML/JS remain publicly readable.
  *
  * Rotate password: change ACCESS_PASSWORD, recompute SHA-256 hex, update ACCESS_HASH, redeploy.
- * Current password: QIMA-Demo-2026
+ * Current password: QIMAproduct
  */
 (function () {
-  var STORAGE_KEY = 'qima_demo_access_v1';
-  // SHA-256 of "QIMA-Demo-2026"
-  var ACCESS_HASH = 'dd09ca0c603740c93889a501e3a05c6dad3f2245efa46578463428f1c1128c07';
+  var STORAGE_KEY = 'qima_demo_access_v2';
+  // SHA-256 of "QIMAproduct"
+  var ACCESS_HASH = '5674506f0ae61d0f77a1a41b94f99c99186777fd15c12e8dd27a73bd8fee3c8f';
   var LOGO_SRC = 'assets/frame207.svg';
 
   function hex(buffer) {
