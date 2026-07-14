@@ -1161,7 +1161,7 @@
 <script src="assets/i18n-runtime.js?v=20260714b"></script>
 <script src="assets/supabase-config.js?v=20260714b"></script>
 <script src="assets/supabase-client.js?v=20260714b"></script>
-<script src="assets/label-parse.js?v=20260714h"></script>
+<script src="assets/label-parse.js?v=20260714i"></script>
 </head>
 <body>
   <div class="phone">
@@ -1320,7 +1320,7 @@
 
     <input id="waybillCamera" type="file" accept="image/*" capture="environment" hidden onchange="processWaybillPhoto()" />
     <input id="productCamera" type="file" accept="image/*" capture="environment" hidden onchange="onProductCameraChange(this)" />
-    <input id="productFiles" type="file" accept="*/*" multiple hidden onchange="onProductFilesChange(this)" />
+    <input id="productFiles" type="file" accept="image/*,.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden onchange="onProductFilesChange(this)" />
 
     <!-- 供应商选择弹窗 -->
     <div class="supplier-mask" id="supplierPicker" onclick="closeSupplierPicker(event)">
@@ -2620,6 +2620,20 @@
       '</div>';
     }
 
+    function localizeParseProgress(msg){
+      const keyMap = {
+        parsingFiles: 'orderChat.parsingFiles',
+        parsingImage: 'orderChat.parsingImage',
+        parsingPdf: 'orderChat.parsingPdf',
+        parsingPdfOcr: 'orderChat.parsingPdfOcr',
+        parsingDocx: 'orderChat.parsingDocx',
+        parsingLegacyDoc: 'orderChat.parsingLegacyDoc',
+        parsingVoice: 'orderChat.parsingVoice'
+      };
+      if(msg && keyMap[msg]) return t(keyMap[msg]);
+      return msg || t('orderChat.parsingLocal');
+    }
+
     function updateParseProgressCard(row, desc){
       if(!row) return;
       const el = row.querySelector('[data-parse-desc]');
@@ -2931,7 +2945,7 @@
           if(window.QimaLabelParse && typeof QimaLabelParse.parseFilesLocally === 'function'){
             return withTimeout(
               QimaLabelParse.parseFilesLocally(files, voiceTranscript, v, function(msg){
-                updateParseProgressCard(progressRow, msg || t('orderChat.parsingLocal'));
+                updateParseProgressCard(progressRow, localizeParseProgress(msg));
               }),
               45000,
               'local_timeout'
@@ -2951,6 +2965,11 @@
         markUserBubbleParsing(userRow, false);
         if(progressRow && progressRow.parentNode) progressRow.remove();
         setParseButtonBusy(false);
+        if(err && (err.code === 'legacy_doc_unsupported' || err.message === 'legacy_doc_unsupported')){
+          botMsg(t('orderChat.parsingLegacyDoc'), false);
+        } else if(err && (err.code === 'empty_local_ocr' || err.message === 'empty_local_ocr')){
+          botMsg(t('orderChat.parseUnsupportedDoc'), false);
+        }
         // Still open guided fill instead of dead-ending
         botMsg(t('orderChat.parseFailedContinue'), false);
         const empty = { fields: {}, product_summary: { name: '', brand: '', hint: t('orderChat.parsePartialHint') } };

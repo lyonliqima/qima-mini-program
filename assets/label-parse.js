@@ -765,9 +765,14 @@
     });
   }
 
+  function notifyProgress(onProgress, code, fallback) {
+    if (typeof onProgress !== 'function') return;
+    onProgress(code || fallback || '');
+  }
+
   function extractTextFromDocx(file, onProgress) {
     return loadMammoth().then(function (mammoth) {
-      if (typeof onProgress === 'function') onProgress('正在读取 Word 文档…');
+      notifyProgress(onProgress, 'parsingDocx', '正在读取 Word 文档…');
       return file.arrayBuffer().then(function (buf) {
         return mammoth.extractRawText({ arrayBuffer: buf });
       }).then(function (result) {
@@ -778,7 +783,7 @@
 
   function extractTextFromPdf(file, onProgress) {
     return loadPdfJs().then(function (pdfjsLib) {
-      if (typeof onProgress === 'function') onProgress('正在读取 PDF…');
+      notifyProgress(onProgress, 'parsingPdf', '正在读取 PDF…');
       return file.arrayBuffer().then(function (buf) {
         return pdfjsLib.getDocument({ data: buf }).promise;
       }).then(function (pdf) {
@@ -806,7 +811,7 @@
           if (combined.length >= 30) return combined;
 
           // Scanned PDF: rasterize first page then OCR
-          if (typeof onProgress === 'function') onProgress('PDF 无文本层，改为图片识别…');
+          notifyProgress(onProgress, 'parsingPdfOcr', 'PDF 无文本层，改为图片识别…');
           return pdf.getPage(1).then(function (page) {
             var viewport = page.getViewport({ scale: 2 });
             var canvas = document.createElement('canvas');
@@ -833,20 +838,27 @@
 
   function extractTextFromUpload(file, onProgress) {
     if (!file) return Promise.resolve('');
-    if (isImageFile(file)) return ocrImageFile(file, onProgress).catch(function () { return ''; });
-    if (isPdfFile(file)) return extractTextFromPdf(file, onProgress).catch(function (err) {
-      console.warn('pdf extract failed', err);
-      return '';
-    });
-    if (isDocxFile(file)) return extractTextFromDocx(file, onProgress).catch(function (err) {
-      console.warn('docx extract failed', err);
-      return '';
-    });
+    if (isImageFile(file)) {
+      notifyProgress(onProgress, 'parsingImage', '正在识别图片文字…');
+      return ocrImageFile(file, onProgress).catch(function () { return ''; });
+    }
+    if (isPdfFile(file)) {
+      return extractTextFromPdf(file, onProgress).catch(function (err) {
+        console.warn('pdf extract failed', err);
+        return '';
+      });
+    }
+    if (isDocxFile(file)) {
+      return extractTextFromDocx(file, onProgress).catch(function (err) {
+        console.warn('docx extract failed', err);
+        return '';
+      });
+    }
     if (isLegacyDocFile(file)) {
-      if (typeof onProgress === 'function') {
-        onProgress('暂不支持旧版 .doc，请另存为 .docx / PDF / 图片后再试');
-      }
-      return Promise.resolve('');
+      notifyProgress(onProgress, 'parsingLegacyDoc', '暂不支持旧版 .doc，请另存为 .docx / PDF / 图片后再试');
+      var err = new Error('legacy_doc_unsupported');
+      err.code = 'legacy_doc_unsupported';
+      return Promise.reject(err);
     }
     return Promise.resolve('');
   }
@@ -857,9 +869,10 @@
     var usable = files.filter(function (f) {
       return f && f.size && (isImageFile(f) || isPdfFile(f) || isDocxFile(f) || isLegacyDocFile(f));
     });
+    var onlyLegacyDoc = usable.length > 0 && usable.every(isLegacyDocFile);
 
     if (!usable.length) {
-      if (typeof onProgress === 'function') onProgress('正在匹配语音字段…');
+      notifyProgress(onProgress, 'parsingVoice', '正在匹配语音字段…');
       if (voiceResult && voiceResult.raw_excerpt) return Promise.resolve(voiceResult);
       if (link) {
         var linkOnly = extractFieldsFromVoiceText(String(link));
@@ -868,10 +881,20 @@
       return Promise.reject(new Error('empty_local_ocr'));
     }
 
-    if (typeof onProgress === 'function') onProgress('正在识别上传文件…');
+    if (onlyLegacyDoc) {
+      notifyProgress(onProgress, 'parsingLegacyDoc', '暂不支持旧版 .doc，请另存为 .docx / PDF / 图片后再试');
+      var legacyErr = new Error('legacy_doc_unsupported');
+      legacyErr.code = 'legacy_doc_unsupported';
+      return Promise.reject(legacyErr);
+    }
 
-    var tasks = usable.slice(0, 3).map(function (f) {
-      return extractTextFromUpload(f, onProgress);
+    notifyProgress(onProgress, 'parsingFiles', '正在识别上传文件…');
+
+    var tasks = usable.filter(function (f) { return !isLegacyDocFile(f); }).slice(0, 3).map(function (f) {
+      return extractTextFromUpload(f, onProgress).catch(function (err) {
+        if (err && err.code === 'legacy_doc_unsupported') return '';
+        return '';
+      });
     });
 
     return Promise.all(tasks).then(function (texts) {
@@ -881,7 +904,9 @@
       if (voiceResult && ocrResult) return mergeFieldSets(ocrResult, voiceResult);
       if (ocrResult) return ocrResult;
       if (voiceResult && voiceResult.raw_excerpt) return voiceResult;
-      return Promise.reject(new Error('empty_local_ocr'));
+      var emptyErr = new Error('empty_local_ocr');
+      emptyErr.code = 'empty_local_ocr';
+      return Promise.reject(emptyErr);
     });
   }
 
