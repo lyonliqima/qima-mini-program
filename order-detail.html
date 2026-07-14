@@ -156,15 +156,26 @@
   }
   .thumb {
     position: relative; width: 64px; height: 64px;
-    border-radius: 8px; overflow: hidden; flex-shrink: 0;
-    background: linear-gradient(135deg, #34343a 0%, #0e0e12 100%);
+    border-radius: 10px; overflow: hidden; flex-shrink: 0;
+    background: #f4f6fa;
+    border: 1px solid #e8ecf3;
+    display: flex; align-items: center; justify-content: center;
+    box-sizing: border-box;
   }
-  .thumb.denim { background: linear-gradient(135deg, #2c3656 0%, #10162a 100%); }
-  .thumb.grey { background: linear-gradient(135deg, #5a5f6b 0%, #2c303a 100%); }
-  .thumb::after {
+  .thumb.placeholder::before {
+    content: "📦";
+    font-size: 28px;
+    line-height: 1;
+  }
+  .thumb.denim { background: linear-gradient(135deg, #2c3656 0%, #10162a 100%); border-color: transparent; }
+  .thumb.grey { background: linear-gradient(135deg, #5a5f6b 0%, #2c303a 100%); border-color: transparent; }
+  .thumb.denim::after,
+  .thumb.grey::after {
     content: ""; position: absolute; inset: 0;
     background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px);
   }
+  .thumb.denim.placeholder::before,
+  .thumb.grey.placeholder::before { content: none; }
   .product-info { min-width: 0; flex: 1; }
   .product-name { font-size: 15px; font-weight: 600; line-height: 22px; }
   .product-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
@@ -478,7 +489,7 @@
       <section class="section-card">
         <div class="section-head" data-i18n="orderDetail.product">产品</div>
         <div class="product-card">
-          <div class="thumb" id="productThumb"></div>
+          <div class="thumb placeholder" id="productThumb" aria-hidden="true"></div>
           <div class="product-info">
             <div class="product-name" id="productName">glasses</div>
             <div class="product-meta">
@@ -1623,7 +1634,15 @@
       statusBadge.className = 'status ' + I18n.statusClass(order.status);
 
       const productThumb = document.getElementById('productThumb');
-      productThumb.className = ('thumb ' + (order.thumbClass || '')).trim();
+      const thumbClass = order.thumbClass || '';
+      // No real photo yet — use package emoji placeholder unless a fabric mock class is set
+      if(thumbClass){
+        productThumb.className = ('thumb ' + thumbClass).trim();
+        productThumb.removeAttribute('aria-label');
+      } else {
+        productThumb.className = 'thumb placeholder';
+        productThumb.setAttribute('aria-label', 'No product photo');
+      }
 
       renderFileList((order.files && order.files.length) ? order.files : (orderSource === 'live' ? [] : defaultFiles));
     }
