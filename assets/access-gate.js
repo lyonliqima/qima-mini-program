@@ -9,7 +9,7 @@
   var STORAGE_KEY = 'qima_demo_access_v2';
   // SHA-256 of "QIMAproduct"
   var ACCESS_HASH = '5674506f0ae61d0f77a1a41b94f99c99186777fd15c12e8dd27a73bd8fee3c8f';
-  var LOGO_SRC = 'assets/frame207.svg';
+  var LOGO_SRC = 'assets/qima-logo.svg';
 
   function hex(buffer) {
     var bytes = new Uint8Array(buffer);
@@ -52,7 +52,7 @@
   }
 
   function showError(el, input) {
-    el.textContent = '密码不正确';
+    el.textContent = 'Incorrect password';
     el.classList.add('show');
     input.classList.add('qima-gate-invalid');
     setTimeout(function () {
@@ -70,17 +70,17 @@
     root.id = 'qima-access-gate';
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-modal', 'true');
-    root.setAttribute('aria-label', '访问验证');
+    root.setAttribute('aria-label', 'Access verification');
     root.innerHTML =
       '<div class="qima-gate-phone">' +
-        '<img class="qima-gate-brand" src="' + LOGO_SRC + '" alt="QIMA" />' +
+        '<img class="qima-gate-brand" src="' + LOGO_SRC + '" width="126" height="28" alt="QIMA" />' +
         '<div class="qima-gate-copy">' +
-          '<p class="qima-gate-title">内部演示</p>' +
-          '<p class="qima-gate-sub">请输入访问密码后继续</p>' +
+          '<p class="qima-gate-title">Internal demo</p>' +
+          '<p class="qima-gate-sub">Enter the access password to continue</p>' +
         '</div>' +
         '<form class="qima-gate-form" autocomplete="off">' +
-          '<input class="qima-gate-input" type="password" name="access" autocomplete="current-password" placeholder="访问密码" aria-label="访问密码" />' +
-          '<button class="qima-gate-btn" type="submit">进入演示</button>' +
+          '<input class="qima-gate-input" type="password" name="access" autocomplete="current-password" placeholder="Access password" aria-label="Access password" />' +
+          '<button class="qima-gate-btn" type="submit">Enter demo</button>' +
           '<p class="qima-gate-error" aria-live="polite"></p>' +
         '</form>' +
       '</div>';
@@ -111,7 +111,7 @@
             }
           })
           .catch(function () {
-            err.textContent = '无法验证，请使用 HTTPS 打开';
+            err.textContent = 'Unable to verify. Please open over HTTPS.';
             err.classList.add('show');
           });
       });

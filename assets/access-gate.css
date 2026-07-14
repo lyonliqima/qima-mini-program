@@ -80,8 +80,12 @@ html.qima-gate-locked #qima-access-gate {
 .qima-gate-brand {
   position: relative;
   z-index: 1;
-  width: 96px;
-  height: auto;
+  /* Match logo viewBox 71.873 × 16 — avoid stretch from SVG preserveAspectRatio=none */
+  width: 126px;
+  height: 28px;
+  aspect-ratio: 71.873 / 16;
+  object-fit: fill;
+  display: block;
   margin-bottom: 36px;
   animation: qima-gate-fade-up 0.55s ease both;
 }
