@@ -408,6 +408,7 @@ window.I18N_ZH = {
   'orderChat.fromSource': '来自 {source}',
   'orderChat.chipPlaceOrder': '信息正确，去下单',
   'orderChat.chipEditFields': '编辑字段',
+  'orderChat.chipReviewForm': '查看已填表单',
   'orderChat.chipAddMissing': '补充缺失项',
   'orderChat.chipContinueEdit': '继续编辑',
   'orderChat.chipPhotoWaybill': '拍照识别面单',

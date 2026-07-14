@@ -1100,6 +1100,7 @@
 <script src="assets/i18n-runtime.js"></script>
 <script src="assets/supabase-config.js"></script>
 <script src="assets/supabase-client.js"></script>
+<script src="assets/label-parse.js"></script>
 </head>
 <body>
   <div class="phone">
@@ -2577,6 +2578,71 @@
         const val = fields[key];
         if(val != null && String(val).trim()) manualAnswers[key] = String(val).trim();
       });
+      fillManualFormFromAnswers();
+    }
+
+    function matchSelectOption(select, value){
+      if(!select || value == null) return false;
+      const raw = String(value).trim();
+      if(!raw) return false;
+      const low = raw.toLowerCase();
+      let matched = null;
+      Array.from(select.options).forEach(function(opt){
+        if(!opt.value && opt.disabled) return;
+        const ov = String(opt.value || opt.textContent || '').trim();
+        if(!ov) return;
+        if(ov === raw || ov.toLowerCase() === low) matched = ov;
+        else if(ov.toLowerCase().indexOf(low) !== -1 || low.indexOf(ov.toLowerCase()) !== -1) matched = matched || ov;
+        else if(/中国|china/i.test(raw) && /中国|china/i.test(ov)) matched = matched || ov;
+        else if(/越南|vietnam/i.test(raw) && /越南|vietnam/i.test(ov)) matched = matched || ov;
+        else if(/印度|india/i.test(raw) && /印度|india/i.test(ov)) matched = matched || ov;
+      });
+      if(matched != null){
+        select.value = matched;
+        // If value attr empty but text matches, set by option loop
+        if(select.value !== matched){
+          Array.from(select.options).forEach(function(opt){
+            if(String(opt.value || opt.textContent || '').trim() === matched){
+              opt.selected = true;
+            }
+          });
+        }
+        return true;
+      }
+      // Add custom option for origin/program if missing
+      const opt = document.createElement('option');
+      opt.value = raw;
+      opt.textContent = raw;
+      select.appendChild(opt);
+      select.value = raw;
+      return true;
+    }
+
+    function fillManualFormFromAnswers(){
+      const setVal = function(id, key){
+        const el = document.getElementById(id);
+        const val = manualAnswers[key];
+        if(el && val) el.value = val;
+      };
+      setVal('mf_productName', 'Product Name');
+      setVal('mf_sku', 'Item#/model#');
+      setVal('mf_manufacturer', 'Manufacturer');
+      setVal('mf_manufacturerAddr', 'Manufacturer Address');
+      setVal('mf_trackingNo', 'Tracking Number');
+      setVal('mf_shippingRemark', 'Shipping Remark');
+
+      const program = document.getElementById('mf_program');
+      if(program && manualAnswers['Program']) matchSelectOption(program, manualAnswers['Program']);
+
+      const origin = document.getElementById('mf_origin');
+      if(origin && manualAnswers['Country of Origin']){
+        matchSelectOption(origin, manualAnswers['Country of Origin']);
+      }
+
+      const carrier = document.getElementById('mf_carrier');
+      if(carrier && manualAnswers['Carrier']) matchSelectOption(carrier, manualAnswers['Carrier']);
+
+      syncManualSalesCountriesFromAnswers();
     }
 
     function countFilledExtractFields(fields){
@@ -2619,16 +2685,21 @@
       else if(hasUploadedFiles) src = t('orderChat.recognizeSourceDoc');
 
       const api = window.QimaSupabase;
-      if(!api || typeof api.parseOrder !== 'function'){
-        alert(t('orderChat.parseFailed'));
-        return;
-      }
-
       setParseButtonBusy(true);
       const typingRow = botTyping();
 
       collectParseFiles().then(function(files){
-        return api.parseOrder({ voiceText: voiceTranscript, link: v, files: files });
+        const remote = (api && typeof api.parseOrder === 'function')
+          ? api.parseOrder({ voiceText: voiceTranscript, link: v, files: files })
+          : Promise.reject(new Error('missing_parse_client'));
+
+        return remote.catch(function(err){
+          console.warn('parseOrder remote failed, trying local label OCR', err);
+          if(window.QimaLabelParse && typeof QimaLabelParse.parseFilesLocally === 'function'){
+            return QimaLabelParse.parseFilesLocally(files, voiceTranscript, v);
+          }
+          throw err;
+        });
       }).then(function(result){
         typingRow.remove();
         setParseButtonBusy(false);
@@ -2685,8 +2756,9 @@
     function openManualFormModal(){
       document.getElementById('manualFormModal').classList.add('show');
       populateManualFormI18n();
-      syncManualSalesCountriesFromAnswers();
+      fillManualFormFromAnswers();
       mfToggleSampleFields();
+      mfToggleElectricDescription();
     }
 
     function closeManualFormModal(e){
@@ -3345,7 +3417,12 @@
             percent: Math.round((reqStats.filled / reqStats.total) * 100),
             missing: missingRequired
           }), false);
+          botMsg(chipsRow(I18n.chipHtml('orderChat.chipReviewForm','edit','openManualFormModal()')), true);
           botMsg(missingFieldsCard(), true);
+          // Auto-open filled form so label fields are immediately visible
+          if(fields['Product Name'] || fields['Item#/model#'] || fields['Manufacturer']){
+            setTimeout(function(){ openManualFormModal(); }, 400);
+          }
         }, 600);
       }, 500);
     }

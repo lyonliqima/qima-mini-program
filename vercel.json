@@ -1,0 +1,25 @@
+{
+  "rewrites": [
+    { "source": "/api/parse-order", "destination": "/api/parse" }
+  ],
+  "functions": {
+    "api/parse.py": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/transcribe.py": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "authorization, content-type, apikey" }
+      ]
+    }
+  ]
+}

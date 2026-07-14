@@ -408,6 +408,7 @@ window.I18N_EN = {
   'orderChat.fromSource': 'From {source}',
   'orderChat.chipPlaceOrder': 'Looks good — place order',
   'orderChat.chipEditFields': 'Edit fields',
+  'orderChat.chipReviewForm': 'Review filled form',
   'orderChat.chipAddMissing': 'Add missing info',
   'orderChat.chipContinueEdit': 'Keep editing',
   'orderChat.chipPhotoWaybill': 'Scan shipping label',

@@ -135,12 +135,18 @@
     },
     /**
      * Multimodal parse: voice text + product link + uploaded files → order fields.
+     * Tries parseEndpoint, then parseEndpointFallback.
      * @param {{voiceText?: string, link?: string, files?: File[]|Blob[]}} input
      * @returns {Promise<object>}
      */
     parseOrder: function (input) {
-      var endpoint = (cfg.parseEndpoint || '').replace(/\/$/, '');
-      if (!endpoint) {
+      var endpoints = [];
+      if (cfg.parseEndpoint) endpoints.push(String(cfg.parseEndpoint).replace(/\/$/, ''));
+      if (cfg.parseEndpointFallback) {
+        var fb = String(cfg.parseEndpointFallback).replace(/\/$/, '');
+        if (endpoints.indexOf(fb) === -1) endpoints.push(fb);
+      }
+      if (!endpoints.length) {
         return Promise.reject(new Error('missing_parse_endpoint'));
       }
       input = input || {};
@@ -154,23 +160,39 @@
         var name = f.name || ('upload-' + i);
         fd.append('files', f, name);
       }
-      return fetch(endpoint, { method: 'POST', body: fd }).then(function (res) {
-        return res.text().then(function (text) {
-          var data = null;
-          try {
-            data = text ? JSON.parse(text) : null;
-          } catch (_) {
-            data = { error: 'bad_response', raw: text };
-          }
-          if (!res.ok) {
-            var err = new Error((data && data.error) || ('http_' + res.status));
-            err.code = (data && data.error) || ('http_' + res.status);
-            err.status = res.status;
-            throw err;
-          }
-          return data;
+
+      function post(endpoint) {
+        return fetch(endpoint, { method: 'POST', body: fd }).then(function (res) {
+          return res.text().then(function (text) {
+            var data = null;
+            try {
+              data = text ? JSON.parse(text) : null;
+            } catch (_) {
+              data = { error: 'bad_response', raw: text };
+            }
+            if (!res.ok) {
+              var err = new Error((data && data.error) || ('http_' + res.status));
+              err.code = (data && data.error) || ('http_' + res.status);
+              err.status = res.status;
+              throw err;
+            }
+            return data;
+          });
         });
-      });
+      }
+
+      var chain = post(endpoints[0]);
+      for (var e = 1; e < endpoints.length; e++) {
+        (function (next) {
+          chain = chain.catch(function (err) {
+            if (err && (err.status === 404 || err.status === 405 || err.status === 502)) {
+              return post(next);
+            }
+            throw err;
+          });
+        })(endpoints[e]);
+      }
+      return chain;
     },
     /**
      * Upload audio blob → NVIDIA Whisper zh-CN ASR (Vercel /api/transcribe).
