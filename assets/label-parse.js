@@ -192,12 +192,299 @@
       }
     }
 
+    // Reject bare service / standard labels (not products)
+    if (/^(?:实验室(?:检测|测试)?|检测服务|验货|装运前(?:检测|检验)|Lab(?:oratory)?\s*(?:testing|test|inspection)?|Pre[-\s]?Shipment\s*Inspection|PSI|Inspection|Testing|EN\s*71|CPSIA|ASTM|RoHS|CE|UKCA|FCC)$/i.test(name)) {
+      return '';
+    }
     // Reject if still looks like a whole sentence / bare service phrase
     if (/^(?:实验室|检测|测试|lab|testing|inspection)\b/i.test(name) && !/(?:玩具|机器人|风扇|鼠标|Fan|Toy|Mouse|Robot)/i.test(name)) {
       if (name.length > 12) return '';
     }
+    // Too many clause markers → still a transcript dump
+    var commaCount = (name.match(/[,，;；]/g) || []).length;
+    if (commaCount >= 2) return '';
+    if (/\b(?:sold\s+in|manufactured\s+by|I\s+need|lab\s+testing\s+for|销往|制造商)\b/i.test(name)) {
+      return '';
+    }
+    var wordCount = name.split(/\s+/).filter(Boolean).length;
+    if (!hasCjk && wordCount > 8) return '';
     if ((hasCjk && name.length > 1) || (!hasCjk && name.length > 1)) return name;
     return name.length >= 2 ? name : '';
+  }
+
+  var KNOWN_ORIGIN_RE =
+    /^(?:中国|China|CN|PRC|越南|Vietnam|VN|印度|India|IN|美国|USA?|United\s+States|英国|UK|United\s+Kingdom|欧盟|EU|European\s+Union|德国|Germany|DE|法国|France|FR|意大利|Italy|IT|日本|Japan|JP|韩国|Korea|KR|加拿大|Canada|CA|澳大利亚|Australia|AU|墨西哥|Mexico|MX|泰国|Thailand|TH|马来西亚|Malaysia|MY|印尼|Indonesia|ID|台湾|Taiwan|TW|香港|Hong\s+Kong|HK)$/i;
+
+  var KNOWN_REGION_TOKEN_RE =
+    /^(?:中国|欧盟|英国|美国|日本|韩国|澳大利亚|加拿大|德国|法国|意大利|越南|印度|墨西哥|泰国|马来西亚|印尼|台湾|香港|Russia|俄罗斯|南美|中东|全球|Worldwide|Global|EU|UK|USA?|China|Japan|Korea|Australia|Canada)$/i;
+
+  var KNOWN_CARRIER_RE =
+    /^(?:顺丰(?:速运|快递)?|SF\s*Express|中通(?:快递)?|圆通(?:速递)?|韵达(?:快递)?|京东(?:物流|快递)?|极兔(?:速递)?|申通(?:快递)?|德邦|邮政(?:EMS)?|EMS|DHL|UPS|FedEx|TNT|Aramex|YTO|ZTO|STO|JT(?:Express)?|JD|YunExpress|4PX|Yanwen)$/i;
+
+  function countWords(s) {
+    return String(s || '').trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  function looksLikeSentence(s) {
+    var t = String(s || '').trim();
+    if (!t) return false;
+    if (t.length > 120) return true;
+    if (/\b(?:I\s+need|we\s+need|please|sold\s+in|manufactured\s+by|lab\s+testing\s+for|我想|我需要|帮我|销往|制造商是)\b/i.test(t)) {
+      return true;
+    }
+    if (/[。.！？!?]/.test(t) && t.length > 40) return true;
+    // Many commas only count as sentence when also long / prose-like (not short addresses)
+    var commas = (t.match(/[,，;；]/g) || []).length;
+    if (commas >= 2 && t.length > 50) return true;
+    if (commas >= 3) return true;
+    return false;
+  }
+
+  function looksLikeAddress(s) {
+    return /(?:路|街|号|区|市|省|镇|村|大道|Building|Bldg|Floor|Fl\.|Road|Rd\.|Street|St\.|Ave|Avenue|District|City|Province|Zip|邮编|P\.?O\.?\s*Box|\d{1,5}\s+[A-Za-z])/i.test(s);
+  }
+
+  function looksLikeTracking(s) {
+    var t = String(s || '').replace(/\s+/g, '');
+    if (!/^[A-Za-z0-9\-]{8,32}$/.test(t)) return false;
+    if (/[A-Za-z]/.test(t) && /\d/.test(t)) return true;
+    if (/^\d{10,22}$/.test(t)) return true;
+    return false;
+  }
+
+  function looksLikeCompanyName(s) {
+    var t = String(s || '').trim();
+    if (!t || t.length < 2 || t.length > 80) return false;
+    if (looksLikeAddress(t) && t.length > 40) return false;
+    if (looksLikeTracking(t)) return false;
+    if (/^(?:MADE\s+IN|Rating|Model|Address|Contact)\b/i.test(t)) return false;
+    if (/\d+\s*V|\d+\s*W|\d+\s*Hz|Rated|Rating/i.test(t) && t.length < 40) return false;
+    return /[\u4e00-\u9fffA-Za-z]/.test(t) && !looksLikeSentence(t);
+  }
+
+  /**
+   * Per-field plausibility gate. Rejects OCR/voice junk; returns '' when unreasonable.
+   * Does not invent demo values — leave empty so UI shows 待确认.
+   */
+  function isPlausibleField(key, value) {
+    var v = value == null ? '' : String(value).trim();
+    if (!v) return false;
+    if (/^(n\/?a|none|null|undefined|unknown|未知|无|暂无|不清楚|not\s*available|-|—|–|\.)$/i.test(v)) {
+      return false;
+    }
+
+    switch (key) {
+      case 'Product Name': {
+        if (v.length > 100) return false;
+        if (looksLikeSentence(v)) return false;
+        if (/^(?:实验室(?:检测|测试)?|检测服务|Lab(?:oratory)?\s*(?:testing|test)?|PSI|Inspection|Testing|EN\s*71|CPSIA)$/i.test(v)) {
+          return false;
+        }
+        var cleaned = cleanProductName(v);
+        if (!cleaned || cleaned.length < 2) return false;
+        if (cleaned.length > 80) return false;
+        var hasCjk = /[\u4e00-\u9fff]/.test(cleaned);
+        if (!hasCjk && countWords(cleaned) > 8) return false;
+        if (hasCjk && cleaned.length > 28) return false;
+        return true;
+      }
+      case 'Program': {
+        if (/^__PROGRAM_(?:TEMU_HW|TEMU_TOY|AMAZON)__$/.test(v)) return true;
+        if (v.length > 80 || looksLikeSentence(v)) return false;
+        return /(?:Program|TEMU|Amazon|亚马逊|Seller\s*Pay|商家付款|EN\s*71|CPSIA|退款|玩具|硬件|关联项目)/i.test(v);
+      }
+      case 'Country of Origin': {
+        if (v.length > 40 || looksLikeSentence(v)) return false;
+        var originNorm = normalizeOrigin(v);
+        if (KNOWN_ORIGIN_RE.test(originNorm) || KNOWN_ORIGIN_RE.test(v)) return true;
+        // Short place-like token (1–3 words / ≤12 CJK)
+        if (/[\u4e00-\u9fff]/.test(v)) return v.length >= 2 && v.length <= 12 && !looksLikeAddress(v);
+        return countWords(v) <= 3 && /^[A-Za-z][A-Za-z\s\-.]{1,35}$/.test(v);
+      }
+      case 'Countries/Regions of Distribution': {
+        if (v.length > 80 || looksLikeSentence(v)) return false;
+        var parts = v.split(/[,，、;/|]+/).map(function (p) { return p.trim(); }).filter(Boolean);
+        if (!parts.length) return false;
+        var ok = 0;
+        parts.forEach(function (p) {
+          if (KNOWN_REGION_TOKEN_RE.test(p) || KNOWN_ORIGIN_RE.test(p) || (p.length <= 12 && /[\u4e00-\u9fffA-Za-z]/.test(p))) {
+            ok += 1;
+          }
+        });
+        return ok > 0 && ok >= Math.ceil(parts.length / 2);
+      }
+      case 'Item#/model#': {
+        if (v.length > 40 || looksLikeSentence(v) || looksLikeAddress(v)) return false;
+        if (/^(?:No\.?|Number|#|N\/A)$/i.test(v)) return false;
+        // Model-like: letters/digits/dashes; not pure prose
+        if (!/^[A-Za-z0-9][A-Za-z0-9\-_.\/#]{0,38}$/.test(v.replace(/\s+/g, ''))) {
+          // Allow short spaced codes like "XY 03"
+          if (!/^[A-Za-z0-9][A-Za-z0-9\-_.\/# ]{1,38}$/.test(v) || countWords(v) > 3) return false;
+        }
+        if (/^(?:Manufacturer|Address|Rating|Made|China|Product)$/i.test(v)) return false;
+        return true;
+      }
+      case 'Manufacturer': {
+        if (v.length > 80 || looksLikeSentence(v)) return false;
+        if (/^MADE\s+IN\b/i.test(v)) return false;
+        if (looksLikeTracking(v)) return false;
+        if (/\d+\s*V|\d+\s*W|\d+\s*Hz|^Rating\b/i.test(v)) return false;
+        return looksLikeCompanyName(v);
+      }
+      case 'Manufacturer Address': {
+        if (v.length > 160) return false;
+        if (v.length < 6) return false;
+        if (/^(?:Manufacturer|Model|Rating|Contact|Company)$/i.test(v)) return false;
+        if (looksLikeTracking(v)) return false;
+        // Address-like values may contain commas — check before sentence reject
+        if (looksLikeAddress(v)) return true;
+        if (looksLikeSentence(v)) return false;
+        if (/[\u4e00-\u9fff]/.test(v) && v.length >= 8) return true;
+        return v.length >= 12 && countWords(v) >= 2;
+      }
+      case 'Sample Collection Method': {
+        if (/^__SAMPLE_(?:SHIP|COLLECT|RECEIVED)__$/.test(v)) return true;
+        if (v.length > 80 || looksLikeSentence(v)) return false;
+        return /(?:寄送|邮寄|送样|现场收集|上门取样|已经拿到|已收到|仓库|ship|collect|received|courier|mail\s*sample)/i.test(v);
+      }
+      case 'Electric Product': {
+        if (/^__ELECTRIC_(?:YES|NO)__$/.test(v)) return true;
+        if (/^(?:带电产品|非电产品|带电|非电|electric|non[-\s]?electric|yes|no)$/i.test(v)) return true;
+        return false;
+      }
+      case 'Product Description': {
+        if (v.length > 200 || looksLikeSentence(v)) return false;
+        // Prefer rating / electric descriptors
+        if (/额定|Rating|Rated|\d+\s*[VvWw]|\d+\s*Hz|电池|充电|Input|Output|电压|功率/.test(v)) return true;
+        return v.length >= 2 && v.length <= 120 && countWords(v) <= 25;
+      }
+      case 'Carrier': {
+        if (v.length > 40 || looksLikeSentence(v)) return false;
+        if (looksLikeTracking(v) && !KNOWN_CARRIER_RE.test(v)) return false;
+        if (KNOWN_CARRIER_RE.test(v)) return true;
+        return countWords(v) <= 4 && /[\u4e00-\u9fffA-Za-z]/.test(v) && !/^\d+$/.test(v);
+      }
+      case 'Tracking Number': {
+        if (looksLikeSentence(v) || looksLikeAddress(v)) return false;
+        var tr = v.replace(/[\s\-]/g, '');
+        if (tr.length < 8 || tr.length > 32) return false;
+        if (!/^[A-Za-z0-9]+$/.test(tr)) return false;
+        // Must be tracking-like, not a product name
+        if (/^(?:toy|fan|robot|product|china|made)/i.test(tr)) return false;
+        return looksLikeTracking(v) || (/[A-Za-z]/.test(tr) && /\d/.test(tr)) || /^\d{10,22}$/.test(tr);
+      }
+      case 'Shipping Remark': {
+        if (v.length > 240) return false;
+        // Reject full voice transcript dumps (allow compliance/batch remarks)
+        if (
+          looksLikeSentence(v) &&
+          !/(?:批号|生产日期|欧代|合规标识|\bCE\b|\bUKCA\b|\bFCC\b|\bRoHS\b|Batch|Remark)/i.test(v)
+        ) {
+          return false;
+        }
+        return true;
+      }
+      default:
+        return v.length > 0 && v.length <= 200 && !looksLikeSentence(v);
+    }
+  }
+
+  /**
+   * Sanitize a fields map in-place-ish: keep only plausible values; blank the rest.
+   * Optionally pass rawExcerpt to drop Shipping Remark that merely duplicates the transcript.
+   */
+  function sanitizeParsedFields(fields, opts) {
+    var out = emptyFields();
+    var src = fields && typeof fields === 'object' ? fields : {};
+    var flat = canonicalizeFieldKeys(src);
+    Object.keys(out).forEach(function (key) {
+      var raw = flat[key] || '';
+      // Prefer already-canonical value if canonicalize skipped (identical keys)
+      if (!raw && src[key] != null) raw = String(src[key]).trim();
+      if (!raw) {
+        out[key] = '';
+        return;
+      }
+      var candidate = raw;
+      if (key === 'Product Name') {
+        candidate = cleanProductName(raw) || '';
+      } else if (key === 'Country of Origin') {
+        candidate = normalizeOrigin(raw) || raw;
+      } else if (key === 'Item#/model#') {
+        // Reject address/prose before cleanModelValue truncates them into fake codes
+        if (looksLikeAddress(raw) || looksLikeSentence(raw) || raw.length > 40) {
+          out[key] = '';
+          return;
+        }
+        candidate = cleanModelValue(raw) || raw;
+      } else if (key === 'Countries/Regions of Distribution') {
+        candidate = mergeRegions([raw]) || raw;
+      }
+
+      if (!candidate || !isPlausibleField(key, candidate)) {
+        out[key] = '';
+        return;
+      }
+      if (key === 'Product Name') {
+        out[key] = cleanProductName(candidate) || candidate;
+        if (!isPlausibleField(key, out[key])) out[key] = '';
+        return;
+      }
+      out[key] = candidate;
+    });
+
+    // Drop shipping remark that is basically the full transcript when richer fields exist
+    if (opts && opts.rawExcerpt && out['Shipping Remark']) {
+      var excerpt = String(opts.rawExcerpt || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      var remark = out['Shipping Remark'].replace(/\s+/g, ' ').trim().toLowerCase();
+      if (excerpt.length > 40 && remark.length > 40) {
+        var overlap =
+          excerpt.indexOf(remark.slice(0, Math.min(40, remark.length))) !== -1 ||
+          remark.indexOf(excerpt.slice(0, Math.min(40, excerpt.length))) !== -1;
+        var hasBetter =
+          !!(out['Product Name'] || out.Manufacturer || out['Item#/model#'] || out['Country of Origin']);
+        if (overlap && hasBetter && !/(?:批号|生产日期|欧代|合规标识|\bce\b|\bukca\b|\bfcc\b|batch)/i.test(remark)) {
+          out['Shipping Remark'] = '';
+        }
+      }
+    }
+
+    // Cap lengths after acceptance
+    if (out['Product Description'] && out['Product Description'].length > 200) {
+      out['Product Description'] = out['Product Description'].slice(0, 200).trim();
+    }
+    if (out['Shipping Remark'] && out['Shipping Remark'].length > 240) {
+      out['Shipping Remark'] = out['Shipping Remark'].slice(0, 240).trim();
+    }
+    return out;
+  }
+
+  /** Sanitize a full parse result (fields + product_summary.name). */
+  function sanitizeParseResult(result) {
+    if (!result || typeof result !== 'object') {
+      return {
+        product_summary: { name: '', brand: '', hint: '' },
+        fields: emptyFields(),
+        confidence: {},
+        raw_excerpt: '',
+        source: ''
+      };
+    }
+    var fields = sanitizeParsedFields(result.fields || {}, { rawExcerpt: result.raw_excerpt || '' });
+    var summary = result.product_summary && typeof result.product_summary === 'object'
+      ? result.product_summary
+      : {};
+    var summaryName = cleanProductName(summary.name || fields['Product Name'] || '') || '';
+    if (summaryName && !isPlausibleField('Product Name', summaryName)) summaryName = '';
+    if (!summaryName) summaryName = fields['Product Name'] || '';
+    return Object.assign({}, result, {
+      fields: fields,
+      product_summary: {
+        name: summaryName,
+        brand: summary.brand != null ? String(summary.brand).trim() : '',
+        hint: summary.hint != null ? String(summary.hint).trim() : ''
+      }
+    });
   }
 
   function extractSpokenProductName(text) {
@@ -620,7 +907,7 @@
     if (ecRep) remarkParts.push('欧代：' + ecRep);
     if (marks.length) remarkParts.push('合规标识：' + marks.join('、'));
 
-    var fields = {
+    var fields = sanitizeParsedFields({
       'Product Name': productName,
       Program: '',
       'Country of Origin': normalizeOrigin(originRaw),
@@ -634,11 +921,14 @@
       Carrier: '',
       'Tracking Number': '',
       'Shipping Remark': remarkParts.join('；')
-    };
+    }, { rawExcerpt: text });
+
+    var summaryName = fields['Product Name'] || '';
+    if (summaryName && !isPlausibleField('Product Name', summaryName)) summaryName = '';
 
     return {
       product_summary: {
-        name: productName || model || '已识别产品标签',
+        name: summaryName,
         brand: '',
         hint: marks.length ? '标签标识：' + marks.join(' / ') : '来自本地标签 OCR'
       },
@@ -874,24 +1164,26 @@
       /tracking\s*(?:number|no\.?)?\s*[:=]?\s*([A-Za-z0-9]{6,40})/i
     ]);
 
-    var fields = emptyFields();
-    fields['Product Name'] = productName;
-    fields.Program = program;
-    fields['Country of Origin'] = normalizeOrigin(originRaw);
-    fields['Countries/Regions of Distribution'] = regions;
-    fields['Item#/model#'] = model;
-    fields.Manufacturer = manufacturer;
-    fields['Manufacturer Address'] = address;
-    fields['Sample Collection Method'] = sampleLabel;
     var electric = inferElectricFromText(text);
-    fields['Electric Product'] = electric.code;
-    fields['Product Description'] = electric.desc;
-    fields.Carrier = carrier || '';
-    fields['Tracking Number'] = tracking || '';
+    var fields = sanitizeParsedFields({
+      'Product Name': productName,
+      Program: program,
+      'Country of Origin': normalizeOrigin(originRaw),
+      'Countries/Regions of Distribution': regions,
+      'Item#/model#': model,
+      Manufacturer: manufacturer,
+      'Manufacturer Address': address,
+      'Sample Collection Method': sampleLabel,
+      'Electric Product': electric.code,
+      'Product Description': electric.desc,
+      Carrier: carrier || '',
+      'Tracking Number': tracking || '',
+      'Shipping Remark': ''
+    }, { rawExcerpt: text });
 
     return {
       product_summary: {
-        name: productName || '语音描述产品',
+        name: fields['Product Name'] || '',
         brand: '',
         hint: '来自语音识别'
       },
@@ -927,14 +1219,16 @@
       }
       out[key] = av || bv;
       if (key === 'Product Name' && out[key]) {
-        out[key] = cleanProductName(out[key]) || out[key];
+        out[key] = cleanProductName(out[key]) || '';
       }
     });
     var summaryA = (primary && primary.product_summary) || {};
     var summaryB = (secondary && secondary.product_summary) || {};
-    var mergedName = cleanProductName(summaryA.name || out['Product Name'] || summaryB.name || '') ||
-      out['Product Name'] ||
-      '';
+    var rawExcerpt = ((primary && primary.raw_excerpt) || (secondary && secondary.raw_excerpt) || '').slice(0, 500);
+    out = sanitizeParsedFields(out, { rawExcerpt: rawExcerpt });
+    var mergedName = cleanProductName(summaryA.name || out['Product Name'] || summaryB.name || '') || '';
+    if (mergedName && !isPlausibleField('Product Name', mergedName)) mergedName = '';
+    if (!mergedName) mergedName = out['Product Name'] || '';
     return {
       product_summary: {
         name: mergedName,
@@ -944,7 +1238,7 @@
       fields: out,
       sample_code: (primary && primary.sample_code) || (secondary && secondary.sample_code) || '',
       confidence: Object.assign({}, (secondary && secondary.confidence) || {}, (primary && primary.confidence) || {}),
-      raw_excerpt: ((primary && primary.raw_excerpt) || (secondary && secondary.raw_excerpt) || '').slice(0, 500),
+      raw_excerpt: rawExcerpt,
       source: [primary && primary.source, secondary && secondary.source].filter(Boolean).join('+') || 'merged'
     };
   }
@@ -1223,6 +1517,9 @@
     extractFieldsFromOcrText: extractFieldsFromOcrText,
     extractFieldsFromVoiceText: extractFieldsFromVoiceText,
     canonicalizeFieldKeys: canonicalizeFieldKeys,
+    isPlausibleField: isPlausibleField,
+    sanitizeParsedFields: sanitizeParsedFields,
+    sanitizeParseResult: sanitizeParseResult,
     mergeFieldSets: mergeFieldSets,
     extractWaybillFromOcrText: extractWaybillFromOcrText,
     recognizeWaybillImage: recognizeWaybillImage,

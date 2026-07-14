@@ -2804,7 +2804,13 @@
 
     function applyParsedFields(fields){
       if(!fields || typeof fields !== 'object') return;
-      const normalized = canonicalizeParsedFields(fields);
+      let normalized = canonicalizeParsedFields(fields);
+      if(window.QimaLabelParse && typeof QimaLabelParse.sanitizeParsedFields === 'function'){
+        normalized = QimaLabelParse.sanitizeParsedFields(normalized);
+      } else if(window.QimaLabelParse && typeof QimaLabelParse.sanitizeParseResult === 'function'){
+        const cleaned = QimaLabelParse.sanitizeParseResult({ fields: normalized });
+        normalized = (cleaned && cleaned.fields) || normalized;
+      }
       Object.keys(normalized).forEach(function(key){
         if(normalized[key]) manualAnswers[key] = normalized[key];
       });
@@ -3886,9 +3892,13 @@
     }
 
     function runRecognize(src, result){
-      const rawFields = (result && result.fields) ? result.fields : {};
+      let safeResult = result || { fields: {}, product_summary: {} };
+      if(window.QimaLabelParse && typeof QimaLabelParse.sanitizeParseResult === 'function'){
+        safeResult = QimaLabelParse.sanitizeParseResult(safeResult);
+      }
+      const rawFields = (safeResult && safeResult.fields) ? safeResult.fields : {};
       const fields = canonicalizeParsedFields(rawFields);
-      const summary = (result && result.product_summary) ? result.product_summary : {};
+      const summary = (safeResult && safeResult.product_summary) ? safeResult.product_summary : {};
       applyParsedFields(Object.assign({}, rawFields, fields));
 
       // Prefer resolved manualAnswers so echoed values match the card (never stale empties)
