@@ -47,7 +47,264 @@ const MARK_TO_REGIONS: Record<string, string[]> = {
   EAC: ["俄罗斯"],
 };
 
+/** Canonical Program options (AIMS display strings). Skip "… - Copy". */
+const PROGRAM_CATALOG = [
+  "TEMU Toys - TEMU Pay（TEMU 付款-玩具产品）",
+  "TEMU Textile (Sleepwear) - TEMU Pay（TEMU 付款，睡衣产品）",
+  "TEMU Hardware- Seller Pay（商家付款，杂货产品）",
+  "DEFAULT",
+  "TEMU Textile (Non-Sleepwear) - Seller Pay（商家付款，非睡衣类纺织品产品）",
+  "TEMU FCM-Seller Pay（商家付款，食品接触产品）",
+  "TEMU FCM-TEMU Pay（Temu 付款，食品接触产品）",
+  "TEMU Textile (Non-Sleepwear) - TEMU Pay（TEMU 付款，非睡衣类纺织品产品）",
+  "TEMU Toys - Seller Pay（商家付款，玩具产品）",
+  "TEMU Textile (Sleepwear) - Seller Pay（商家付款，睡衣产品）",
+  "TEMU Eyewear(PPE)-Seller Pay（商家付款,PPE 眼镜产品）",
+  "TEMU Electric product -Seller Pay（商家付款，电子产品）",
+  "SH-Self",
+  "TEMU MSDS-Seller Pay（商家付款，只做MSDS专用program）",
+] as const;
+
+const PROGRAM_BY_KEY: Record<string, string> = {
+  toys_temu: "TEMU Toys - TEMU Pay（TEMU 付款-玩具产品）",
+  toys_seller: "TEMU Toys - Seller Pay（商家付款，玩具产品）",
+  sleepwear_temu: "TEMU Textile (Sleepwear) - TEMU Pay（TEMU 付款，睡衣产品）",
+  sleepwear_seller: "TEMU Textile (Sleepwear) - Seller Pay（商家付款，睡衣产品）",
+  non_sleepwear_temu:
+    "TEMU Textile (Non-Sleepwear) - TEMU Pay（TEMU 付款，非睡衣类纺织品产品）",
+  non_sleepwear_seller:
+    "TEMU Textile (Non-Sleepwear) - Seller Pay（商家付款，非睡衣类纺织品产品）",
+  hardware_seller: "TEMU Hardware- Seller Pay（商家付款，杂货产品）",
+  fcm_seller: "TEMU FCM-Seller Pay（商家付款，食品接触产品）",
+  fcm_temu: "TEMU FCM-TEMU Pay（Temu 付款，食品接触产品）",
+  eyewear_seller: "TEMU Eyewear(PPE)-Seller Pay（商家付款,PPE 眼镜产品）",
+  electric_seller: "TEMU Electric product -Seller Pay（商家付款，电子产品）",
+  msds_seller: "TEMU MSDS-Seller Pay（商家付款，只做MSDS专用program）",
+  sh_self: "SH-Self",
+  default: "DEFAULT",
+};
+
 type FieldMap = Record<string, string>;
+
+function compactProgramKey(s: string): string {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[\s\-–—_/()（）,，.·]+/g, "")
+    .replace(/selly/g, "seller");
+}
+
+function resolveProgramLabel(value: string): string {
+  const v = String(value ?? "").trim();
+  if (!v) return "";
+  if (/^__PROGRAM_TEMU_TOY__$/.test(v)) return PROGRAM_BY_KEY.toys_seller;
+  if (/^__PROGRAM_TEMU_HW__$/.test(v)) return PROGRAM_BY_KEY.hardware_seller;
+  if (/^__PROGRAM_AMAZON__$/.test(v)) return "";
+  for (const label of PROGRAM_CATALOG) {
+    if (label === v) return label;
+  }
+  const compact = compactProgramKey(v);
+  if (compact.length >= 6) {
+    for (const label of PROGRAM_CATALOG) {
+      if (compactProgramKey(label) === compact) return label;
+    }
+  }
+  if (compact.length >= 14) {
+    for (const label of PROGRAM_CATALOG) {
+      const cLabel = compactProgramKey(label);
+      if (cLabel.includes(compact) || compact.includes(cLabel)) {
+        return label;
+      }
+    }
+  }
+  if (
+    /temu.*hardware|hardware.*seller|硬件|杂货/i.test(v) &&
+    /seller|商家|退款|refund/i.test(v)
+  ) {
+    return PROGRAM_BY_KEY.hardware_seller;
+  }
+  if (
+    /temu.*toys?|toys?.*seller|玩具/i.test(v) &&
+    /seller|商家/i.test(v) &&
+    !/temu\s*pay|temu付款|付款/i.test(v)
+  ) {
+    return PROGRAM_BY_KEY.toys_seller;
+  }
+  if (/temu.*toys?|玩具/i.test(v) && /temu\s*pay|temu付款|付款/i.test(v)) {
+    return PROGRAM_BY_KEY.toys_temu;
+  }
+  if (/msds/i.test(v)) return PROGRAM_BY_KEY.msds_seller;
+  if (/^sh[-\s]?self$/i.test(v) || /自助\s*program|self\s*program/i.test(v)) {
+    return PROGRAM_BY_KEY.sh_self;
+  }
+  if (/^default$/i.test(v)) return PROGRAM_BY_KEY.default;
+  return "";
+}
+
+function detectProgramPayer(text: string): "" | "temu" | "seller" {
+  const t = String(text || "");
+  const temuPay = /TEMU\s*Pay|TEMU\s*付款|Temu\s*付款|平台付款|TEMU付款/i.test(t);
+  const sellerPay =
+    /Seller\s*Pay|Selly\s*Pay|商家付款|卖家付款|seller\s*paid/i.test(t);
+  if (temuPay && !sellerPay) return "temu";
+  if (sellerPay && !temuPay) return "seller";
+  if (temuPay && sellerPay) {
+    if (
+      /Program.{0,40}(?:TEMU\s*Pay|TEMU\s*付款)|(?:TEMU\s*Pay|TEMU\s*付款).{0,40}Program/i
+        .test(t)
+    ) {
+      return "temu";
+    }
+    if (
+      /Program.{0,40}(?:Seller\s*Pay|商家付款)|(?:Seller\s*Pay|商家付款).{0,40}Program/i
+        .test(t)
+    ) {
+      return "seller";
+    }
+  }
+  return "";
+}
+
+function detectProgramCategory(
+  text: string,
+  hints: { productName?: string; electricYes?: boolean } = {},
+): string {
+  const t = String(text || "");
+  const name = String(hints.productName || "").trim();
+  const blob = (name + "\n" + t).toLowerCase();
+  const electricHint = !!hints.electricYes;
+  if (
+    electricHint ||
+    /__ELECTRIC_YES__/i.test(t) ||
+    /\b(?:electric\s+fan|electric\s+product|electronics?|battery|voltage|charger|motor|adapter|电源|电机|充电|电池|电压|功率|电子产品|电风扇|带电)\b/i
+      .test(blob) ||
+    /\d+\s*V(?:olt)?|\d+\s*W(?:att)?|\d+\s*Hz/i.test(blob)
+  ) {
+    const toyCue =
+      /\b(?:toy|toys|en\s*71|cpsia|玩具|机器人玩具|积木)\b/i.test(blob);
+    const electricName =
+      /\b(?:fan|lamp|light|heater|blender|mixer|vacuum|speaker|耳机|风扇|台灯|吹风机|充电器)\b/i
+        .test(blob) ||
+      /electric\s+product|电子产品|带电产品/i.test(blob);
+    if (electricName || (electricHint && !toyCue)) return "electric";
+    if (!toyCue) return "electric";
+  }
+  if (
+    /\b(?:msds\s*only|only\s*msds|只做\s*msds|msds专用|msds\s*program)\b/i
+      .test(blob) ||
+    (/msds/i.test(blob) && /只做|专用|only/i.test(blob))
+  ) {
+    return "msds";
+  }
+  if (/\bsh[-\s]?self\b|自助\s*program|self\s*program/i.test(blob)) {
+    return "sh_self";
+  }
+  if (
+    /\b(?:eyewear|glasses|goggles|ppe\b|safety\s*glasses|护目镜|眼镜|ppe\s*眼镜)\b/i
+      .test(blob)
+  ) {
+    return "eyewear";
+  }
+  if (
+    /\b(?:food\s*contact|fcm\b|lfgb|食品接触|餐具|水杯|bowl|cup\b(?!\s*toy))/i
+      .test(blob)
+  ) {
+    return "fcm";
+  }
+  // Check non-sleepwear before sleepwear (hyphenated "non-sleepwear" contains "sleepwear")
+  if (/\b(?:non[-\s]?sleepwear|非睡衣)/i.test(blob)) {
+    return "non_sleepwear";
+  }
+  if (
+    /\b(?:sleepwear|pajamas?|pyjamas?|nightgown|睡衣|睡袍|家居服)\b/i.test(blob)
+  ) {
+    return "sleepwear";
+  }
+  if (
+    /\b(?:textile|fabric|apparel|garment|clothing|面料|纺织|衣服|服装|布料)\b/i
+      .test(blob)
+  ) {
+    return "non_sleepwear";
+  }
+  if (/\b(?:toy|toys|en\s*71|cpsia|玩具|积木|公仔|doll|plush)\b/i.test(blob)) {
+    return "toys";
+  }
+  if (
+    /\b(?:hardware|grocery|kitchen\s*gadget|杂货|五金|厨具|日用|餐刀|scissors)\b/i
+      .test(blob) ||
+    (/temu/i.test(blob) && /硬件|杂货/.test(t))
+  ) {
+    return "hardware";
+  }
+  if (/\bdefault\b/i.test(blob) && /program|关联项目|项目/i.test(blob)) {
+    return "default";
+  }
+  return "";
+}
+
+function matchProgramFromText(
+  text: string,
+  hints: { productName?: string; electricYes?: boolean } = {},
+): string {
+  const raw = String(text || "");
+  if (!raw && !hints.productName) return "";
+
+  const programMention = raw.match(
+    /(?:关联)?(?:项目|Program)\s*[是为：:=]\s*([^\n，。;；]{2,80})/i,
+  );
+  const direct = resolveProgramLabel(programMention?.[1]?.trim() || "");
+  if (direct) return direct;
+
+  for (const label of PROGRAM_CATALOG) {
+    if (label.length >= 4 && raw.includes(label)) return label;
+    const compactLabel = compactProgramKey(label);
+    if (
+      compactLabel.length >= 8 &&
+      compactProgramKey(raw).includes(compactLabel)
+    ) {
+      return label;
+    }
+  }
+
+  const category = detectProgramCategory(raw, hints);
+  if (!category) return "";
+  if (category === "default") return PROGRAM_BY_KEY.default;
+  if (category === "sh_self") return PROGRAM_BY_KEY.sh_self;
+  if (category === "electric") return PROGRAM_BY_KEY.electric_seller;
+  if (category === "hardware") return PROGRAM_BY_KEY.hardware_seller;
+  if (category === "eyewear") return PROGRAM_BY_KEY.eyewear_seller;
+  if (category === "msds") return PROGRAM_BY_KEY.msds_seller;
+
+  let payer = detectProgramPayer(raw) || "seller";
+  const key = `${category}_${payer}`;
+  if (PROGRAM_BY_KEY[key]) return PROGRAM_BY_KEY[key];
+  return PROGRAM_BY_KEY[`${category}_seller`] || "";
+}
+
+function ensureProgramMatched(
+  fields: FieldMap,
+  opts: { rawExcerpt?: string } = {},
+): FieldMap {
+  const existing = resolveProgramLabel(fields.Program || "");
+  if (existing) {
+    fields.Program = existing;
+    return fields;
+  }
+  const hintText = [
+    opts.rawExcerpt || "",
+    fields["Product Name"] || "",
+    fields["Product Description"] || "",
+    fields["Electric Product"] || "",
+    fields["Shipping Remark"] || "",
+  ].join("\n");
+  fields.Program = matchProgramFromText(hintText, {
+    productName: fields["Product Name"] || "",
+    electricYes:
+      /带电|electric\s*yes|^electric$/i.test(
+        String(fields["Electric Product"] || ""),
+      ),
+  }) || "";
+  return fields;
+}
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const allow =
@@ -286,10 +543,9 @@ function isPlausibleField(key: string, value: string): boolean {
       return true;
     }
     case "Program": {
-      if (/^__PROGRAM_(?:TEMU_HW|TEMU_TOY|AMAZON)__$/.test(v)) return true;
-      if (v.length > 80 || looksLikeSentence(v)) return false;
-      return /(?:Program|TEMU|Amazon|亚马逊|Seller\s*Pay|商家付款|EN\s*71|CPSIA|退款|玩具|硬件|关联项目)/i
-        .test(v);
+      if (/^__PROGRAM_(?:TEMU_HW|TEMU_TOY)__$/.test(v)) return true;
+      if (v.length > 120 || looksLikeSentence(v)) return false;
+      return !!resolveProgramLabel(v);
     }
     case "Country of Origin": {
       if (v.length > 40 || looksLikeSentence(v)) return false;
@@ -428,6 +684,8 @@ function sanitizeParsedFields(
       candidate = cleanProductName(raw) || "";
     } else if (key === "Country of Origin") {
       candidate = normalizeOrigin(raw) || raw;
+    } else if (key === "Program") {
+      candidate = resolveProgramLabel(raw) || "";
     }
     if (!candidate || !isPlausibleField(key, candidate)) {
       out[key] = "";
@@ -436,10 +694,14 @@ function sanitizeParsedFields(
     if (key === "Product Name") {
       const cleaned = cleanProductName(candidate) || candidate;
       out[key] = isPlausibleField(key, cleaned) ? cleaned : "";
+    } else if (key === "Program") {
+      out[key] = resolveProgramLabel(candidate) || "";
     } else {
       out[key] = candidate;
     }
   }
+
+  ensureProgramMatched(out, { rawExcerpt: opts?.rawExcerpt || "" });
 
   if (opts?.rawExcerpt && out["Shipping Remark"]) {
     const excerpt = String(opts.rawExcerpt || "").replace(/\s+/g, " ").trim()
@@ -908,6 +1170,18 @@ function seedFieldsFromLabels(
         seed["Electric Product"] = "带电产品";
       }
     }
+    if (!seed.Program) {
+      const hintBlob = [
+        seed["Product Name"],
+        seed["Product Description"],
+        seed["Electric Product"],
+        String(label.ocr_text || ""),
+      ].join("\n");
+      seed.Program = matchProgramFromText(hintBlob, {
+        productName: seed["Product Name"] || "",
+        electricYes: /带电|electric/i.test(seed["Electric Product"] || ""),
+      });
+    }
     const extraRemark = buildShippingRemark(label);
     if (extraRemark) remarkBits.push(extraRemark);
   }
@@ -938,6 +1212,9 @@ function normalizeResult(
   }
   if (fields["Country of Origin"]) {
     fields["Country of Origin"] = normalizeOrigin(fields["Country of Origin"]);
+  }
+  if (fields.Program) {
+    fields.Program = resolveProgramLabel(fields.Program) || fields.Program;
   }
   fields["Countries/Regions of Distribution"] = mergeRegionList(
     seedFields["Countries/Regions of Distribution"] || "",
@@ -1017,7 +1294,14 @@ async function structureFields(
     "明确非电填「非电产品」，否则空字符串\n" +
     "6) Product Description：带电时写入 Rating/电池/充电等要点\n" +
     "7) Shipping Remark 可汇总批号、生产日期、欧代、合规标识\n" +
-    "8) 无法确定或明显不合理的字段留空字符串，不要编造、不要把整段语音塞进任一字段\n" +
+    "8) Program：只能从下列固定列表中选择完整字符串之一，禁止自创：" +
+    PROGRAM_CATALOG.map((p) => `「${p}」`).join("、") +
+    "。根据品名/品类推断：玩具→Toys，睡衣→Textile Sleepwear，纺织/面料非睡衣→Textile Non-Sleepwear，" +
+    "食品接触/FCM→FCM，眼镜/PPE→Eyewear，电子/电压/风扇→Electric product，杂货/五金→Hardware，" +
+    "只做MSDS→MSDS，SH-Self 字样→SH-Self，字面 DEFAULT→DEFAULT。" +
+    "付款方：TEMU Pay / TEMU 付款 vs Seller Pay / 商家付款；未提及付款方时默认 Seller Pay 变体（若该品类有）。" +
+    "置信度不足则 Program 留空字符串。\n" +
+    "9) 无法确定或明显不合理的字段留空字符串，不要编造、不要把整段语音塞进任一字段\n" +
     'JSON：{"product_summary":{"name":"短品名","brand":"","hint":""},' +
     '"fields":{...},"confidence":{...},"raw_excerpt":""}';
 

@@ -1163,7 +1163,7 @@
 <script src="assets/i18n-runtime.js?v=20260714b"></script>
 <script src="assets/supabase-config.js?v=20260714b"></script>
 <script src="assets/supabase-client.js?v=20260714b"></script>
-<script src="assets/label-parse.js?v=20260714i"></script>
+<script src="assets/label-parse.js?v=20260714j"></script>
 </head>
 <body>
   <div class="phone">
@@ -1376,9 +1376,6 @@
             <div class="fm-label"><span data-i18n="index.project">关联项目</span> <span class="req" data-i18n="common.required">*</span></div>
             <select class="fm-select" id="mf_program">
               <option value="" disabled selected data-i18n="index.projectPlaceholder">请选择关联项目</option>
-              <option>TEMU 硬件 - 商家付款（商家付款，测试后退款）</option>
-              <option>TEMU 玩具 - 商家付款</option>
-              <option>Amazon Seller Program</option>
             </select>
           </div>
 
@@ -1533,7 +1530,37 @@
     }
 
     function getProgramOptions(){
-      return [t('orderChat.projectTemuHardwareRefund'), t('orderChat.projectTemuToys'), t('orderChat.projectAmazon')];
+      if(window.QimaLabelParse && typeof QimaLabelParse.getProgramCatalog === 'function'){
+        return QimaLabelParse.getProgramCatalog();
+      }
+      return [
+        'TEMU Toys - TEMU Pay（TEMU 付款-玩具产品）',
+        'TEMU Textile (Sleepwear) - TEMU Pay（TEMU 付款，睡衣产品）',
+        'TEMU Hardware- Seller Pay（商家付款，杂货产品）',
+        'DEFAULT',
+        'TEMU Textile (Non-Sleepwear) - Seller Pay（商家付款，非睡衣类纺织品产品）',
+        'TEMU FCM-Seller Pay（商家付款，食品接触产品）',
+        'TEMU FCM-TEMU Pay（Temu 付款，食品接触产品）',
+        'TEMU Textile (Non-Sleepwear) - TEMU Pay（TEMU 付款，非睡衣类纺织品产品）',
+        'TEMU Toys - Seller Pay（商家付款，玩具产品）',
+        'TEMU Textile (Sleepwear) - Seller Pay（商家付款，睡衣产品）',
+        'TEMU Eyewear(PPE)-Seller Pay（商家付款,PPE 眼镜产品）',
+        'TEMU Electric product -Seller Pay（商家付款，电子产品）',
+        'SH-Self',
+        'TEMU MSDS-Seller Pay（商家付款，只做MSDS专用program）'
+      ];
+    }
+
+    function resolveProgramOption(value){
+      const raw = String(value || '').trim();
+      if(!raw) return '';
+      if(window.QimaLabelParse && typeof QimaLabelParse.resolveProgramLabel === 'function'){
+        const hit = QimaLabelParse.resolveProgramLabel(raw);
+        if(hit) return hit;
+      }
+      const opts = getProgramOptions();
+      if(opts.indexOf(raw) !== -1) return raw;
+      return '';
     }
 
     function getOriginOptions(){
@@ -1640,9 +1667,32 @@
         }
       });
       var prog = document.getElementById('mf_program');
-      if(prog && prog.options.length > 1){
+      if(prog){
         var opts = getProgramOptions();
-        for(var i=1;i<prog.options.length && i-1<opts.length;i++){ prog.options[i].textContent = opts[i-1]; prog.options[i].value = opts[i-1]; }
+        var prev = prog.value;
+        var placeholder = prog.options[0] ? prog.options[0].cloneNode(true) : null;
+        prog.innerHTML = '';
+        if(placeholder){
+          placeholder.selected = true;
+          prog.appendChild(placeholder);
+        } else {
+          var ph = document.createElement('option');
+          ph.value = '';
+          ph.disabled = true;
+          ph.selected = true;
+          ph.textContent = t('index.projectPlaceholder') || 'Select program';
+          prog.appendChild(ph);
+        }
+        opts.forEach(function(label){
+          var opt = document.createElement('option');
+          opt.value = label;
+          opt.textContent = label;
+          prog.appendChild(opt);
+        });
+        if(prev){
+          var resolved = resolveProgramOption(prev) || prev;
+          if(opts.indexOf(resolved) !== -1) prog.value = resolved;
+        }
       }
       var origin = document.getElementById('mf_origin');
       if(origin && origin.options.length > 1){
@@ -1813,7 +1863,7 @@
           sourceDesc: t('orderChat.historyDescLtToys'),
           fields: {
             'Product Name': t('orderChat.productRobotToy'),
-            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Program': t('orderChat.projectTemuToys'),
             'Country of Origin': t('orderChat.originChina'),
             'Countries/Regions of Distribution': t('orderChat.distributionPresetEn'),
             'Item#/model#': 'RBT-2025-X9',
@@ -1847,7 +1897,7 @@
           sourceDesc: t('orderChat.historyDescEn71'),
           fields: {
             'Product Name': t('orderChat.productBlockToy'),
-            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Program': t('orderChat.projectTemuToys'),
             'Country of Origin': t('orderChat.originChina'),
             'Countries/Regions of Distribution': t('country.eu'),
             'Item#/model#': 'BLOCK-EN71-001',
@@ -1864,7 +1914,7 @@
           sourceDesc: t('orderChat.historyDescLtPsi'),
           fields: {
             'Product Name': t('orderChat.productToysPsi'),
-            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Program': t('orderChat.projectTemuToys'),
             'Country of Origin': t('orderChat.originChina'),
             'Countries/Regions of Distribution': t('orderChat.distributionUsCa'),
             'Item#/model#': 'Q202349103',
@@ -1881,7 +1931,7 @@
           sourceDesc: t('orderChat.historyDescLtToys'),
           fields: {
             'Product Name': t('orderChat.productRobotToy'),
-            'Program': t('orderChat.projectTemuHardwareRefund'),
+            'Program': t('orderChat.projectTemuToys'),
             'Country of Origin': t('orderChat.originChina'),
             'Countries/Regions of Distribution': t('orderChat.distributionPresetAll'),
             'Item#/model#': 'Q202310887',
@@ -2825,11 +2875,20 @@
       else if(raw === '__SAMPLE_RECEIVED__') manualAnswers['Sample Collection Method'] = sampleMethodReceived();
 
       const prog = manualAnswers['Program'] || '';
-      const programs = getProgramOptions();
-      if(prog === '__PROGRAM_TEMU_HW__' && programs[0]) manualAnswers['Program'] = programs[0];
-      else if(prog === '__PROGRAM_TEMU_TOY__' && programs[1]) manualAnswers['Program'] = programs[1];
-      else if(prog === '__PROGRAM_AMAZON__' && programs[2]) manualAnswers['Program'] = programs[2];
-
+      const resolvedProg = resolveProgramOption(prog);
+      if(resolvedProg) manualAnswers['Program'] = resolvedProg;
+      else if(prog === '__PROGRAM_TEMU_HW__') manualAnswers['Program'] = resolveProgramOption('TEMU Hardware- Seller Pay（商家付款，杂货产品）') || '';
+      else if(prog === '__PROGRAM_TEMU_TOY__') manualAnswers['Program'] = resolveProgramOption('TEMU Toys - Seller Pay（商家付款，玩具产品）') || '';
+      else if(prog === '__PROGRAM_AMAZON__') manualAnswers['Program'] = '';
+      else if(prog && !resolvedProg && window.QimaLabelParse && typeof QimaLabelParse.matchProgramFromText === 'function'){
+        const matched = QimaLabelParse.matchProgramFromText(prog + '\n' + (manualAnswers['Product Name'] || ''), {
+          productName: manualAnswers['Product Name'] || '',
+          electricYes: /带电|electric/i.test(manualAnswers[FIELD_ELECTRIC] || '')
+        });
+        manualAnswers['Program'] = matched || '';
+      } else if(prog && !resolvedProg){
+        manualAnswers['Program'] = '';
+      }
       const origin = manualAnswers['Country of Origin'] || '';
       if(origin === '中国' || /china/i.test(origin)){
         const opts = getOriginOptions();

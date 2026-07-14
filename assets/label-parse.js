@@ -18,6 +18,248 @@
     RCM: ['澳大利亚']
   };
 
+  /**
+   * Canonical Program options (AIMS display strings).
+   * Skip low-value duplicates like "TEMU Toys - Seller Pay - Copy".
+   * MSDS uses cleaned "Seller" (source typo was "Selly").
+   */
+  var PROGRAM_CATALOG = [
+    'TEMU Toys - TEMU Pay（TEMU 付款-玩具产品）',
+    'TEMU Textile (Sleepwear) - TEMU Pay（TEMU 付款，睡衣产品）',
+    'TEMU Hardware- Seller Pay（商家付款，杂货产品）',
+    'DEFAULT',
+    'TEMU Textile (Non-Sleepwear) - Seller Pay（商家付款，非睡衣类纺织品产品）',
+    'TEMU FCM-Seller Pay（商家付款，食品接触产品）',
+    'TEMU FCM-TEMU Pay（Temu 付款，食品接触产品）',
+    'TEMU Textile (Non-Sleepwear) - TEMU Pay（TEMU 付款，非睡衣类纺织品产品）',
+    'TEMU Toys - Seller Pay（商家付款，玩具产品）',
+    'TEMU Textile (Sleepwear) - Seller Pay（商家付款，睡衣产品）',
+    'TEMU Eyewear(PPE)-Seller Pay（商家付款,PPE 眼镜产品）',
+    'TEMU Electric product -Seller Pay（商家付款，电子产品）',
+    'SH-Self',
+    'TEMU MSDS-Seller Pay（商家付款，只做MSDS专用program）'
+  ];
+
+  var PROGRAM_BY_KEY = {
+    toys_temu: 'TEMU Toys - TEMU Pay（TEMU 付款-玩具产品）',
+    toys_seller: 'TEMU Toys - Seller Pay（商家付款，玩具产品）',
+    sleepwear_temu: 'TEMU Textile (Sleepwear) - TEMU Pay（TEMU 付款，睡衣产品）',
+    sleepwear_seller: 'TEMU Textile (Sleepwear) - Seller Pay（商家付款，睡衣产品）',
+    non_sleepwear_temu: 'TEMU Textile (Non-Sleepwear) - TEMU Pay（TEMU 付款，非睡衣类纺织品产品）',
+    non_sleepwear_seller: 'TEMU Textile (Non-Sleepwear) - Seller Pay（商家付款，非睡衣类纺织品产品）',
+    hardware_seller: 'TEMU Hardware- Seller Pay（商家付款，杂货产品）',
+    fcm_seller: 'TEMU FCM-Seller Pay（商家付款，食品接触产品）',
+    fcm_temu: 'TEMU FCM-TEMU Pay（Temu 付款，食品接触产品）',
+    eyewear_seller: 'TEMU Eyewear(PPE)-Seller Pay（商家付款,PPE 眼镜产品）',
+    electric_seller: 'TEMU Electric product -Seller Pay（商家付款，电子产品）',
+    msds_seller: 'TEMU MSDS-Seller Pay（商家付款，只做MSDS专用program）',
+    sh_self: 'SH-Self',
+    default: 'DEFAULT'
+  };
+
+  function getProgramCatalog() {
+    return PROGRAM_CATALOG.slice();
+  }
+
+  function compactProgramKey(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/[\s\-–—_/()（）,，.·]+/g, '')
+      .replace(/selly/g, 'seller');
+  }
+
+  function resolveProgramLabel(value) {
+    var v = value == null ? '' : String(value).trim();
+    if (!v) return '';
+    if (/^__PROGRAM_TEMU_TOY__$/.test(v)) return PROGRAM_BY_KEY.toys_seller;
+    if (/^__PROGRAM_TEMU_HW__$/.test(v)) return PROGRAM_BY_KEY.hardware_seller;
+    if (/^__PROGRAM_AMAZON__$/.test(v)) return '';
+    for (var i = 0; i < PROGRAM_CATALOG.length; i++) {
+      if (PROGRAM_CATALOG[i] === v) return PROGRAM_CATALOG[i];
+    }
+    var compact = compactProgramKey(v);
+    if (compact.length >= 6) {
+      for (var j = 0; j < PROGRAM_CATALOG.length; j++) {
+        var label = PROGRAM_CATALOG[j];
+        var cLabel = compactProgramKey(label);
+        if (cLabel === compact) return label;
+      }
+    }
+    // Substring only when the candidate is a substantial unique fragment
+    if (compact.length >= 14) {
+      for (var k = 0; k < PROGRAM_CATALOG.length; k++) {
+        var label2 = PROGRAM_CATALOG[k];
+        var cLabel2 = compactProgramKey(label2);
+        if (cLabel2.indexOf(compact) !== -1 || compact.indexOf(cLabel2) !== -1) {
+          return label2;
+        }
+      }
+    }
+    // Alias: old demo refund hardware / short toys labels
+    if (/temu.*hardware|hardware.*seller|硬件|杂货/i.test(v) && /seller|商家|退款|refund/i.test(v)) {
+      return PROGRAM_BY_KEY.hardware_seller;
+    }
+    if (/temu.*toys?|toys?.*seller|玩具/i.test(v) && /seller|商家/i.test(v) && !/temu\s*pay|temu付款|付款/i.test(v)) {
+      return PROGRAM_BY_KEY.toys_seller;
+    }
+    if (/temu.*toys?|玩具/i.test(v) && /temu\s*pay|temu付款|付款/i.test(v)) {
+      return PROGRAM_BY_KEY.toys_temu;
+    }
+    if (/msds/i.test(v)) return PROGRAM_BY_KEY.msds_seller;
+    if (/^sh[-\s]?self$/i.test(v) || /自助\s*program|self\s*program/i.test(v)) {
+      return PROGRAM_BY_KEY.sh_self;
+    }
+    if (/^default$/i.test(v)) return PROGRAM_BY_KEY.default;
+    return '';
+  }
+
+  function detectProgramPayer(text) {
+    var t = String(text || '');
+    var temuPay = /TEMU\s*Pay|TEMU\s*付款|Temu\s*付款|平台付款|TEMU付款/i.test(t);
+    var sellerPay = /Seller\s*Pay|Selly\s*Pay|商家付款|卖家付款|seller\s*paid/i.test(t);
+    if (temuPay && !sellerPay) return 'temu';
+    if (sellerPay && !temuPay) return 'seller';
+    if (temuPay && sellerPay) {
+      // Both mentioned: prefer the payer that appears nearer a Program cue
+      if (/Program.{0,40}(?:TEMU\s*Pay|TEMU\s*付款)|(?:TEMU\s*Pay|TEMU\s*付款).{0,40}Program/i.test(t)) {
+        return 'temu';
+      }
+      if (/Program.{0,40}(?:Seller\s*Pay|商家付款)|(?:Seller\s*Pay|商家付款).{0,40}Program/i.test(t)) {
+        return 'seller';
+      }
+    }
+    return '';
+  }
+
+  function detectProgramCategory(text, hints) {
+    var t = String(text || '');
+    var name = String((hints && hints.productName) || '').trim();
+    var blob = (name + '\n' + t).toLowerCase();
+    var electricHint = !!(hints && hints.electricYes);
+    if (
+      electricHint ||
+      /__ELECTRIC_YES__/i.test(t) ||
+      /\b(?:electric\s+fan|electric\s+product|electronics?|battery|voltage|charger|motor|adapter|电源|电机|充电|电池|电压|功率|电子产品|电风扇|带电)\b/i.test(blob) ||
+      /\d+\s*V(?:olt)?|\d+\s*W(?:att)?|\d+\s*Hz/i.test(blob)
+    ) {
+      // Prefer electric when product is clearly powered; toys with batteries still toys if toy cue stronger
+      var toyCue = /\b(?:toy|toys|en\s*71|cpsia|玩具|机器人玩具|积木)\b/i.test(blob);
+      var electricName = /\b(?:fan|lamp|light|heater|blender|mixer|vacuum|speaker|耳机|风扇|台灯|吹风机|充电器)\b/i.test(blob) ||
+        /electric\s+product|电子产品|带电产品/i.test(blob);
+      if (electricName || (electricHint && !toyCue)) {
+        return 'electric';
+      }
+      if (!toyCue) return 'electric';
+    }
+    if (/\b(?:msds\s*only|only\s*msds|只做\s*msds|msds专用|msds\s*program)\b/i.test(blob) ||
+      (/msds/i.test(blob) && /只做|专用|only/i.test(blob))) {
+      return 'msds';
+    }
+    if (/\bsh[-\s]?self\b|自助\s*program|self\s*program/i.test(blob)) return 'sh_self';
+    if (/\b(?:eyewear|glasses|goggles|ppe\b|safety\s*glasses|护目镜|眼镜|ppe\s*眼镜)\b/i.test(blob)) {
+      return 'eyewear';
+    }
+    if (/\b(?:food\s*contact|fcm\b|lfgb|食品接触|餐具|水杯|bowl|cup\b(?!\s*toy))/i.test(blob)) {
+      return 'fcm';
+    }
+    // non-sleepwear before sleepwear — hyphenated "non-sleepwear" contains "sleepwear"
+    if (/\b(?:non[-\s]?sleepwear|非睡衣)/i.test(blob)) {
+      return 'non_sleepwear';
+    }
+    if (/\b(?:sleepwear|pajamas?|pyjamas?|nightgown|睡衣|睡袍|家居服)\b/i.test(blob)) {
+      return 'sleepwear';
+    }
+    if (
+      /\b(?:textile|fabric|apparel|garment|clothing|面料|纺织|衣服|服装|布料)\b/i.test(blob)
+    ) {
+      return 'non_sleepwear';
+    }
+    if (/\b(?:toy|toys|en\s*71|cpsia|玩具|积木|公仔|doll|plush)\b/i.test(blob)) {
+      return 'toys';
+    }
+    if (
+      /\b(?:hardware|grocery|kitchen\s*gadget|杂货|五金|厨具|日用|餐刀|scissors)\b/i.test(blob) ||
+      (/temu/i.test(blob) && /硬件|杂货/.test(t))
+    ) {
+      return 'hardware';
+    }
+    if (/\bdefault\b/i.test(blob) && /program|关联项目|项目/i.test(blob)) {
+      return 'default';
+    }
+    return '';
+  }
+
+  /**
+   * Smart Program match from OCR / voice / product text.
+   * Only returns a catalog label when category is reasonably clear.
+   * Default payer = Seller Pay when category clear but payer ambiguous.
+   * Returns '' when confidence is too low (never invent outside catalog).
+   */
+  function matchProgramFromText(text, hints) {
+    var raw = String(text || '');
+    if (!raw && !(hints && hints.productName)) return '';
+
+    // Direct mention of a known program string
+    var direct = resolveProgramLabel(pick(raw, [
+      /(?:关联)?(?:项目|Program)\s*[是为：:=]\s*([^\n，。;；]{2,80})/i
+    ]) || '');
+    if (direct) return direct;
+
+    // Full catalog substring present in text
+    for (var i = 0; i < PROGRAM_CATALOG.length; i++) {
+      var label = PROGRAM_CATALOG[i];
+      if (label.length >= 4 && raw.indexOf(label) !== -1) return label;
+      var compactLabel = compactProgramKey(label);
+      if (compactLabel.length >= 8 && compactProgramKey(raw).indexOf(compactLabel) !== -1) {
+        return label;
+      }
+    }
+
+    var category = detectProgramCategory(raw, hints || {});
+    if (!category) return '';
+    if (category === 'default') return PROGRAM_BY_KEY.default;
+    if (category === 'sh_self') return PROGRAM_BY_KEY.sh_self;
+
+    var payer = detectProgramPayer(raw);
+    // Only Seller Pay variants exist for these categories
+    if (category === 'electric') return PROGRAM_BY_KEY.electric_seller;
+    if (category === 'hardware') return PROGRAM_BY_KEY.hardware_seller;
+    if (category === 'eyewear') return PROGRAM_BY_KEY.eyewear_seller;
+    if (category === 'msds') return PROGRAM_BY_KEY.msds_seller;
+
+    if (!payer) payer = 'seller';
+
+    var key = category + '_' + payer;
+    if (category === 'non_sleepwear') key = 'non_sleepwear_' + payer;
+    if (PROGRAM_BY_KEY[key]) return PROGRAM_BY_KEY[key];
+    // Fallback to seller variant of category
+    var sellerKey = category === 'non_sleepwear' ? 'non_sleepwear_seller' : category + '_seller';
+    return PROGRAM_BY_KEY[sellerKey] || '';
+  }
+
+  function ensureProgramMatched(fields, opts) {
+    var out = fields || {};
+    var existing = resolveProgramLabel(out.Program || '');
+    if (existing) {
+      out.Program = existing;
+      return out;
+    }
+    var hintText = [
+      (opts && opts.rawExcerpt) || '',
+      out['Product Name'] || '',
+      out['Product Description'] || '',
+      out['Electric Product'] || '',
+      out['Shipping Remark'] || ''
+    ].join('\n');
+    var matched = matchProgramFromText(hintText, {
+      productName: out['Product Name'] || '',
+      electricYes: out['Electric Product'] === '__ELECTRIC_YES__' ||
+        /带电|electric\s*yes|^electric$/i.test(String(out['Electric Product'] || ''))
+    });
+    out.Program = matched || '';
+    return out;
+  }
+
   var TESSERACT_CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
   var PDFJS_CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
   var PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
@@ -289,9 +531,9 @@
         return true;
       }
       case 'Program': {
-        if (/^__PROGRAM_(?:TEMU_HW|TEMU_TOY|AMAZON)__$/.test(v)) return true;
-        if (v.length > 80 || looksLikeSentence(v)) return false;
-        return /(?:Program|TEMU|Amazon|亚马逊|Seller\s*Pay|商家付款|EN\s*71|CPSIA|退款|玩具|硬件|关联项目)/i.test(v);
+        if (/^__PROGRAM_(?:TEMU_HW|TEMU_TOY)__$/.test(v)) return true;
+        if (v.length > 120 || looksLikeSentence(v)) return false;
+        return !!resolveProgramLabel(v);
       }
       case 'Country of Origin': {
         if (v.length > 40 || looksLikeSentence(v)) return false;
@@ -419,6 +661,8 @@
         candidate = cleanModelValue(raw) || raw;
       } else if (key === 'Countries/Regions of Distribution') {
         candidate = mergeRegions([raw]) || raw;
+      } else if (key === 'Program') {
+        candidate = resolveProgramLabel(raw) || '';
       }
 
       if (!candidate || !isPlausibleField(key, candidate)) {
@@ -430,8 +674,14 @@
         if (!isPlausibleField(key, out[key])) out[key] = '';
         return;
       }
+      if (key === 'Program') {
+        out[key] = resolveProgramLabel(candidate) || '';
+        return;
+      }
       out[key] = candidate;
     });
+
+    ensureProgramMatched(out, opts);
 
     // Drop shipping remark that is basically the full transcript when richer fields exist
     if (opts && opts.rawExcerpt && out['Shipping Remark']) {
@@ -907,9 +1157,14 @@
     if (ecRep) remarkParts.push('欧代：' + ecRep);
     if (marks.length) remarkParts.push('合规标识：' + marks.join('、'));
 
+    var program = matchProgramFromText(text + (productName ? '\n' + productName : ''), {
+      productName: productName,
+      electricYes: electric.code === '__ELECTRIC_YES__'
+    });
+
     var fields = sanitizeParsedFields({
       'Product Name': productName,
-      Program: '',
+      Program: program,
       'Country of Origin': normalizeOrigin(originRaw),
       'Countries/Regions of Distribution': regions,
       'Item#/model#': model,
@@ -1066,14 +1321,8 @@
     return mergeRegions(fromText.concat(fromMarks));
   }
 
-  function extractProgram(text) {
-    if (/TEMU/i.test(text) && /硬件/.test(text)) return '__PROGRAM_TEMU_HW__';
-    if (/TEMU\s*玩具|玩具\s*[-—]?\s*商家|temu.*toy/i.test(text)) return '__PROGRAM_TEMU_TOY__';
-    if (/Amazon|亚马逊/i.test(text)) return '__PROGRAM_AMAZON__';
-    if (/TEMU/i.test(text) && /商家付款|退款|program/i.test(text)) return '__PROGRAM_TEMU_HW__';
-    if (/TEMU/i.test(text)) return '__PROGRAM_TEMU_HW__';
-    var m = text.match(/(?:关联)?(?:项目|Program)\s*[是为：:]\s*([^\n，。,]{2,60})/i);
-    return m ? m[1].trim() : '';
+  function extractProgram(text, hints) {
+    return matchProgramFromText(text, hints || {}) || '';
   }
 
   function extractSampleMethod(text) {
@@ -1145,7 +1394,10 @@
 
     var regions = extractDistributionRegions(text);
 
-    var program = extractProgram(text);
+    var program = extractProgram(text, {
+      productName: productName,
+      electricYes: false
+    });
     var sampleCode = extractSampleMethod(text);
     var sampleLabel = '';
     if (sampleCode === 'ship') sampleLabel = '__SAMPLE_SHIP__';
@@ -1165,6 +1417,12 @@
     ]);
 
     var electric = inferElectricFromText(text);
+    if (!program) {
+      program = matchProgramFromText(text, {
+        productName: productName,
+        electricYes: electric.code === '__ELECTRIC_YES__'
+      });
+    }
     var fields = sanitizeParsedFields({
       'Product Name': productName,
       Program: program,
@@ -1524,6 +1782,9 @@
     extractWaybillFromOcrText: extractWaybillFromOcrText,
     recognizeWaybillImage: recognizeWaybillImage,
     parseFilesLocally: parseFilesLocally,
-    loadTesseract: loadTesseract
+    loadTesseract: loadTesseract,
+    getProgramCatalog: getProgramCatalog,
+    matchProgramFromText: matchProgramFromText,
+    resolveProgramLabel: resolveProgramLabel
   };
 })(window);
