@@ -20,7 +20,7 @@ from http.server import BaseHTTPRequestHandler
 
 NVIDIA_BASE = "https://integrate.api.nvidia.com/v1/chat/completions"
 VISION_MODEL = "meta/llama-3.2-11b-vision-instruct"
-LLM_MODEL = "nvidia/llama-3.1-nemotron-nano-8b-v1"
+LLM_MODEL = "meta/llama-3.1-8b-instruct"
 
 MAX_FILES = 5
 MAX_FILE_BYTES = 8 * 1024 * 1024

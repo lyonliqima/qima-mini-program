@@ -11,7 +11,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const NVIDIA_BASE = "https://integrate.api.nvidia.com/v1/chat/completions";
 const VISION_MODEL = "meta/llama-3.2-11b-vision-instruct";
-const LLM_MODEL = "nvidia/llama-3.1-nemotron-nano-8b-v1";
+// nemotron-nano currently hangs on NIM; use a responsive instruct model
+const LLM_MODEL = "meta/llama-3.1-8b-instruct";
 
 const MAX_FILES = 5;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
