@@ -1,0 +1,209 @@
+/* Access gate: hide app until unlock. Deterrence only — source remains public. */
+html.qima-gate-locked,
+html.qima-gate-locked body {
+  overflow: hidden !important;
+  height: 100% !important;
+}
+
+html.qima-gate-locked body > *:not(#qima-access-gate) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#qima-access-gate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(ellipse 80% 50% at 70% -10%, rgba(245, 143, 0, 0.12), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 20%, rgba(160, 134, 196, 0.14), transparent 50%),
+    #c9ced8;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+  box-sizing: border-box;
+}
+
+html.qima-gate-locked #qima-access-gate {
+  display: flex;
+}
+
+#qima-access-gate *,
+#qima-access-gate *::before,
+#qima-access-gate *::after {
+  box-sizing: border-box;
+}
+
+.qima-gate-phone {
+  width: min(390px, 100%);
+  min-height: min(720px, calc(100vh - 48px));
+  background: linear-gradient(180deg, #f2f5fc 0%, #fafbfe 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 28px 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(25, 25, 25, 0.12);
+}
+
+.qima-gate-phone::before,
+.qima-gate-phone::after {
+  content: "";
+  position: absolute;
+  border-radius: 68px;
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.qima-gate-phone::before {
+  width: 220px;
+  height: 200px;
+  background: #f58f00;
+  opacity: 0.08;
+  right: -40px;
+  top: -60px;
+}
+
+.qima-gate-phone::after {
+  width: 160px;
+  height: 140px;
+  background: #a086c4;
+  opacity: 0.12;
+  left: -50px;
+  top: 40px;
+}
+
+.qima-gate-brand {
+  position: relative;
+  z-index: 1;
+  width: 96px;
+  height: auto;
+  margin-bottom: 36px;
+  animation: qima-gate-fade-up 0.55s ease both;
+}
+
+.qima-gate-copy {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 28px;
+  animation: qima-gate-fade-up 0.55s ease 0.08s both;
+}
+
+.qima-gate-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #191919;
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+  margin: 0 0 8px;
+}
+
+.qima-gate-sub {
+  margin: 0;
+  font-size: 13px;
+  color: #737373;
+  line-height: 1.5;
+}
+
+.qima-gate-form {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: qima-gate-fade-up 0.55s ease 0.16s both;
+}
+
+.qima-gate-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #dedede;
+  background: #fff;
+  padding: 0 14px;
+  font-size: 15px;
+  color: #191919;
+  outline: none;
+  border-radius: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qima-gate-input:focus {
+  border-color: #e4002b;
+  box-shadow: 0 0 0 3px rgba(228, 0, 43, 0.12);
+}
+
+.qima-gate-input.qima-gate-invalid {
+  border-color: #e4002b;
+  animation: qima-gate-shake 0.35s ease;
+}
+
+.qima-gate-btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  background: #e4002b;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.qima-gate-btn:hover {
+  background: #c90026;
+}
+
+.qima-gate-btn:active {
+  transform: scale(0.98);
+}
+
+.qima-gate-error {
+  min-height: 18px;
+  margin: 0;
+  font-size: 12px;
+  color: #e4002b;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.qima-gate-error.show {
+  opacity: 1;
+}
+
+@keyframes qima-gate-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes qima-gate-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+@media (max-width: 420px) {
+  .qima-gate-phone {
+    min-height: 100vh;
+    min-height: 100dvh;
+    box-shadow: none;
+  }
+
+  #qima-access-gate {
+    padding: 0;
+  }
+}
