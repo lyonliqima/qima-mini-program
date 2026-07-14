@@ -10,7 +10,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const NVIDIA_BASE = "https://integrate.api.nvidia.com/v1/chat/completions";
-const VISION_MODEL = "meta/llama-3.2-11b-vision-instruct";
+const VISION_MODEL = "nvidia/llama-3.1-nemotron-nano-vl-8b-v1";
 // nemotron-nano currently hangs on NIM; use a responsive instruct model
 const LLM_MODEL = "meta/llama-3.1-8b-instruct";
 
@@ -1020,17 +1020,18 @@ async function ocrImageStructured(
       {
         role: "user",
         content: [
-          { type: "text", text: prompt },
           {
             type: "image_url",
             image_url: { url: `data:${media};base64,${b64}` },
           },
+          { type: "text", text: prompt },
         ],
       },
     ],
     // Keep tokens modest — latency on NIM vision is dominated by output size
     max_tokens: 900,
     temperature: 0.05,
+    stream: false,
   });
   try {
     return parseJsonFromLlm(raw);

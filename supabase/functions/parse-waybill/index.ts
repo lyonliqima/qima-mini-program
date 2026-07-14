@@ -10,7 +10,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const NVIDIA_BASE = "https://integrate.api.nvidia.com/v1/chat/completions";
 // Same vision stack as parse-order; short prompt + low max_tokens keeps latency down
-const VISION_MODEL = "meta/llama-3.2-11b-vision-instruct";
+const VISION_MODEL = "nvidia/llama-3.1-nemotron-nano-vl-8b-v1";
 const MAX_FILE_BYTES = 6 * 1024 * 1024;
 
 type WaybillResult = {
@@ -211,22 +211,24 @@ async function visionWaybill(
     "规则：carrier 优先 顺丰/中通/圆通/申通/韵达/京东/极兔/DHL/UPS/FedEx；" +
     "tracking 只要字母数字运单号；不确定字段用空字符串。务必简短。";
 
+  // Nemotron Nano VL examples put image before text
   const raw = await nvidiaChat({
     model: VISION_MODEL,
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: prompt },
           {
             type: "image_url",
             image_url: { url: `data:${media};base64,${b64}` },
           },
+          { type: "text", text: prompt },
         ],
       },
     ],
     max_tokens: 220,
     temperature: 0,
+    stream: false,
   });
 
   let parsed: Record<string, unknown> = {};
