@@ -263,6 +263,67 @@
           return { text: (data && data.text) ? String(data.text) : '' };
         });
       });
+    },
+    /**
+     * Waybill photo → cloud NVIDIA vision (carrier + tracking only).
+     * Faster than parse-order: single short vision call, no full-field LLM.
+     * @param {Blob|File} file
+     * @returns {Promise<{carrier:string,carrierKey:string,tracking:string,source:string}>}
+     */
+    parseWaybill: function (file) {
+      if (!file || !file.size) {
+        return Promise.reject(new Error('empty_file'));
+      }
+      var endpoint = (cfg.waybillEndpoint || '').replace(/\/$/, '');
+      if (!endpoint) {
+        if (!ready()) return Promise.reject(new Error('missing_config'));
+        endpoint = url.replace(/\/$/, '') + '/functions/v1/parse-waybill';
+      }
+      var fd = new FormData();
+      fd.append('file', file, file.name || 'waybill.jpg');
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timer = null;
+      if (controller) {
+        timer = setTimeout(function () { controller.abort(); }, 35000);
+      }
+      var headers = {};
+      if (endpoint.indexOf('/functions/v1/') !== -1 && anonKey) {
+        headers.apikey = anonKey;
+        headers.Authorization = 'Bearer ' + anonKey;
+      }
+      return fetch(endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: fd,
+        signal: controller ? controller.signal : undefined
+      }).then(function (res) {
+        return res.text().then(function (text) {
+          var data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch (_) {
+            data = { error: 'bad_response', raw: text };
+          }
+          if (!res.ok) {
+            var err = new Error((data && data.error) || ('http_' + res.status));
+            err.code = (data && data.error) || ('http_' + res.status);
+            err.status = res.status;
+            err.data = data;
+            throw err;
+          }
+          return data;
+        });
+      }).catch(function (err) {
+        if (err && err.name === 'AbortError') {
+          var te = new Error('waybill_timeout');
+          te.code = 'waybill_timeout';
+          te.status = 408;
+          throw te;
+        }
+        throw err;
+      }).finally(function () {
+        if (timer) clearTimeout(timer);
+      });
     }
   };
 

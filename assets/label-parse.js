@@ -1755,7 +1755,7 @@
     };
   }
 
-  function recognizeWaybillImage(file, onProgress) {
+  function recognizeWaybillImageLocal(file, onProgress) {
     return ocrImageFile(file, onProgress).then(function (text) {
       var parsed = extractWaybillFromOcrText(text);
       if (!parsed.tracking && !parsed.carrier) {
@@ -1764,7 +1764,107 @@
         err.raw = text;
         throw err;
       }
+      parsed.source = parsed.source || 'waybill_ocr_local';
       return parsed;
+    });
+  }
+
+  /**
+   * Prefer cloud parse-waybill (NVIDIA vision, carrier+tracking only).
+   * Race local Tesseract so clear waybills can resolve faster; first valid wins.
+   * Cloud result preferred when both settle within a short window after either wins
+   * with tracking (cloud overrides soft local-only carrier within 1.2s).
+   */
+  function recognizeWaybillImage(file, onProgress) {
+    notifyProgress(onProgress, 'parsingImage', 'Recognizing shipping label…');
+    var api = global.QimaSupabase;
+    var cloudFn = api && typeof api.parseWaybill === 'function'
+      ? function () {
+          notifyProgress(onProgress, 'parsingImage', 'Cloud waybill OCR…');
+          return api.parseWaybill(file).then(function (data) {
+            var parsed = {
+              carrier: (data && data.carrier) || '',
+              carrierKey: (data && data.carrierKey) || '',
+              tracking: (data && data.tracking) || '',
+              raw_excerpt: (data && data.raw_excerpt) || '',
+              source: (data && data.source) || 'waybill_edge_vision'
+            };
+            if (!parsed.tracking && !parsed.carrier) {
+              var err = new Error('waybill_not_recognized');
+              err.code = 'waybill_not_recognized';
+              throw err;
+            }
+            return parsed;
+          });
+        }
+      : null;
+
+    var localFn = function () {
+      return recognizeWaybillImageLocal(file, onProgress);
+    };
+
+    if (!cloudFn) return localFn();
+
+    return new Promise(function (resolve, reject) {
+      var settled = false;
+      var localResult = null;
+      var cloudError = null;
+      var localError = null;
+      var pending = 2;
+
+      function doneOne() {
+        pending -= 1;
+        if (settled) return;
+        if (pending <= 0) {
+          if (localResult) {
+            settled = true;
+            resolve(localResult);
+            return;
+          }
+          reject(cloudError || localError || new Error('waybill_not_recognized'));
+        }
+      }
+
+      function tryAccept(parsed, fromCloud) {
+        if (settled || !parsed) return;
+        var hasTracking = !!(parsed.tracking && String(parsed.tracking).trim());
+        var hasCarrier = !!(parsed.carrier && String(parsed.carrier).trim());
+        if (!hasTracking && !hasCarrier) return;
+        // Prefer cloud when it has a tracking number
+        if (fromCloud && hasTracking) {
+          settled = true;
+          resolve(parsed);
+          return;
+        }
+        if (fromCloud) {
+          settled = true;
+          resolve(parsed);
+          return;
+        }
+        // Local: accept immediately if tracking found; else keep as soft fallback
+        if (hasTracking) {
+          settled = true;
+          resolve(parsed);
+          return;
+        }
+        localResult = parsed;
+      }
+
+      cloudFn().then(function (parsed) {
+        tryAccept(parsed, true);
+        doneOne();
+      }).catch(function (err) {
+        cloudError = err;
+        doneOne();
+      });
+
+      localFn().then(function (parsed) {
+        tryAccept(parsed, false);
+        doneOne();
+      }).catch(function (err) {
+        localError = err;
+        doneOne();
+      });
     });
   }
 

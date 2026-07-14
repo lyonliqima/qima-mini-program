@@ -1161,9 +1161,9 @@
 <script src="assets/i18n/zh.js?v=20260714b"></script>
 <script src="assets/i18n/en.js?v=20260714b"></script>
 <script src="assets/i18n-runtime.js?v=20260714b"></script>
-<script src="assets/supabase-config.js?v=20260714b"></script>
-<script src="assets/supabase-client.js?v=20260714b"></script>
-<script src="assets/label-parse.js?v=20260714j"></script>
+<script src="assets/supabase-config.js?v=20260714c"></script>
+<script src="assets/supabase-client.js?v=20260714c"></script>
+<script src="assets/label-parse.js?v=20260714k"></script>
 </head>
 <body>
   <div class="phone">
@@ -2706,7 +2706,11 @@
       });
     }
 
-    function compressImageFileForParse(file){
+    function compressImageFileForParse(file, opts){
+      opts = opts || {};
+      const maxSide = opts.maxSide || 1280;
+      const quality = opts.quality != null ? opts.quality : 0.85;
+      const skipUnderBytes = opts.skipUnderBytes != null ? opts.skipUnderBytes : (2 * 1024 * 1024);
       return new Promise(function(resolve){
         if(!file || !file.type || file.type.indexOf('image/') !== 0){
           resolve(file);
@@ -2715,7 +2719,6 @@
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = function(){
-          const maxSide = 1280;
           let w = img.naturalWidth || img.width;
           let h = img.naturalHeight || img.height;
           if(!w || !h){
@@ -2723,7 +2726,7 @@
             resolve(file);
             return;
           }
-          if(w <= maxSide && h <= maxSide && file.size <= 2 * 1024 * 1024){
+          if(w <= maxSide && h <= maxSide && file.size <= skipUnderBytes){
             URL.revokeObjectURL(url);
             resolve(file);
             return;
@@ -2743,7 +2746,7 @@
               return;
             }
             resolve(new File([blob], file.name || 'photo.jpg', { type: 'image/jpeg' }));
-          }, 'image/jpeg', 0.85);
+          }, 'image/jpeg', quality);
         };
         img.onerror = function(){
           URL.revokeObjectURL(url);
@@ -4565,11 +4568,19 @@
         btn.textContent = t('carrier.scanning');
       }
 
-      const recognize = (window.QimaLabelParse && typeof QimaLabelParse.recognizeWaybillImage === 'function')
-        ? QimaLabelParse.recognizeWaybillImage(file, function(msg){
-            updateParseProgressCard(progressRow, msg || t('orderChat.waybillRecognizing'));
-          })
-        : Promise.reject(new Error('missing_waybill_ocr'));
+      // Smaller JPEG for cloud waybill = less upload + faster vision
+      const recognize = compressImageFileForParse(file, {
+        maxSide: 960,
+        quality: 0.78,
+        skipUnderBytes: 450 * 1024
+      }).then(function(compressed){
+        if(!(window.QimaLabelParse && typeof QimaLabelParse.recognizeWaybillImage === 'function')){
+          return Promise.reject(new Error('missing_waybill_ocr'));
+        }
+        return QimaLabelParse.recognizeWaybillImage(compressed, function(msg){
+          updateParseProgressCard(progressRow, msg || t('orderChat.waybillRecognizing'));
+        });
+      });
 
       recognize.then(function(parsed){
         if(progressRow && progressRow.parentNode) progressRow.remove();

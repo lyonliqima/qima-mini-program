@@ -1028,7 +1028,8 @@ async function ocrImageStructured(
         ],
       },
     ],
-    max_tokens: 1600,
+    // Keep tokens modest — latency on NIM vision is dominated by output size
+    max_tokens: 900,
     temperature: 0.05,
   });
   try {
@@ -1320,7 +1321,8 @@ async function structureFields(
       { role: "user", content: user },
     ],
     temperature: 0.1,
-    max_tokens: 2048,
+    // Cap output — full catalog already seeded; shorter JSON = faster
+    max_tokens: 1400,
   });
   const parsed = parseJsonFromLlm(raw);
   return normalizeResult(parsed, seedFields);

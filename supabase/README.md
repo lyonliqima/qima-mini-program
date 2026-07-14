@@ -100,6 +100,7 @@ Frontend calls **Supabase Edge Functions only** (no Vercel):
 | Function | Purpose |
 |---|---|
 | `parse-order` | Multimodal OCR / label parse (NVIDIA vision + LLM) |
+| `parse-waybill` | Fast shipping-label OCR (single short vision call → carrier + tracking) |
 | `transcribe-voice` | Chinese ASR proxy (Whisper via upstream if configured) |
 
 ```bash
@@ -109,13 +110,15 @@ export SUPABASE_ACCESS_TOKEN=sbp_xxx   # https://supabase.com/dashboard/account/
 npx supabase secrets set NVIDIA_API_KEY=nvapi-xxx --project-ref dewcjtkqykkclxwcmusg
 
 npx supabase functions deploy parse-order --project-ref dewcjtkqykkclxwcmusg
+npx supabase functions deploy parse-waybill --project-ref dewcjtkqykkclxwcmusg
 npx supabase functions deploy transcribe-voice --project-ref dewcjtkqykkclxwcmusg
 ```
 
 Endpoints:
 
 - `https://dewcjtkqykkclxwcmusg.supabase.co/functions/v1/parse-order`
+- `https://dewcjtkqykkclxwcmusg.supabase.co/functions/v1/parse-waybill`
 - `https://dewcjtkqykkclxwcmusg.supabase.co/functions/v1/transcribe-voice`
 
-Frontend: `SUPABASE_CONFIG.parseEndpoint` / `asrEndpoint` in `assets/supabase-config.js`.
-Local `assets/label-parse.js` is fallback only when the edge API is unavailable.
+Frontend: `SUPABASE_CONFIG.parseEndpoint` / `waybillEndpoint` / `asrEndpoint` in `assets/supabase-config.js`.
+Local `assets/label-parse.js` is fallback / race partner when the edge API is slow or unavailable.
