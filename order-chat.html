@@ -939,6 +939,11 @@
     border-radius: 10px; background: #fff; color: var(--pool-500);
     font-size: 12px; cursor: pointer;
   }
+  .fm-sales-country-add { margin-top: 8px; }
+  .fm-sales-country-add input {
+    background: #fff;
+    border-color: #e0e4ef;
+  }
   .shipping-methods { display: flex; flex-direction: column; gap: 9px; }
   .shipping-method {
     width: 100%;
@@ -1326,12 +1331,16 @@
 
           <div class="fm-row">
             <div class="fm-label"><span data-i18n="index.salesCountry">销售国家或地区</span> <span class="req" data-i18n="common.required">*</span></div>
-            <div class="fm-check-grid">
+            <div class="fm-check-grid" id="mf_salesCountryGrid">
               <label class="fm-radio-line"><input type="checkbox" value="欧盟"> <span data-dist-preset>欧盟</span></label>
               <label class="fm-radio-line"><input type="checkbox" value="美国"> <span data-dist-preset>美国</span></label>
               <label class="fm-radio-line"><input type="checkbox" value="澳大利亚"> <span data-dist-preset>澳大利亚</span></label>
               <label class="fm-radio-line"><input type="checkbox" value="加拿大"> <span data-dist-preset>加拿大</span></label>
               <label class="fm-radio-line"><input type="checkbox" value="南非"> <span data-dist-preset>南非</span></label>
+            </div>
+            <div class="distribution-add fm-sales-country-add">
+              <input class="distribution-input" id="mf_salesCountryInput" type="text" placeholder="添加其他国家或地区" data-i18n-placeholder="orderChat.distributionAddPlaceholder" onkeydown="if(event.key==='Enter'){event.preventDefault();addManualSalesCountry();}">
+              <button type="button" onclick="addManualSalesCountry()" data-i18n="orderChat.distributionAdd">添加</button>
             </div>
           </div>
 
@@ -2676,12 +2685,73 @@
     function openManualFormModal(){
       document.getElementById('manualFormModal').classList.add('show');
       populateManualFormI18n();
+      syncManualSalesCountriesFromAnswers();
       mfToggleSampleFields();
     }
 
     function closeManualFormModal(e){
       if(e && e.target !== e.currentTarget) return;
       document.getElementById('manualFormModal').classList.remove('show');
+    }
+
+    function getManualSalesCountryGrid(){
+      return document.getElementById('mf_salesCountryGrid');
+    }
+
+    function findManualSalesCountryCheckbox(value){
+      const grid = getManualSalesCountryGrid();
+      if(!grid || !value) return null;
+      const needle = String(value).trim().toLowerCase();
+      return Array.from(grid.querySelectorAll('input[type="checkbox"]')).find(function(cb){
+        return String(cb.value || '').trim().toLowerCase() === needle;
+      }) || null;
+    }
+
+    function appendManualSalesCountryOption(value, checked){
+      const grid = getManualSalesCountryGrid();
+      const label = String(value || '').trim();
+      if(!grid || !label) return null;
+      const existing = findManualSalesCountryCheckbox(label);
+      if(existing){
+        if(checked) existing.checked = true;
+        return existing;
+      }
+      const el = document.createElement('label');
+      el.className = 'fm-radio-line';
+      el.innerHTML = '<input type="checkbox" value="'+escapeHtml(label)+'"'+(checked ? ' checked' : '')+'> <span>'+escapeHtml(label)+'</span>';
+      grid.appendChild(el);
+      return el.querySelector('input');
+    }
+
+    function addManualSalesCountry(){
+      const input = document.getElementById('mf_salesCountryInput');
+      const value = input ? input.value.trim() : '';
+      if(!value) return;
+      appendManualSalesCountryOption(value, true);
+      if(input){
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function splitSalesCountryValues(raw){
+      if(!raw) return [];
+      return String(raw)
+        .split(/[,，、;/|]+/)
+        .map(function(part){ return part.trim(); })
+        .filter(Boolean);
+    }
+
+    function syncManualSalesCountriesFromAnswers(){
+      const grid = getManualSalesCountryGrid();
+      if(!grid) return;
+      const raw = manualAnswers['Countries/Regions of Distribution'] || '';
+      const countries = splitSalesCountryValues(raw);
+      grid.querySelectorAll('input[type="checkbox"]').forEach(function(cb){ cb.checked = false; });
+      countries.forEach(function(country){
+        const display = (window.I18n && I18n.displayCountry) ? I18n.displayCountry(country) : country;
+        appendManualSalesCountryOption(display || country, true);
+      });
     }
 
     function mfToggleSampleFields(){
@@ -2724,9 +2794,11 @@
         return;
       }
 
-      const salesChecked = document.querySelectorAll('#mf_shippingSection .fm-check-grid input:checked, #manualFormModal .fm-check-grid input:checked');
       let salesCountries = [];
-      document.querySelectorAll('#manualFormModal .fm-check-grid input:checked').forEach(function(cb){ salesCountries.push(cb.value); });
+      document.querySelectorAll('#mf_salesCountryGrid input:checked').forEach(function(cb){
+        const value = (cb.value || '').trim();
+        if(value) salesCountries.push(value);
+      });
 
       const labRadio = document.querySelector('input[name="mf_lab"]:checked');
       const labName = labRadio ? (labRadio.parentElement.querySelector('[data-lab-label]') || {}).textContent || '' : '';
