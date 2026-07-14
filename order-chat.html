@@ -2710,11 +2710,103 @@
       }));
     }
 
+    /** Map alternate OCR/LLM keys onto canonical English field names. */
+    function canonicalizeParsedFields(raw){
+      if(!raw || typeof raw !== 'object') return {};
+      const out = {};
+      const aliasToCanonical = {
+        'product name': 'Product Name',
+        'product_name': 'Product Name',
+        'productname': 'Product Name',
+        '品名': 'Product Name',
+        '产品名称': 'Product Name',
+        'program': 'Program',
+        '关联项目': 'Program',
+        'country of origin': 'Country of Origin',
+        'country_of_origin': 'Country of Origin',
+        'origin': 'Country of Origin',
+        'made in': 'Country of Origin',
+        '原产国': 'Country of Origin',
+        '原产国家或地区': 'Country of Origin',
+        '产地': 'Country of Origin',
+        'countries/regions of distribution': 'Countries/Regions of Distribution',
+        'countries of distribution': 'Countries/Regions of Distribution',
+        'distribution': 'Countries/Regions of Distribution',
+        'sales regions': 'Countries/Regions of Distribution',
+        '销售国家或地区': 'Countries/Regions of Distribution',
+        '销往': 'Countries/Regions of Distribution',
+        'item#/model#': 'Item#/model#',
+        'item # / model #': 'Item#/model#',
+        'item/model': 'Item#/model#',
+        'item_model': 'Item#/model#',
+        'model': 'Item#/model#',
+        'model no': 'Item#/model#',
+        'model no.': 'Item#/model#',
+        'model number': 'Item#/model#',
+        'model#': 'Item#/model#',
+        'sku': 'Item#/model#',
+        'p/n': 'Item#/model#',
+        'pn': 'Item#/model#',
+        '型号': 'Item#/model#',
+        '货号': 'Item#/model#',
+        '货号 / 型号': 'Item#/model#',
+        'manufacturer': 'Manufacturer',
+        'manufacturer name': 'Manufacturer',
+        'company': 'Manufacturer',
+        'factory': 'Manufacturer',
+        '制造商': 'Manufacturer',
+        '生产商': 'Manufacturer',
+        '厂家': 'Manufacturer',
+        '厂商': 'Manufacturer',
+        'manufacturer address': 'Manufacturer Address',
+        'manufacturer_address': 'Manufacturer Address',
+        'address': 'Manufacturer Address',
+        'factory address': 'Manufacturer Address',
+        '制造商地址': 'Manufacturer Address',
+        '厂址': 'Manufacturer Address',
+        '地址': 'Manufacturer Address',
+        'sample collection method': 'Sample Collection Method',
+        'sample collection': 'Sample Collection Method',
+        '样品收集方式': 'Sample Collection Method',
+        'electric product': 'Electric Product',
+        'electrical product': 'Electric Product',
+        '产品是否带电': 'Electric Product',
+        'product description': 'Product Description',
+        'rating': 'Product Description',
+        '产品说明': 'Product Description',
+        'carrier': 'Carrier',
+        '快递公司': 'Carrier',
+        'tracking number': 'Tracking Number',
+        'tracking no': 'Tracking Number',
+        '运单号': 'Tracking Number',
+        'shipping remark': 'Shipping Remark',
+        'remark': 'Shipping Remark',
+        'remarks': 'Shipping Remark',
+        '备注': 'Shipping Remark',
+        '物流备注': 'Shipping Remark'
+      };
+      const emptyish = /^(n\/?a|none|null|undefined|unknown|未知|无|暂无|不清楚|not\s*available|-|—|–|\.)$/i;
+      Object.keys(raw).forEach(function(key){
+        const val = raw[key];
+        if(val == null) return;
+        const text = String(val).trim();
+        if(!text || emptyish.test(text)) return;
+        const canon = aliasToCanonical[String(key).trim().toLowerCase()] ||
+          (['Product Name','Program','Country of Origin','Countries/Regions of Distribution',
+            'Item#/model#','Manufacturer','Manufacturer Address','Sample Collection Method',
+            'Electric Product','Product Description','Carrier','Tracking Number','Shipping Remark'
+          ].indexOf(key) !== -1 ? key : '');
+        if(!canon) return;
+        if(!out[canon]) out[canon] = text;
+      });
+      return out;
+    }
+
     function applyParsedFields(fields){
       if(!fields || typeof fields !== 'object') return;
-      Object.keys(fields).forEach(function(key){
-        const val = fields[key];
-        if(val != null && String(val).trim()) manualAnswers[key] = String(val).trim();
+      const normalized = canonicalizeParsedFields(fields);
+      Object.keys(normalized).forEach(function(key){
+        if(normalized[key]) manualAnswers[key] = normalized[key];
       });
       resolveParsedSamplePlaceholders();
       fillManualFormFromAnswers();
@@ -2890,15 +2982,29 @@
       syncManualSalesCountriesFromAnswers();
     }
 
-    function countFilledExtractFields(fields){
+    function extractDisplayKeys(fields){
       const keys = [
         'Product Name','Program','Country of Origin','Countries/Regions of Distribution',
-        'Item#/model#','Manufacturer','Manufacturer Address','Sample Collection Method',
-        'Carrier','Tracking Number','Shipping Remark'
+        'Item#/model#', FIELD_ELECTRIC, 'Manufacturer','Manufacturer Address',
+        'Sample Collection Method','Carrier','Tracking Number','Shipping Remark'
       ];
+      // Echo Product Description whenever OCR/LLM filled it
+      if(fields && fields[FIELD_ELECTRIC_DESC] && String(fields[FIELD_ELECTRIC_DESC]).trim()){
+        const idx = keys.indexOf(FIELD_ELECTRIC);
+        keys.splice(idx + 1, 0, FIELD_ELECTRIC_DESC);
+      }
+      return keys;
+    }
+
+    function countFilledExtractFields(fields){
+      const keys = extractDisplayKeys(fields);
       let filled = 0;
       keys.forEach(function(k){
-        if(fields && fields[k] && String(fields[k]).trim()) filled++;
+        const raw = fields && fields[k] != null ? String(fields[k]).trim() : '';
+        if(!raw) return;
+        if(/^__(?:ELECTRIC|SAMPLE|PROGRAM)_/.test(raw)) return;
+        if(/^(n\/?a|none|null|unknown|未知|无|暂无|-|—)$/i.test(raw)) return;
+        filled++;
       });
       return { filled: filled, total: keys.length };
     }
@@ -3780,13 +3886,16 @@
     }
 
     function runRecognize(src, result){
-      const fields = (result && result.fields) ? result.fields : {};
+      const rawFields = (result && result.fields) ? result.fields : {};
+      const fields = canonicalizeParsedFields(rawFields);
       const summary = (result && result.product_summary) ? result.product_summary : {};
-      applyParsedFields(fields);
+      applyParsedFields(Object.assign({}, rawFields, fields));
 
-      const allStats = countFilledExtractFields(fields);
+      // Prefer resolved manualAnswers so echoed values match the card (never stale empties)
+      const displayFields = Object.assign({}, fields, manualAnswers);
+      const allStats = countFilledExtractFields(displayFields);
       const reqStats = countFilledRequiredFields(manualAnswers);
-      const percent = Math.round((allStats.filled / allStats.total) * 100);
+      const percent = allStats.total ? Math.round((allStats.filled / allStats.total) * 100) : 0;
       const missingRequired = getMissingRequiredFields();
       const missingCount = missingRequired.length;
 
@@ -3797,8 +3906,8 @@
         const typingRow2 = botTyping();
         setTimeout(function(){
           typingRow2.remove();
-          botMsg(productSummaryCard(summary, fields), true);
-          botMsg(extractCard(Object.assign({}, fields, manualAnswers), percent), true);
+          botMsg(productSummaryCard(summary, displayFields), true);
+          botMsg(extractCard(displayFields, percent), true);
           botMsg(tHtml('orderChat.recognizeDoneDynamic', {
             filled: reqStats.filled,
             total: reqStats.total,
@@ -3831,10 +3940,23 @@
     }
     function extractCard(fields, percent){
       fields = fields || {};
-      const pct = (percent != null) ? percent : Math.round((countFilledExtractFields(fields).filled / 10) * 100);
+      // Always prefer live answers so any recognized non-empty value echoes with ✓
+      const merged = Object.assign({}, fields, manualAnswers);
+      const stats = countFilledExtractFields(merged);
+      const pct = (percent != null) ? percent : (stats.total ? Math.round((stats.filled / stats.total) * 100) : 0);
       const progressLabel = t('orderChat.progressPercent', { percent: pct });
-      function val(k){ return fields[k] ? String(fields[k]).trim() : ''; }
+      function val(k){
+        const raw = merged[k] != null ? String(merged[k]).trim() : '';
+        if(!raw) return '';
+        if(/^__(?:ELECTRIC|SAMPLE|PROGRAM)_/.test(raw)) return '';
+        if(/^(n\/?a|none|null|unknown|未知|无|暂无|-|—)$/i.test(raw)) return '';
+        return raw;
+      }
       function ok(k){ return !!val(k); }
+      const electricRow = field(FIELD_ELECTRIC, val(FIELD_ELECTRIC), ok(FIELD_ELECTRIC));
+      const electricDescRow = ok(FIELD_ELECTRIC_DESC)
+        ? field(FIELD_ELECTRIC_DESC, val(FIELD_ELECTRIC_DESC), true)
+        : '';
       return '<div class="panel">'+
         '<div class="extract-head"><div class="eh-title">'+t('orderChat.extractTitle')+'</div><div class="progress-pill">'+progressLabel+'</div></div>'+
         '<div class="fields">'+
@@ -3843,6 +3965,8 @@
           field('Country of Origin', val('Country of Origin'), ok('Country of Origin'))+
           field('Countries/Regions of Distribution', val('Countries/Regions of Distribution'), ok('Countries/Regions of Distribution'))+
           field('Item#/model#', val('Item#/model#'), ok('Item#/model#'))+
+          electricRow+
+          electricDescRow+
           field('Manufacturer', val('Manufacturer'), ok('Manufacturer'))+
           field('Manufacturer Address', val('Manufacturer Address'), ok('Manufacturer Address'))+
           field('Sample Collection Method', val('Sample Collection Method'), ok('Sample Collection Method'))+

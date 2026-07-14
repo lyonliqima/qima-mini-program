@@ -478,18 +478,101 @@
     return extractSpokenProductName(text);
   }
 
+  function canonicalizeFieldKeys(raw) {
+    var out = emptyFields();
+    if (!raw || typeof raw !== 'object') return out;
+    var alias = {
+      'product name': 'Product Name',
+      product_name: 'Product Name',
+      品名: 'Product Name',
+      产品名称: 'Product Name',
+      model: 'Item#/model#',
+      'model no': 'Item#/model#',
+      'model number': 'Item#/model#',
+      'model#': 'Item#/model#',
+      sku: 'Item#/model#',
+      型号: 'Item#/model#',
+      货号: 'Item#/model#',
+      'item # / model #': 'Item#/model#',
+      manufacturer: 'Manufacturer',
+      'manufacturer name': 'Manufacturer',
+      制造商: 'Manufacturer',
+      生产商: 'Manufacturer',
+      厂家: 'Manufacturer',
+      address: 'Manufacturer Address',
+      'manufacturer address': 'Manufacturer Address',
+      制造商地址: 'Manufacturer Address',
+      厂址: 'Manufacturer Address',
+      地址: 'Manufacturer Address',
+      origin: 'Country of Origin',
+      'country of origin': 'Country of Origin',
+      原产国: 'Country of Origin',
+      rating: 'Product Description',
+      'electric product': 'Electric Product',
+      'electrical product': 'Electric Product',
+      remark: 'Shipping Remark',
+      remarks: 'Shipping Remark',
+      备注: 'Shipping Remark'
+    };
+    var emptyish = /^(n\/?a|none|null|unknown|未知|无|暂无|-|—)$/i;
+    Object.keys(raw).forEach(function (key) {
+      var text = raw[key] != null ? String(raw[key]).trim() : '';
+      if (!text || emptyish.test(text)) return;
+      var canon = Object.prototype.hasOwnProperty.call(out, key)
+        ? key
+        : alias[String(key).trim().toLowerCase()];
+      if (canon && !out[canon]) out[canon] = text;
+    });
+    return out;
+  }
+
   function extractFieldsFromOcrText(ocrText) {
     var text = simplifySpaces(ocrText);
     var productName = extractProductName(text);
     var model = extractModel(text);
-    var manufacturer = pickLabelValue(text, ['Manufacturer', '制造商', '生产商', '厂家']);
-    var address = pickLabelValue(text, ['Address', '制造商地址', '地址', '厂址']);
+    var manufacturer = pickLabelValue(text, [
+      'Manufacturer',
+      'Manufactured by',
+      'Manufactured By',
+      'Made by',
+      'Factory',
+      'Company',
+      '制造商',
+      '生产商',
+      '厂家',
+      '厂商',
+      '生产厂家'
+    ]);
+    var address = pickLabelValue(text, [
+      'Manufacturer Address',
+      'Factory Address',
+      'Address',
+      'Addr',
+      '制造商地址',
+      '工厂地址',
+      '厂址',
+      '地址'
+    ]);
+    if (!manufacturer) {
+      var mfrLine = text.match(
+        /(?:^|\n)\s*(?:Manufacturer|Manufactured\s+by|制造商|生产商|厂家)\s*[:：]?\s*([^\n]{2,120})/i
+      );
+      if (mfrLine) manufacturer = simplifySpaces(mfrLine[1]);
+    }
+    if (!address) {
+      var addrLine = text.match(
+        /(?:^|\n)\s*(?:Address|Addr\.?|制造商地址|厂址|地址)\s*[:：]?\s*([^\n]{2,160})/i
+      );
+      if (addrLine) address = simplifySpaces(addrLine[1]);
+    }
     if (manufacturer) {
-      manufacturer = manufacturer.split(/\s+(?:Address|Contact|EC\s*REP|UK\s*REP|Rating)\b/i)[0].trim();
+      manufacturer = manufacturer.split(/\s+(?:Address|Contact|EC\s*REP|UK\s*REP|Rating|Model)\b/i)[0].trim();
       manufacturer = manufacturer.replace(/[,，;；]\s*$/, '').trim();
+      if (/^(Address|Model|Rating|Contact)$/i.test(manufacturer)) manufacturer = '';
     }
     if (address) {
-      address = address.split(/\s+(?:Contact|EC\s*REP|UK\s*REP|Manufacturer|Model)\b/i)[0].trim();
+      address = address.split(/\s+(?:Contact|EC\s*REP|UK\s*REP|Manufacturer|Model|Rating)\b/i)[0].trim();
+      if (/^(Manufacturer|Model|Rating|Contact)$/i.test(address)) address = '';
     }
 
     var originRaw =
@@ -822,8 +905,8 @@
 
   function mergeFieldSets(primary, secondary) {
     var out = emptyFields();
-    var a = (primary && primary.fields) || primary || {};
-    var b = (secondary && secondary.fields) || secondary || {};
+    var a = canonicalizeFieldKeys((primary && primary.fields) || primary || {});
+    var b = canonicalizeFieldKeys((secondary && secondary.fields) || secondary || {});
     Object.keys(out).forEach(function (key) {
       var av = a[key] != null ? String(a[key]).trim() : '';
       var bv = b[key] != null ? String(b[key]).trim() : '';
@@ -1139,9 +1222,10 @@
     extractProductName: extractProductName,
     extractFieldsFromOcrText: extractFieldsFromOcrText,
     extractFieldsFromVoiceText: extractFieldsFromVoiceText,
+    canonicalizeFieldKeys: canonicalizeFieldKeys,
+    mergeFieldSets: mergeFieldSets,
     extractWaybillFromOcrText: extractWaybillFromOcrText,
     recognizeWaybillImage: recognizeWaybillImage,
-    mergeFieldSets: mergeFieldSets,
     parseFilesLocally: parseFilesLocally,
     loadTesseract: loadTesseract
   };

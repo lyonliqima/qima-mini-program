@@ -180,6 +180,104 @@ function cleanProductName(raw: string): string {
   return name.length >= 2 ? name : "";
 }
 
+function isEmptyishField(val: unknown): boolean {
+  const s = String(val ?? "").trim();
+  if (!s) return true;
+  return /^(n\/?a|none|null|undefined|unknown|未知|无|暂无|不清楚|not\s*available|-|—|–|\.)$/i
+    .test(s);
+}
+
+/** Map alternate vision/LLM keys onto canonical FIELD_KEYS. */
+function canonicalizeFieldMap(
+  raw: Record<string, unknown> | null | undefined,
+): FieldMap {
+  const out: FieldMap = {};
+  if (!raw || typeof raw !== "object") return out;
+  const alias: Record<string, (typeof FIELD_KEYS)[number]> = {
+    "product name": "Product Name",
+    product_name: "Product Name",
+    productname: "Product Name",
+    品名: "Product Name",
+    产品名称: "Product Name",
+    program: "Program",
+    关联项目: "Program",
+    "country of origin": "Country of Origin",
+    country_of_origin: "Country of Origin",
+    origin: "Country of Origin",
+    "made in": "Country of Origin",
+    原产国: "Country of Origin",
+    原产国家或地区: "Country of Origin",
+    产地: "Country of Origin",
+    "countries/regions of distribution": "Countries/Regions of Distribution",
+    "countries of distribution": "Countries/Regions of Distribution",
+    distribution: "Countries/Regions of Distribution",
+    "sales regions": "Countries/Regions of Distribution",
+    销售国家或地区: "Countries/Regions of Distribution",
+    "item#/model#": "Item#/model#",
+    "item # / model #": "Item#/model#",
+    "item/model": "Item#/model#",
+    item_model: "Item#/model#",
+    model: "Item#/model#",
+    "model no": "Item#/model#",
+    "model no.": "Item#/model#",
+    "model number": "Item#/model#",
+    "model#": "Item#/model#",
+    sku: "Item#/model#",
+    "p/n": "Item#/model#",
+    pn: "Item#/model#",
+    型号: "Item#/model#",
+    货号: "Item#/model#",
+    "货号 / 型号": "Item#/model#",
+    manufacturer: "Manufacturer",
+    "manufacturer name": "Manufacturer",
+    company: "Manufacturer",
+    factory: "Manufacturer",
+    制造商: "Manufacturer",
+    生产商: "Manufacturer",
+    厂家: "Manufacturer",
+    厂商: "Manufacturer",
+    "manufacturer address": "Manufacturer Address",
+    manufacturer_address: "Manufacturer Address",
+    address: "Manufacturer Address",
+    "factory address": "Manufacturer Address",
+    制造商地址: "Manufacturer Address",
+    厂址: "Manufacturer Address",
+    地址: "Manufacturer Address",
+    "sample collection method": "Sample Collection Method",
+    "sample collection": "Sample Collection Method",
+    样品收集方式: "Sample Collection Method",
+    "electric product": "Electric Product",
+    "electrical product": "Electric Product",
+    产品是否带电: "Electric Product",
+    "product description": "Product Description",
+    rating: "Product Description",
+    产品说明: "Product Description",
+    carrier: "Carrier",
+    快递公司: "Carrier",
+    "tracking number": "Tracking Number",
+    "tracking no": "Tracking Number",
+    运单号: "Tracking Number",
+    "shipping remark": "Shipping Remark",
+    remark: "Shipping Remark",
+    remarks: "Shipping Remark",
+    备注: "Shipping Remark",
+    物流备注: "Shipping Remark",
+  };
+  for (const [key, value] of Object.entries(raw)) {
+    if (isEmptyishField(value)) continue;
+    const text = String(value).trim();
+    let canon: (typeof FIELD_KEYS)[number] | undefined;
+    if ((FIELD_KEYS as readonly string[]).includes(key)) {
+      canon = key as (typeof FIELD_KEYS)[number];
+    } else {
+      canon = alias[key.trim().toLowerCase()];
+    }
+    if (!canon) continue;
+    if (!out[canon]) out[canon] = text;
+  }
+  return out;
+}
+
 function normalizeOrigin(raw: string): string {
   const s = String(raw || "").trim();
   if (!s) return "";
@@ -344,9 +442,9 @@ async function ocrImageStructured(
     "字段说明：\n" +
     '- "Product Name": 简短产品名称 ONLY（如 Electric Fan、Toy Race Car、智能机器人玩具）。' +
     '不要整句、不要「实验室检测 · xxx」、不要销往/制造商/型号后缀。从语音长句中只抠出品名\n' +
-    '- "Item#/model#": 型号/货号，优先取 Model / Model No / 型号 / SKU / Item No / P/N（如 XP-085、XY-03）\n' +
-    '- "Manufacturer": 制造商公司全称\n' +
-    '- "Manufacturer Address": 制造商地址（完整一行）\n' +
+    '- "Item#/model#": 型号/货号，优先取 Model / Model No / 型号 / SKU / Item No / P/N（如 XP-085、XY-03）。键名必须是 Item#/model#，不要用 Model\n' +
+    '- "Manufacturer": 制造商公司全称（Manufacturer / Manufactured by / 制造商）\n' +
+    '- "Manufacturer Address": 制造商地址完整一行（Address / 厂址）；不要把欧代地址当作制造商地址\n' +
     '- "Country of Origin": 原产国（优先 MADE IN / Manufacturing location，值用简体如「中国」）\n' +
     '- "Batch": 批号/Batch\n' +
     '- "Date of manufacture": 生产日期\n' +
@@ -471,29 +569,30 @@ function seedFieldsFromLabels(
   const remarkBits: string[] = [];
   const regions: string[] = [];
   for (const label of labels) {
+    const flat = canonicalizeFieldMap(label);
     for (
       const key of [
         "Product Name",
         "Item#/model#",
         "Manufacturer",
         "Manufacturer Address",
-      ]
+      ] as const
     ) {
-      const val = String(label[key] || "").trim();
+      const val = String(flat[key] || "").trim();
       if (val && !seed[key]) {
         seed[key] = key === "Product Name" ? (cleanProductName(val) || val) : val;
       }
     }
-    const origin = normalizeOrigin(String(label["Country of Origin"] || ""));
+    const origin = normalizeOrigin(String(flat["Country of Origin"] || ""));
     if (origin && !seed["Country of Origin"]) {
       seed["Country of Origin"] = origin;
     }
-    regions.push(String(label["Countries/Regions of Distribution"] || ""));
+    regions.push(String(flat["Countries/Regions of Distribution"] || ""));
     regions.push(...regionsFromMarks(label.marks));
     if (String(label["EC REP"] || "").trim()) regions.push("欧盟");
     if (String(label["UK REP"] || "").trim()) regions.push("英国");
 
-    const elec = String(label["Electric Product"] || "").trim();
+    const elec = String(flat["Electric Product"] || "").trim();
     if (elec && !seed["Electric Product"]) {
       if (/非电|non[-\s]?electric|no/i.test(elec)) {
         seed["Electric Product"] = "非电产品";
@@ -502,12 +601,14 @@ function seedFieldsFromLabels(
       }
     }
     const rating = String(
-      label.Rating || label["Product Description"] || "",
+      flat["Product Description"] || label.Rating || "",
     ).trim();
     if (rating && !seed["Product Description"]) {
       seed["Product Description"] = rating.startsWith("额定")
         ? rating
-        : `额定：${rating}`;
+        : /V|W|Hz|电池|充电|Rated|Rating/i.test(rating)
+        ? `额定：${rating}`
+        : rating;
       if (
         !seed["Electric Product"] &&
         /\d+\s*V|\d+\s*W|\d+\s*Hz|电池|充电|Electric/i.test(rating)
@@ -529,14 +630,15 @@ function normalizeResult(
   parsed: Record<string, unknown>,
   seedFields: FieldMap,
 ): Record<string, unknown> {
-  const fieldsIn =
+  const fieldsInRaw =
     parsed.fields && typeof parsed.fields === "object"
       ? parsed.fields as Record<string, unknown>
       : {};
+  const fieldsIn = canonicalizeFieldMap(fieldsInRaw);
   const fields: FieldMap = {};
   for (const key of FIELD_KEYS) {
     let val = fieldsIn[key];
-    if (val == null || String(val).trim() === "") val = seedFields[key] || "";
+    if (isEmptyishField(val)) val = seedFields[key] || "";
     fields[key] = val != null ? String(val).trim() : "";
   }
   if (fields["Product Name"]) {
@@ -555,6 +657,20 @@ function normalizeResult(
   } else if (fields["Shipping Remark"] && seedFields["Shipping Remark"]) {
     if (!fields["Shipping Remark"].includes(seedFields["Shipping Remark"])) {
       fields["Shipping Remark"] += "；" + seedFields["Shipping Remark"];
+    }
+  }
+  // Prefer richer seed Manufacturer / Model / Address when LLM left them blankish
+  for (
+    const key of [
+      "Item#/model#",
+      "Manufacturer",
+      "Manufacturer Address",
+      "Electric Product",
+      "Product Description",
+    ] as const
+  ) {
+    if (isEmptyishField(fields[key]) && seedFields[key]) {
+      fields[key] = seedFields[key];
     }
   }
 
