@@ -3054,14 +3054,29 @@
       const keys = [
         'Product Name','Program','Country of Origin','Countries/Regions of Distribution',
         'Item#/model#', FIELD_ELECTRIC, 'Manufacturer','Manufacturer Address',
-        'Sample Collection Method','Carrier','Tracking Number','Shipping Remark'
+        'Sample Collection Method','Carrier','Tracking Number'
       ];
       // Echo Product Description whenever OCR/LLM filled it
       if(fields && fields[FIELD_ELECTRIC_DESC] && String(fields[FIELD_ELECTRIC_DESC]).trim()){
         const idx = keys.indexOf(FIELD_ELECTRIC);
         keys.splice(idx + 1, 0, FIELD_ELECTRIC_DESC);
       }
+      // Optional remark: only count when filled (don't inflate denominator)
+      if(fields && fields['Shipping Remark'] && String(fields['Shipping Remark']).trim()){
+        keys.push('Shipping Remark');
+      }
       return keys;
+    }
+
+    function isCountedFieldValue(raw){
+      const text = raw != null ? String(raw).trim() : '';
+      if(!text) return false;
+      if(/^__(?:ELECTRIC|SAMPLE|PROGRAM)_/.test(text)) return false;
+      if(/^(n\/?a|none|null|undefined|unknown|未知|无|暂无|不清楚|not\s*available|-|—|–|\.)$/i.test(text)) return false;
+      try {
+        if(typeof t === 'function' && text === t('orderChat.fieldPending')) return false;
+      } catch (_) {}
+      return true;
     }
 
     function countFilledExtractFields(fields){
@@ -3069,10 +3084,7 @@
       let filled = 0;
       keys.forEach(function(k){
         const raw = fields && fields[k] != null ? String(fields[k]).trim() : '';
-        if(!raw) return;
-        if(/^__(?:ELECTRIC|SAMPLE|PROGRAM)_/.test(raw)) return;
-        if(/^(n\/?a|none|null|unknown|未知|无|暂无|-|—)$/i.test(raw)) return;
-        filled++;
+        if(isCountedFieldValue(raw)) filled++;
       });
       return { filled: filled, total: keys.length };
     }
@@ -3080,7 +3092,8 @@
     function countFilledRequiredFields(fields){
       let filled = 0;
       REQUIRED_ORDER_FIELDS.forEach(function(k){
-        if(fields && fields[k] && String(fields[k]).trim()) filled++;
+        const raw = fields && fields[k] != null ? String(fields[k]).trim() : '';
+        if(isCountedFieldValue(raw)) filled++;
       });
       return { filled: filled, total: REQUIRED_ORDER_FIELDS.length };
     }
@@ -3965,11 +3978,11 @@
 
       // Prefer resolved manualAnswers so echoed values match the card (never stale empties)
       const displayFields = Object.assign({}, fields, manualAnswers);
+      // Count must match extract-card checkmarks (same key set), not a separate "required-only" set
       const allStats = countFilledExtractFields(displayFields);
-      const reqStats = countFilledRequiredFields(manualAnswers);
       const percent = allStats.total ? Math.round((allStats.filled / allStats.total) * 100) : 0;
+      const missingCount = Math.max(0, allStats.total - allStats.filled);
       const missingRequired = getMissingRequiredFields();
-      const missingCount = missingRequired.length;
 
       const typingRow = botTyping();
       setTimeout(function(){
@@ -3981,15 +3994,15 @@
           botMsg(productSummaryCard(summary, displayFields), true);
           botMsg(extractCard(displayFields, percent), true);
           botMsg(tHtml('orderChat.recognizeDoneDynamic', {
-            filled: reqStats.filled,
-            total: reqStats.total,
-            percent: Math.round((reqStats.filled / reqStats.total) * 100),
+            filled: allStats.filled,
+            total: allStats.total,
+            percent: percent,
             missing: missingCount
           }), false);
 
           const needSampleOrShip = !getFieldDisplayValue('Sample Collection Method');
           const hasMatched = !!(getFieldDisplayValue('Product Name') || getFieldDisplayValue('Item#/model#') || getFieldDisplayValue('Manufacturer') || getFieldDisplayValue('Program') || getFieldDisplayValue('Country of Origin') || getFieldDisplayValue('Countries/Regions of Distribution'));
-          const needForm = hasMatched || missingCount > 0 || needSampleOrShip;
+          const needForm = hasMatched || missingRequired.length > 0 || needSampleOrShip;
 
           if(needForm){
             botMsg(t('orderChat.fillMissingInForm'), false);
@@ -4015,13 +4028,13 @@
       // Always prefer live answers so any recognized non-empty value echoes with ✓
       const merged = Object.assign({}, fields, manualAnswers);
       const stats = countFilledExtractFields(merged);
-      const pct = (percent != null) ? percent : (stats.total ? Math.round((stats.filled / stats.total) * 100) : 0);
+      // Always derive pill from the same filled/total as the message (ignore stale percent)
+      const pct = stats.total ? Math.round((stats.filled / stats.total) * 100) : 0;
+      void percent;
       const progressLabel = t('orderChat.progressPercent', { percent: pct });
       function val(k){
         const raw = merged[k] != null ? String(merged[k]).trim() : '';
-        if(!raw) return '';
-        if(/^__(?:ELECTRIC|SAMPLE|PROGRAM)_/.test(raw)) return '';
-        if(/^(n\/?a|none|null|unknown|未知|无|暂无|-|—)$/i.test(raw)) return '';
+        if(!isCountedFieldValue(raw)) return '';
         return raw;
       }
       function ok(k){ return !!val(k); }
@@ -4357,7 +4370,7 @@
 
     function getFieldDisplayValue(name){
       const value = manualAnswers[name] || getFieldValue(name);
-      return value && value !== t('orderChat.fieldPending') ? value : '';
+      return isCountedFieldValue(value) ? String(value).trim() : '';
     }
 
     function getMissingRequiredFields(){
